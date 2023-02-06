@@ -6,7 +6,7 @@ capsules = ['antwerp', 'stockholm', 'rio']
 total = 0
 
 ant_l = 1200
-ant_c = 3411
+ant_c = 3600
 ant_co = 1200
 ant_au = 1000
 ant = [ant_l, ant_c, ant_co, ant_au]
