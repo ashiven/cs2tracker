@@ -10,7 +10,6 @@ def parse_row(row):
 
 filename = 'output.csv'
 
-# Read data from CSV file
 dates = []
 dollars = []
 euros = []
@@ -32,7 +31,6 @@ for date_str in dates:
     date = datetime.datetime.strptime(date_str[:-9], '%Y-%m-%d')
     datesp.append(date)
 
-# Plot data
 fig, ax = plt.subplots()
 ax.plot(datesp, dollars, label='Dollars')
 ax.plot(datesp, euros, label='Euros')
@@ -41,9 +39,8 @@ ax.set_ylabel('Price')
 ax.set_title('Price over Time')
 ax.legend()
 
-# Format x-axis to only show day, month, and year
 date_form = DateFormatter("%d-%m-%Y")
 ax.xaxis.set_major_formatter(date_form)
-fig.autofmt_xdate() # Rotate and align x-axis labels
+fig.autofmt_xdate()
 
 plt.show()
