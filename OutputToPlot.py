@@ -4,21 +4,9 @@ import matplotlib.pyplot as plt
 import re
 
 def parse_row(row):
-    # Extract date and price from row
-    date_str, price_str = row
-
-    # Remove currency symbol and any non-numeric characters from price string
-    if row_num % 2 == 0:
-        price_str = re.sub(r'[^\d\.]+', '', price_str)
-    else:
-        price_str = re.sub(r'[^\d\,]+', '', price_str)
-        price_str = price_str.replace(',', '.')
-
-    # Convert date and price to datetime object and float, respectively
-    date = datetime.datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S.%f")
-    price = float(price_str)
-
-    return date, price
+    date_str, price_str = row.strip().split(',')
+    price = float(price_str[:-1]) if price_str.endswith('€') else float(price_str[:-1].replace(',', '.'))
+    return (date_str, price)
 
 filename = 'output.csv'
 
@@ -27,7 +15,7 @@ dates = []
 dollars = []
 euros = []
 row_num = 0
-with open(filename, 'r', newline='') as csvfile:
+with open(filename, 'r', newline='', encoding = 'utf-8') as csvfile:
     reader = csv.reader(csvfile)
     next(reader) # skip header row
     for row in reader:
