@@ -5,8 +5,8 @@ import re
 
 def parse_row(row):
     date_str, price_str = row.strip().split(',')
-    price = float(price_str[:-1]) if price_str.endswith('€') else float(price_str[:-1].replace(',', '.'))
-    return (date_str, price)
+    price = float(price_str[:-1])
+    return date_str, price
 
 filename = 'output.csv'
 
