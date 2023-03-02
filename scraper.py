@@ -119,6 +119,6 @@ if date != last_date_str:
     output1 = "{:.2f}$".format(total)
     output2 = "{:.2f}€".format(eur_total)
     with open(filename, 'a', newline = '', encoding = 'utf-8') as csvfile:
-	      writer = csv.writer(csvfile)
-	      writer.writerow([today, output1])
-	      writer.writerow([today, output2])
+        writer = csv.writer(csvfile)
+        writer.writerow([today, output1])
+        writer.writerow([today, output2])
