@@ -1,10 +1,8 @@
 import csv
-import datetime
 import matplotlib.pyplot as plt
-import re
 
 def parse_row(row):
-    date_str, price_str = row.strip().split(',')
+    date_str, price_str = row
     price = float(price_str[:-1])
     return date_str, price
 
@@ -17,7 +15,6 @@ euros = []
 row_num = 0
 with open(filename, 'r', newline='', encoding = 'utf-8') as csvfile:
     reader = csv.reader(csvfile)
-    next(reader) # skip header row
     for row in reader:
         row_num += 1
         date, price = parse_row(row)
