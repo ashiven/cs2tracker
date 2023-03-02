@@ -1,5 +1,7 @@
 from bs4 import BeautifulSoup
 import requests
+import csv
+import datetime
 
 capsules = ['antwerp', 'stockholm', 'rio']
 
@@ -93,3 +95,26 @@ rate = float(rate3)
 eur_total = rate * total
 print('Total in EUR')
 print(float(f'{eur_total:.2f}'))
+
+filename = 'output.csv'
+now = datetime.datetime.now()
+date = now.strftime("%Y-%m-%d")
+
+with open(filename, 'r', encoding = 'utf-8') as csvfile:
+    reader = csv.reader(csvfile)
+    last_row = None
+    for row in reader:
+        last_row = row
+    if last_row is not None:
+        last_date_str = last_row[0][:10]
+    else:
+        last_date_str = ''
+
+if date != last_date_str:
+    today = now.strftime("%Y-%m-%d %H:%M:%S")
+    output1 = "{:.2f}$".format(total)
+    output2 = "{:.2f}€".format(eur_total)
+    with open(filename, 'a', newline = '', encoding = 'utf-8') as csvfile:
+	      writer = csv.writer(csvfile)
+	      writer.writerow([today, output1])
+	      writer.writerow([today, output2])
