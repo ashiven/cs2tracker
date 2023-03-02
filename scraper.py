@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 import requests
 import csv
 import datetime
+import os
 
 capsules = ['antwerp', 'stockholm', 'rio']
 
@@ -99,6 +100,9 @@ print(float(f'{eur_total:.2f}'))
 filename = 'output.csv'
 now = datetime.datetime.now()
 date = now.strftime("%Y-%m-%d")
+
+if not os.path.isfile(filename):
+    open(filename, "w").close()
 
 with open(filename, 'r', encoding = 'utf-8') as csvfile:
     reader = csv.reader(csvfile)
