@@ -77,62 +77,67 @@ woff_case = int(config.get('Cases', 'Winter_Offensive_Weapon_Case'))
 
 
 ######################################## DISPLAY CAPSULE PRICES ######################################################
+if(ant[0] != 0 or ant[1] != 0 or ant[2] != 0 or ant[3] != 0 or st[0] != 0 or st[1] != 0 or st[2] != 0 or st[3] != 0 or rio[0] != 0 or rio[1] != 0 or rio[2] != 0 or rio[3] != 0):
+    for capsule in capsules:
+        url = f'https://steamcommunity.com/market/search?q={capsule}+capsule'
+        page = requests.get(url)
+        soup = BeautifulSoup(page.content, 'html.parser')
+        capsule_name = ['\033[34mLegends\033[0m', '\033[34mChallengers\033[0m', '\033[34mContenders\033[0m', '\033[34mChampions Autographs\033[0m']
+        count = 0
 
-for capsule in capsules:
-    print(f'-------------{capsule} Capsule-----------------'[:41])
-    url = f'https://steamcommunity.com/market/search?q={capsule}+capsule'
-    page = requests.get(url)
-    soup = BeautifulSoup(page.content, 'html.parser')
-    capsule_name = ['Legends', 'Challengers', 'Contenders', 'Champions Autographs']
-    count = 0
+        if(capsule == 'Antwerp'):
+            if(ant[0] != 0 or ant[1] != 0 or ant[2] != 0 or ant[3] != 0):
+                print('\033[35m------------Antwerp Capsule--------------\033[0m')
+            hrefs = ['https://steamcommunity.com/market/listings/730/Antwerp%202022%20Legends%20Sticker%20Capsule'
+                    ,'https://steamcommunity.com/market/listings/730/Antwerp%202022%20Challengers%20Sticker%20Capsule'
+                    ,'https://steamcommunity.com/market/listings/730/Antwerp%202022%20Contenders%20Sticker%20Capsule'
+                    ,'https://steamcommunity.com/market/listings/730/Antwerp%202022%20Champions%20Autograph%20Capsule']
+            for href in hrefs:
+                if(ant[count] != 0):
+                    listing = soup.find('a', attrs={'href':f'{href}'})
+                    price = listing.find('span', attrs={'class':'normal_price'})
+                    print(capsule_name[count]) 
+                    data = price.text.split()[2]
+                    data_raw = data.replace('$', '')
+                    print(*[data, '--> $' + str(int(ant[count] * float(data_raw))) + f' ({ant[count]})' ])
+                    total = total + (ant[count] * float(data_raw) )
+                count = count + 1
 
-    if(capsule == 'Antwerp'):
-        hrefs = ['https://steamcommunity.com/market/listings/730/Antwerp%202022%20Legends%20Sticker%20Capsule'
-                ,'https://steamcommunity.com/market/listings/730/Antwerp%202022%20Challengers%20Sticker%20Capsule'
-                ,'https://steamcommunity.com/market/listings/730/Antwerp%202022%20Contenders%20Sticker%20Capsule'
-                ,'https://steamcommunity.com/market/listings/730/Antwerp%202022%20Champions%20Autograph%20Capsule']
-        for href in hrefs:
-            listing = soup.find('a', attrs={'href':f'{href}'})
-            price = listing.find('span', attrs={'class':'normal_price'})
-            print(capsule_name[count]) 
-            data = price.text.split()[2]
-            data_raw = data.replace('$', '')
-
-            print(*[data, '--> $' + str(int(ant[count] * float(data_raw))) + f' ({ant[count]})' ])
-            total = total + (ant[count] * float(data_raw) )
-            count = count + 1
-
-    if(capsule == 'Stockholm'):
-        hrefs = ['https://steamcommunity.com/market/listings/730/Stockholm%202021%20Legends%20Sticker%20Capsule'
-                ,'https://steamcommunity.com/market/listings/730/Stockholm%202021%20Challengers%20Sticker%20Capsule'
-                ,'https://steamcommunity.com/market/listings/730/Stockholm%202021%20Contenders%20Sticker%20Capsule'
-                ,'https://steamcommunity.com/market/listings/730/Stockholm%202021%20Champions%20Autograph%20Capsule']
-        for href in hrefs:
-            listing = soup.find('a', attrs={'href':f'{href}'})
-            price = listing.find('span', attrs={'class':'normal_price'})
-            print(capsule_name[count]) 
-            data = price.text.split()[2]
-            data_raw = data.replace('$', '')
-
-            print(*[data, '--> $' + str(int(st[count] * float(data_raw))) + f' ({st[count]})'])
-            total = total + (st[count] * float(data_raw) )
-            count = count + 1
-        
-    if(capsule == 'Rio'):
-        hrefs = ['https://steamcommunity.com/market/listings/730/Rio%202022%20Legends%20Sticker%20Capsule'
-                ,'https://steamcommunity.com/market/listings/730/Rio%202022%20Challengers%20Sticker%20Capsule'
-                ,'https://steamcommunity.com/market/listings/730/Rio%202022%20Contenders%20Sticker%20Capsule'
-                ,'https://steamcommunity.com/market/listings/730/Rio%202022%20Champions%20Autograph%20Capsule']
-        for href in hrefs:
-            listing = soup.find('a', attrs={'href':f'{href}'})
-            price = listing.find('span', attrs={'class':'normal_price'})
-            print(capsule_name[count]) 
-            data = price.text.split()[2]
-            data_raw = data.replace('$', '')
-
-            print(*[data, '--> $' + str(int(rio[count] * float(data_raw))) + f' ({rio[count]})' ])
-            total = total + (rio[count] * float(data_raw) )
-            count = count + 1
+        if(capsule == 'Stockholm'):
+            if(st[0] != 0 or st[1] != 0 or st[2] != 0 or st[3] != 0):
+                print('\033[35m------------Stockholm Capsule------------\033[0m')
+            hrefs = ['https://steamcommunity.com/market/listings/730/Stockholm%202021%20Legends%20Sticker%20Capsule'
+                    ,'https://steamcommunity.com/market/listings/730/Stockholm%202021%20Challengers%20Sticker%20Capsule'
+                    ,'https://steamcommunity.com/market/listings/730/Stockholm%202021%20Contenders%20Sticker%20Capsule'
+                    ,'https://steamcommunity.com/market/listings/730/Stockholm%202021%20Champions%20Autograph%20Capsule']
+            for href in hrefs:
+                if(st[count] != 0):
+                    listing = soup.find('a', attrs={'href':f'{href}'})
+                    price = listing.find('span', attrs={'class':'normal_price'})
+                    print(capsule_name[count]) 
+                    data = price.text.split()[2]
+                    data_raw = data.replace('$', '')
+                    print(*[data, '--> $' + str(int(st[count] * float(data_raw))) + f' ({st[count]})'])
+                    total = total + (st[count] * float(data_raw) )
+                count = count + 1
+            
+        if(capsule == 'Rio'):
+            if(rio[0] != 0 or rio[1] != 0 or rio[2] != 0 or rio[3] != 0):
+                print('\033[35m------------Rio Capsule------------------\033[0m')
+            hrefs = ['https://steamcommunity.com/market/listings/730/Rio%202022%20Legends%20Sticker%20Capsule'
+                    ,'https://steamcommunity.com/market/listings/730/Rio%202022%20Challengers%20Sticker%20Capsule'
+                    ,'https://steamcommunity.com/market/listings/730/Rio%202022%20Contenders%20Sticker%20Capsule'
+                    ,'https://steamcommunity.com/market/listings/730/Rio%202022%20Champions%20Autograph%20Capsule']
+            for href in hrefs:
+                if(rio[count] != 0):
+                    listing = soup.find('a', attrs={'href':f'{href}'})
+                    price = listing.find('span', attrs={'class':'normal_price'})
+                    print(capsule_name[count]) 
+                    data = price.text.split()[2]
+                    data_raw = data.replace('$', '')
+                    print(*[data, '--> $' + str(int(rio[count] * float(data_raw))) + f' ({rio[count]})' ])
+                    total = total + (rio[count] * float(data_raw) )
+                count = count + 1
 
 ##################################### DISPLAY OTHER ITEMS ###############################################################
 
@@ -158,34 +163,34 @@ if(rec_case != 0):
     total += (rec_case * data_raw)
 
 if(dnn_case != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
+    page = requests.get('https://steamcommunity.com/market/search?q=dreams+and+nightmares+case')
     soup = BeautifulSoup(page.content, 'html.parser')
     price = soup.find('span', attrs={'class':'normal_price'})
     data = price.text.split()[2]
     data_raw = float(data.replace('$', ''))
-    print('\033[35m------------Revolution Case--------------\033[0m')
-    print(data + ' --> $' + str(rev1_case * data_raw) + ' (' + str(rev1_case) + ')' )
-    total += (rev1_case * data_raw)
+    print('\033[35m------------Dreams & Nightmares Case-----\033[0m')
+    print(data + ' --> $' + str(int(dnn_case * data_raw)) + ' (' + str(dnn_case) + ')' )
+    total += (dnn_case * data_raw)
 
 if(rip_case != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
+    page = requests.get('https://steamcommunity.com/market/search?q=operation+riptide+case')
     soup = BeautifulSoup(page.content, 'html.parser')
     price = soup.find('span', attrs={'class':'normal_price'})
     data = price.text.split()[2]
     data_raw = float(data.replace('$', ''))
-    print('\033[35m------------Revolution Case--------------\033[0m')
-    print(data + ' --> $' + str(rev1_case * data_raw) + ' (' + str(rev1_case) + ')' )
-    total += (rev1_case * data_raw)
+    print('\033[35m------------Riptide Case-----------------\033[0m')
+    print(data + ' --> $' + str(int(rip_case * data_raw)) + ' (' + str(rip_case) + ')' )
+    total += (rip_case * data_raw)
 
 if(snk_case != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
+    page = requests.get('https://steamcommunity.com/market/search?q=snakebite+case')
     soup = BeautifulSoup(page.content, 'html.parser')
     price = soup.find('span', attrs={'class':'normal_price'})
     data = price.text.split()[2]
     data_raw = float(data.replace('$', ''))
-    print('\033[35m------------Revolution Case--------------\033[0m')
-    print(data + ' --> $' + str(rev1_case * data_raw) + ' (' + str(rev1_case) + ')' )
-    total += (rev1_case * data_raw)
+    print('\033[35m------------Snakebite Case--------------\033[0m')
+    print(data + ' --> $' + str(int(snk_case * data_raw)) + ' (' + str(snk_case) + ')' )
+    total += (snk_case * data_raw)
 
 if(brk_case != 0):
     page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
