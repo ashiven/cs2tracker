@@ -3,28 +3,80 @@ import requests
 import csv
 import datetime
 import os
+import configparser
 
-capsules = ['antwerp', 'stockholm', 'rio']
+####################################### READ CONFIG AND SET VARIABLES #################################################
+
+config = configparser.ConfigParser()
+config.read('config.ini')
 
 total = 0
 
-ant_l = 1200
-ant_c = 3600
-ant_co = 1200
-ant_au = 1000
+## sticker capsules
+capsules = ['antwerp', 'stockholm', 'rio']
+
+ant_l = int(config.get('Antwerp', 'Antwerp_Legends'))
+ant_c = int(config.get('Antwerp', 'Antwerp_Challengers'))
+ant_co = int(config.get('Antwerp', 'Antwerp_Contenders'))
+ant_au = int(config.get('Antwerp', 'Antwerp_Champions_Autographs'))
 ant = [ant_l, ant_c, ant_co, ant_au]
 
-st_l = 650
-st_c = 50
-st_co = 50
-st_au = 250
+st_l = int(config.get('Stockholm', 'Stockholm_Legends'))
+st_c = int(config.get('Stockholm', 'Stockholm_Challengers'))
+st_co = int(config.get('Stockholm', 'Stockholm_Contenders'))
+st_au = int(config.get('Stockholm', 'Stockholm_Champions_Autographs'))
 st = [st_l, st_c, st_co, st_au]
 
-rio_l = 500
-rio_c = 500
-rio_co = 750
-rio_au = 250
+rio_l = int(config.get('Rio', 'Rio_Legends'))
+rio_c = int(config.get('Rio', 'Rio_Challengers'))
+rio_co = int(config.get('Rio', 'Rio_Contenders'))
+rio_au = int(config.get('Rio', 'Rio_Champions_Autographs'))
 rio = [rio_l, rio_c, rio_co, rio_au]
+
+## cases
+
+rev_case = int(config.get('Cases', 'Revolution_Case'))
+rec_case = int(config.get('Cases', 'Recoil_Case'))
+dnn_case = int(config.get('Cases', 'Dreams_And_Nightmares_Case'))
+rip_case = int(config.get('Cases', 'Operation_Riptide_Case'))
+snk_case = int(config.get('Cases', 'Snakebite_Case'))
+brk_case = int(config.get('Cases', 'Operation_Broken_Fang_Case'))
+frac_case = int(config.get('Cases', 'Fracture_Case'))
+chr_case = int(config.get('Cases', 'Chroma_Case'))
+chr2_case = int(config.get('Cases', 'Chroma_2_Case'))
+chr3_case = int(config.get('Cases', 'Chroma_3_Case'))
+clt_case = int(config.get('Cases', 'Clutch_Case'))
+csg_case = int(config.get('Cases', 'CSGO_Weapon_Case'))
+csg2_case = int(config.get('Cases', 'CSGO_Weapon_Case_2'))
+csg3_case = int(config.get('Cases', 'CSGO_Weapon_Case_3'))
+cs20_case = int(config.get('Cases', 'CS20_Case'))
+dgz_case = int(config.get('Cases', 'Danger_Zone_Case'))
+esp_case = int(config.get('Cases', 'eSports_2013_Case'))
+espw_case = int(config.get('Cases', 'eSports_2013_Winter_Case'))
+esps_case = int(config.get('Cases', 'eSports_2014_Summer_Case'))
+flch_case = int(config.get('Cases', 'Falchion_Case'))
+gam_case = int(config.get('Cases', 'Gamma_Case'))
+gam2_case = int(config.get('Cases', 'Gamma_2_Case'))
+glv_case = int(config.get('Cases', 'Glove_Case'))
+hrz_case = int(config.get('Cases', 'Horizon_Case'))
+hnts_case = int(config.get('Cases', 'Huntsman_Weapon_Case'))
+brav_case = int(config.get('Cases', 'Operation_Bravo_Case'))
+brkt_case = int(config.get('Cases', 'Operation_Breakout_Weapon_Case'))
+hydr_case = int(config.get('Cases', 'Operation_Hydra_Case'))
+phnx_case = int(config.get('Cases', 'Operation_Phoenix_Weapon_Case'))
+vngd_case = int(config.get('Cases', 'Operation_Vanguard_Weapon_Case'))
+wldf_case = int(config.get('Cases', 'Operation_Wildfire_Case'))
+prsm_case = int(config.get('Cases', 'Prisma_Case'))
+prsm2_case = int(config.get('Cases', 'Prisma_2_Case'))
+rev_case = int(config.get('Cases', 'Revolver_Case'))
+shdw_case = int(config.get('Cases', 'Shadow_Case'))
+shwb_case = int(config.get('Cases', 'Shattered_Web_Case'))
+spec_case = int(config.get('Cases', 'Spectrum_Case'))
+spec2_case = int(config.get('Cases', 'Spectrum_2_Case'))
+woff_case = int(config.get('Cases', 'Winter_Offensive_Weapon_Case'))
+
+
+######################################## DISPLAY CAPSULE PRICES ######################################################
 
 for capsule in capsules:
     print(f'-------------{capsule} capsule-----------------')
@@ -82,6 +134,10 @@ for capsule in capsules:
             total = total + (rio[count] * float(data_raw) )
             count = count + 1
 
+##################################### DISPLAY OTHER ITEMS ###############################################################
+
+##################################### PRINT TOTAL #######################################################################
+
 print('-----------------------------------')
 print('Total in USD')
 print(float(f'{total:.2f}'))
@@ -96,6 +152,10 @@ rate = float(rate3)
 eur_total = rate * total
 print('Total in EUR')
 print(float(f'{eur_total:.2f}'))
+
+
+
+##################################### WRITE TOTAL TO OUTPUT FILE ########################################################
 
 filename = 'output.csv'
 now = datetime.datetime.now()
