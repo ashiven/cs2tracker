@@ -144,7 +144,7 @@ if(rio[0] != 0 or rio[1] != 0 or rio[2] != 0 or rio[3] != 0):
             total = total + (rio[count] * float(data_raw) )
         count = count + 1
 
-##################################### DISPLAY OTHER ITEMS ###############################################################
+##################################### DISPLAY CASES ###############################################################
 
 if(rev1_case != 0):
     page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
@@ -198,54 +198,57 @@ if(snk_case != 0):
     total += (snk_case * data_raw)
 
 if(brk_case != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
+    page = requests.get('https://steamcommunity.com/market/search?q=broken+fang+case')
     soup = BeautifulSoup(page.content, 'html.parser')
     price = soup.find('span', attrs={'class':'normal_price'})
     data = price.text.split()[2]
     data_raw = float(data.replace('$', ''))
-    print('\033[35m------------Revolution Case--------------\033[0m')
-    print(data + ' --> $' + str(rev1_case * data_raw) + ' (' + str(rev1_case) + ')' )
-    total += (rev1_case * data_raw)
+    print('\033[35m------------Broken Fang Case-------------\033[0m')
+    print(data + ' --> $' + str(int(brk_case * data_raw)) + ' (' + str(brk_case) + ')' )
+    total += (brk_case * data_raw)
 
 if(frac_case != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
+    page = requests.get('https://steamcommunity.com/market/search?q=fracture+case')
     soup = BeautifulSoup(page.content, 'html.parser')
     price = soup.find('span', attrs={'class':'normal_price'})
     data = price.text.split()[2]
     data_raw = float(data.replace('$', ''))
-    print('\033[35m------------Revolution Case--------------\033[0m')
-    print(data + ' --> $' + str(rev1_case * data_raw) + ' (' + str(rev1_case) + ')' )
-    total += (rev1_case * data_raw)
+    print('\033[35m------------Fracture Case----------------\033[0m')
+    print(data + ' --> $' + str(int(frac_case * data_raw)) + ' (' + str(frac_case) + ')' )
+    total += (frac_case * data_raw)
 
 if(chr_case != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
+    page = requests.get('https://steamcommunity.com/market/search?q=chroma+case')
     soup = BeautifulSoup(page.content, 'html.parser')
-    price = soup.find('span', attrs={'class':'normal_price'})
+    listing = soup.find('a', attrs={'href':'https://steamcommunity.com/market/listings/730/Chroma%20Case'})
+    price = listing.find('span', attrs={'class':'normal_price'})
     data = price.text.split()[2]
     data_raw = float(data.replace('$', ''))
-    print('\033[35m------------Revolution Case--------------\033[0m')
-    print(data + ' --> $' + str(rev1_case * data_raw) + ' (' + str(rev1_case) + ')' )
-    total += (rev1_case * data_raw)
+    print('\033[35m------------Chroma Case------------------\033[0m')
+    print(data + ' --> $' + str(int(chr_case * data_raw)) + ' (' + str(chr_case) + ')' )
+    total += (chr_case * data_raw)
 
 if(chr2_case != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
+    page = requests.get('https://steamcommunity.com/market/search?q=chroma+case')
     soup = BeautifulSoup(page.content, 'html.parser')
-    price = soup.find('span', attrs={'class':'normal_price'})
+    listing = soup.find('a', attrs={'href':'https://steamcommunity.com/market/listings/730/Chroma%202%20Case'})
+    price = listing.find('span', attrs={'class':'normal_price'})
     data = price.text.split()[2]
     data_raw = float(data.replace('$', ''))
-    print('\033[35m------------Revolution Case--------------\033[0m')
-    print(data + ' --> $' + str(rev1_case * data_raw) + ' (' + str(rev1_case) + ')' )
-    total += (rev1_case * data_raw)
+    print('\033[35m------------Chroma 2 Case----------------\033[0m')
+    print(data + ' --> $' + str(int(chr2_case * data_raw)) + ' (' + str(chr2_case) + ')' )
+    total += (chr2_case * data_raw)
 
 if(chr3_case != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
+    page = requests.get('https://steamcommunity.com/market/search?q=chroma+case')
     soup = BeautifulSoup(page.content, 'html.parser')
-    price = soup.find('span', attrs={'class':'normal_price'})
+    listing = soup.find('a', attrs={'href':'https://steamcommunity.com/market/listings/730/Chroma%203%20Case'})
+    price = listing.find('span', attrs={'class':'normal_price'})
     data = price.text.split()[2]
     data_raw = float(data.replace('$', ''))
-    print('\033[35m------------Revolution Case--------------\033[0m')
-    print(data + ' --> $' + str(rev1_case * data_raw) + ' (' + str(rev1_case) + ')' )
-    total += (rev1_case * data_raw)
+    print('\033[35m------------Chroma 3 Case----------------\033[0m')
+    print(data + ' --> $' + str(int(chr3_case * data_raw)) + ' (' + str(chr3_case) + ')' )
+    total += (chr3_case * data_raw)
 
 if(clt_case != 0):
     page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
