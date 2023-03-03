@@ -142,15 +142,395 @@ if(rev1_case != 0):
     price = soup.find('span', attrs={'class':'normal_price'})
     data = price.text.split()[2]
     data_raw = float(data.replace('$', ''))
-    print('------------Revolution Case--------------')
-    print(data + ' --> ' + str(rev1_case * data_raw) + ' (' + str(rev1_case) + ')' )
+    print('\033[35m------------Revolution Case--------------\033[0m')
+    print(data + ' --> $' + str(int(rev1_case * data_raw)) + ' (' + str(rev1_case) + ')' )
+    total += (rev1_case * data_raw)
+
+if(rec_case != 0):
+    page = requests.get('https://steamcommunity.com/market/search?q=recoil+case')
+    soup = BeautifulSoup(page.content, 'html.parser')
+    listing = soup.find('a', attrs={'href':'https://steamcommunity.com/market/listings/730/Recoil%20Case'})
+    price = listing.find('span', attrs={'class':'normal_price'})
+    data = price.text.split()[2]
+    data_raw = float(data.replace('$', ''))
+    print('\033[35m------------Recoil Case------------------\033[0m')
+    print(data + ' --> $' + str(int(rec_case * data_raw)) + ' (' + str(rec_case) + ')' )
+    total += (rec_case * data_raw)
+
+if(dnn_case != 0):
+    page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
+    soup = BeautifulSoup(page.content, 'html.parser')
+    price = soup.find('span', attrs={'class':'normal_price'})
+    data = price.text.split()[2]
+    data_raw = float(data.replace('$', ''))
+    print('\033[35m------------Revolution Case--------------\033[0m')
+    print(data + ' --> $' + str(rev1_case * data_raw) + ' (' + str(rev1_case) + ')' )
+    total += (rev1_case * data_raw)
+
+if(rip_case != 0):
+    page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
+    soup = BeautifulSoup(page.content, 'html.parser')
+    price = soup.find('span', attrs={'class':'normal_price'})
+    data = price.text.split()[2]
+    data_raw = float(data.replace('$', ''))
+    print('\033[35m------------Revolution Case--------------\033[0m')
+    print(data + ' --> $' + str(rev1_case * data_raw) + ' (' + str(rev1_case) + ')' )
+    total += (rev1_case * data_raw)
+
+if(snk_case != 0):
+    page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
+    soup = BeautifulSoup(page.content, 'html.parser')
+    price = soup.find('span', attrs={'class':'normal_price'})
+    data = price.text.split()[2]
+    data_raw = float(data.replace('$', ''))
+    print('\033[35m------------Revolution Case--------------\033[0m')
+    print(data + ' --> $' + str(rev1_case * data_raw) + ' (' + str(rev1_case) + ')' )
+    total += (rev1_case * data_raw)
+
+if(brk_case != 0):
+    page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
+    soup = BeautifulSoup(page.content, 'html.parser')
+    price = soup.find('span', attrs={'class':'normal_price'})
+    data = price.text.split()[2]
+    data_raw = float(data.replace('$', ''))
+    print('\033[35m------------Revolution Case--------------\033[0m')
+    print(data + ' --> $' + str(rev1_case * data_raw) + ' (' + str(rev1_case) + ')' )
+    total += (rev1_case * data_raw)
+
+if(frac_case != 0):
+    page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
+    soup = BeautifulSoup(page.content, 'html.parser')
+    price = soup.find('span', attrs={'class':'normal_price'})
+    data = price.text.split()[2]
+    data_raw = float(data.replace('$', ''))
+    print('\033[35m------------Revolution Case--------------\033[0m')
+    print(data + ' --> $' + str(rev1_case * data_raw) + ' (' + str(rev1_case) + ')' )
+    total += (rev1_case * data_raw)
+
+if(chr_case != 0):
+    page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
+    soup = BeautifulSoup(page.content, 'html.parser')
+    price = soup.find('span', attrs={'class':'normal_price'})
+    data = price.text.split()[2]
+    data_raw = float(data.replace('$', ''))
+    print('\033[35m------------Revolution Case--------------\033[0m')
+    print(data + ' --> $' + str(rev1_case * data_raw) + ' (' + str(rev1_case) + ')' )
+    total += (rev1_case * data_raw)
+
+if(chr2_case != 0):
+    page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
+    soup = BeautifulSoup(page.content, 'html.parser')
+    price = soup.find('span', attrs={'class':'normal_price'})
+    data = price.text.split()[2]
+    data_raw = float(data.replace('$', ''))
+    print('\033[35m------------Revolution Case--------------\033[0m')
+    print(data + ' --> $' + str(rev1_case * data_raw) + ' (' + str(rev1_case) + ')' )
+    total += (rev1_case * data_raw)
+
+if(chr3_case != 0):
+    page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
+    soup = BeautifulSoup(page.content, 'html.parser')
+    price = soup.find('span', attrs={'class':'normal_price'})
+    data = price.text.split()[2]
+    data_raw = float(data.replace('$', ''))
+    print('\033[35m------------Revolution Case--------------\033[0m')
+    print(data + ' --> $' + str(rev1_case * data_raw) + ' (' + str(rev1_case) + ')' )
+    total += (rev1_case * data_raw)
+
+if(clt_case != 0):
+    page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
+    soup = BeautifulSoup(page.content, 'html.parser')
+    price = soup.find('span', attrs={'class':'normal_price'})
+    data = price.text.split()[2]
+    data_raw = float(data.replace('$', ''))
+    print('\033[35m------------Revolution Case--------------\033[0m')
+    print(data + ' --> $' + str(rev1_case * data_raw) + ' (' + str(rev1_case) + ')' )
+    total += (rev1_case * data_raw)
+
+if(csg_case != 0):
+    page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
+    soup = BeautifulSoup(page.content, 'html.parser')
+    price = soup.find('span', attrs={'class':'normal_price'})
+    data = price.text.split()[2]
+    data_raw = float(data.replace('$', ''))
+    print('\033[35m------------Revolution Case--------------\033[0m')
+    print(data + ' --> $' + str(rev1_case * data_raw) + ' (' + str(rev1_case) + ')' )
+    total += (rev1_case * data_raw)
+
+if(csg2_case != 0):
+    page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
+    soup = BeautifulSoup(page.content, 'html.parser')
+    price = soup.find('span', attrs={'class':'normal_price'})
+    data = price.text.split()[2]
+    data_raw = float(data.replace('$', ''))
+    print('\033[35m------------Revolution Case--------------\033[0m')
+    print(data + ' --> $' + str(rev1_case * data_raw) + ' (' + str(rev1_case) + ')' )
+    total += (rev1_case * data_raw)
+
+if(csg3_case != 0):
+    page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
+    soup = BeautifulSoup(page.content, 'html.parser')
+    price = soup.find('span', attrs={'class':'normal_price'})
+    data = price.text.split()[2]
+    data_raw = float(data.replace('$', ''))
+    print('\033[35m------------Revolution Case--------------\033[0m')
+    print(data + ' --> $' + str(rev1_case * data_raw) + ' (' + str(rev1_case) + ')' )
+    total += (rev1_case * data_raw)
+
+if(cs20_case != 0):
+    page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
+    soup = BeautifulSoup(page.content, 'html.parser')
+    price = soup.find('span', attrs={'class':'normal_price'})
+    data = price.text.split()[2]
+    data_raw = float(data.replace('$', ''))
+    print('\033[35m------------Revolution Case--------------\033[0m')
+    print(data + ' --> $' + str(rev1_case * data_raw) + ' (' + str(rev1_case) + ')' )
+    total += (rev1_case * data_raw)
+
+if(dgz_case != 0):
+    page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
+    soup = BeautifulSoup(page.content, 'html.parser')
+    price = soup.find('span', attrs={'class':'normal_price'})
+    data = price.text.split()[2]
+    data_raw = float(data.replace('$', ''))
+    print('\033[35m------------Revolution Case--------------\033[0m')
+    print(data + ' --> $' + str(rev1_case * data_raw) + ' (' + str(rev1_case) + ')' )
+    total += (rev1_case * data_raw)
+
+if(esp_case != 0):
+    page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
+    soup = BeautifulSoup(page.content, 'html.parser')
+    price = soup.find('span', attrs={'class':'normal_price'})
+    data = price.text.split()[2]
+    data_raw = float(data.replace('$', ''))
+    print('\033[35m------------Revolution Case--------------\033[0m')
+    print(data + ' --> $' + str(rev1_case * data_raw) + ' (' + str(rev1_case) + ')' )
+    total += (rev1_case * data_raw)
+
+if(espw_case != 0):
+    page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
+    soup = BeautifulSoup(page.content, 'html.parser')
+    price = soup.find('span', attrs={'class':'normal_price'})
+    data = price.text.split()[2]
+    data_raw = float(data.replace('$', ''))
+    print('\033[35m------------Revolution Case--------------\033[0m')
+    print(data + ' --> $' + str(rev1_case * data_raw) + ' (' + str(rev1_case) + ')' )
+    total += (rev1_case * data_raw)
+
+if(esps_case != 0):
+    page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
+    soup = BeautifulSoup(page.content, 'html.parser')
+    price = soup.find('span', attrs={'class':'normal_price'})
+    data = price.text.split()[2]
+    data_raw = float(data.replace('$', ''))
+    print('\033[35m------------Revolution Case--------------\033[0m')
+    print(data + ' --> $' + str(rev1_case * data_raw) + ' (' + str(rev1_case) + ')' )
+    total += (rev1_case * data_raw)
+
+if(flch_case != 0):
+    page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
+    soup = BeautifulSoup(page.content, 'html.parser')
+    price = soup.find('span', attrs={'class':'normal_price'})
+    data = price.text.split()[2]
+    data_raw = float(data.replace('$', ''))
+    print('\033[35m------------Revolution Case--------------\033[0m')
+    print(data + ' --> $' + str(rev1_case * data_raw) + ' (' + str(rev1_case) + ')' )
+    total += (rev1_case * data_raw)
+
+if(gam_case != 0):
+    page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
+    soup = BeautifulSoup(page.content, 'html.parser')
+    price = soup.find('span', attrs={'class':'normal_price'})
+    data = price.text.split()[2]
+    data_raw = float(data.replace('$', ''))
+    print('\033[35m------------Revolution Case--------------\033[0m')
+    print(data + ' --> $' + str(rev1_case * data_raw) + ' (' + str(rev1_case) + ')' )
+    total += (rev1_case * data_raw)
+
+if(gam2_case != 0):
+    page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
+    soup = BeautifulSoup(page.content, 'html.parser')
+    price = soup.find('span', attrs={'class':'normal_price'})
+    data = price.text.split()[2]
+    data_raw = float(data.replace('$', ''))
+    print('\033[35m------------Revolution Case--------------\033[0m')
+    print(data + ' --> $' + str(rev1_case * data_raw) + ' (' + str(rev1_case) + ')' )
+    total += (rev1_case * data_raw)
+
+if(glv_case != 0):
+    page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
+    soup = BeautifulSoup(page.content, 'html.parser')
+    price = soup.find('span', attrs={'class':'normal_price'})
+    data = price.text.split()[2]
+    data_raw = float(data.replace('$', ''))
+    print('\033[35m------------Revolution Case--------------\033[0m')
+    print(data + ' --> $' + str(rev1_case * data_raw) + ' (' + str(rev1_case) + ')' )
+    total += (rev1_case * data_raw)
+
+if(hrz_case != 0):
+    page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
+    soup = BeautifulSoup(page.content, 'html.parser')
+    price = soup.find('span', attrs={'class':'normal_price'})
+    data = price.text.split()[2]
+    data_raw = float(data.replace('$', ''))
+    print('\033[35m------------Revolution Case--------------\033[0m')
+    print(data + ' --> $' + str(rev1_case * data_raw) + ' (' + str(rev1_case) + ')' )
+    total += (rev1_case * data_raw)
+
+if(hnts_case != 0):
+    page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
+    soup = BeautifulSoup(page.content, 'html.parser')
+    price = soup.find('span', attrs={'class':'normal_price'})
+    data = price.text.split()[2]
+    data_raw = float(data.replace('$', ''))
+    print('\033[35m------------Revolution Case--------------\033[0m')
+    print(data + ' --> $' + str(rev1_case * data_raw) + ' (' + str(rev1_case) + ')' )
+    total += (rev1_case * data_raw)
+
+if(brav_case != 0):
+    page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
+    soup = BeautifulSoup(page.content, 'html.parser')
+    price = soup.find('span', attrs={'class':'normal_price'})
+    data = price.text.split()[2]
+    data_raw = float(data.replace('$', ''))
+    print('\033[35m------------Revolution Case--------------\033[0m')
+    print(data + ' --> $' + str(rev1_case * data_raw) + ' (' + str(rev1_case) + ')' )
+    total += (rev1_case * data_raw)
+
+if(brkt_case != 0):
+    page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
+    soup = BeautifulSoup(page.content, 'html.parser')
+    price = soup.find('span', attrs={'class':'normal_price'})
+    data = price.text.split()[2]
+    data_raw = float(data.replace('$', ''))
+    print('\033[35m------------Revolution Case--------------\033[0m')
+    print(data + ' --> $' + str(rev1_case * data_raw) + ' (' + str(rev1_case) + ')' )
+    total += (rev1_case * data_raw)
+
+if(hydr_case != 0):
+    page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
+    soup = BeautifulSoup(page.content, 'html.parser')
+    price = soup.find('span', attrs={'class':'normal_price'})
+    data = price.text.split()[2]
+    data_raw = float(data.replace('$', ''))
+    print('\033[35m------------Revolution Case--------------\033[0m')
+    print(data + ' --> $' + str(rev1_case * data_raw) + ' (' + str(rev1_case) + ')' )
+    total += (rev1_case * data_raw)
+
+if(phnx_case != 0):
+    page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
+    soup = BeautifulSoup(page.content, 'html.parser')
+    price = soup.find('span', attrs={'class':'normal_price'})
+    data = price.text.split()[2]
+    data_raw = float(data.replace('$', ''))
+    print('\033[35m------------Revolution Case--------------\033[0m')
+    print(data + ' --> $' + str(rev1_case * data_raw) + ' (' + str(rev1_case) + ')' )
+    total += (rev1_case * data_raw)
+
+if(vngd_case != 0):
+    page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
+    soup = BeautifulSoup(page.content, 'html.parser')
+    price = soup.find('span', attrs={'class':'normal_price'})
+    data = price.text.split()[2]
+    data_raw = float(data.replace('$', ''))
+    print('\033[35m------------Revolution Case--------------\033[0m')
+    print(data + ' --> $' + str(rev1_case * data_raw) + ' (' + str(rev1_case) + ')' )
+    total += (rev1_case * data_raw)
+
+if(wldf_case != 0):
+    page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
+    soup = BeautifulSoup(page.content, 'html.parser')
+    price = soup.find('span', attrs={'class':'normal_price'})
+    data = price.text.split()[2]
+    data_raw = float(data.replace('$', ''))
+    print('\033[35m------------Revolution Case--------------\033[0m')
+    print(data + ' --> $' + str(rev1_case * data_raw) + ' (' + str(rev1_case) + ')' )
+    total += (rev1_case * data_raw)
+
+if(prsm_case != 0):
+    page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
+    soup = BeautifulSoup(page.content, 'html.parser')
+    price = soup.find('span', attrs={'class':'normal_price'})
+    data = price.text.split()[2]
+    data_raw = float(data.replace('$', ''))
+    print('\033[35m------------Revolution Case--------------\033[0m')
+    print(data + ' --> $' + str(rev1_case * data_raw) + ' (' + str(rev1_case) + ')' )
+    total += (rev1_case * data_raw)
+
+if(prsm2_case != 0):
+    page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
+    soup = BeautifulSoup(page.content, 'html.parser')
+    price = soup.find('span', attrs={'class':'normal_price'})
+    data = price.text.split()[2]
+    data_raw = float(data.replace('$', ''))
+    print('\033[35m------------Revolution Case--------------\033[0m')
+    print(data + ' --> $' + str(rev1_case * data_raw) + ' (' + str(rev1_case) + ')' )
+    total += (rev1_case * data_raw)
+
+if(rev_case != 0):
+    page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
+    soup = BeautifulSoup(page.content, 'html.parser')
+    price = soup.find('span', attrs={'class':'normal_price'})
+    data = price.text.split()[2]
+    data_raw = float(data.replace('$', ''))
+    print('\033[35m------------Revolution Case--------------\033[0m')
+    print(data + ' --> $' + str(rev1_case * data_raw) + ' (' + str(rev1_case) + ')' )
+    total += (rev1_case * data_raw)
+
+if(shdw_case != 0):
+    page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
+    soup = BeautifulSoup(page.content, 'html.parser')
+    price = soup.find('span', attrs={'class':'normal_price'})
+    data = price.text.split()[2]
+    data_raw = float(data.replace('$', ''))
+    print('\033[35m------------Revolution Case--------------\033[0m')
+    print(data + ' --> $' + str(rev1_case * data_raw) + ' (' + str(rev1_case) + ')' )
+    total += (rev1_case * data_raw)
+
+if(shwb_case != 0):
+    page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
+    soup = BeautifulSoup(page.content, 'html.parser')
+    price = soup.find('span', attrs={'class':'normal_price'})
+    data = price.text.split()[2]
+    data_raw = float(data.replace('$', ''))
+    print('\033[35m------------Revolution Case--------------\033[0m')
+    print(data + ' --> $' + str(rev1_case * data_raw) + ' (' + str(rev1_case) + ')' )
+    total += (rev1_case * data_raw)
+
+if(spec_case != 0):
+    page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
+    soup = BeautifulSoup(page.content, 'html.parser')
+    price = soup.find('span', attrs={'class':'normal_price'})
+    data = price.text.split()[2]
+    data_raw = float(data.replace('$', ''))
+    print('\033[35m------------Revolution Case--------------\033[0m')
+    print(data + ' --> $' + str(rev1_case * data_raw) + ' (' + str(rev1_case) + ')' )
+    total += (rev1_case * data_raw)
+
+if(spec2_case != 0):
+    page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
+    soup = BeautifulSoup(page.content, 'html.parser')
+    price = soup.find('span', attrs={'class':'normal_price'})
+    data = price.text.split()[2]
+    data_raw = float(data.replace('$', ''))
+    print('\033[35m------------Revolution Case--------------\033[0m')
+    print(data + ' --> $' + str(rev1_case * data_raw) + ' (' + str(rev1_case) + ')' )
+    total += (rev1_case * data_raw)
+
+if(woff_case != 0):
+    page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
+    soup = BeautifulSoup(page.content, 'html.parser')
+    price = soup.find('span', attrs={'class':'normal_price'})
+    data = price.text.split()[2]
+    data_raw = float(data.replace('$', ''))
+    print('\033[35m------------Revolution Case--------------\033[0m')
+    print(data + ' --> $' + str(rev1_case * data_raw) + ' (' + str(rev1_case) + ')' )
     total += (rev1_case * data_raw)
 
 ##################################### PRINT TOTAL #######################################################################
 
-print('-----------------------------------------')
-print('Total in USD')
-print(float(f'{total:.2f}'))
+print('\033[32m------------USD Total--------------------\033[0m')
+print('$' + str(float(f'{total:.2f}')))
 
 url2 = 'https://www.xe.com/de/currencyconverter/convert/?Amount=1&From=EUR&To=USD'
 page2 = requests.get(url2)
@@ -160,8 +540,9 @@ rate2 = rate1.text.split()
 rate3 = rate2[3].replace(',', '.')
 rate = float(rate3)
 eur_total = rate * total
-print('Total in EUR')
-print(float(f'{eur_total:.2f}'))
+print('\033[32m------------EUR Total--------------------\033[0m')
+print('€' + str(float(f'{eur_total:.2f}')))
+print('\033[32m-----------------------------------------\033[0m')
 
 
 
