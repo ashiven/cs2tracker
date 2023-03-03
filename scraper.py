@@ -13,7 +13,7 @@ config.read('config.ini')
 total = 0
 
 ## sticker capsules
-capsules = ['antwerp', 'stockholm', 'rio']
+capsules = ['Antwerp', 'Stockholm', 'Rio']
 
 ant_l = int(config.get('Antwerp', 'Antwerp_Legends'))
 ant_c = int(config.get('Antwerp', 'Antwerp_Challengers'))
@@ -35,7 +35,7 @@ rio = [rio_l, rio_c, rio_co, rio_au]
 
 ## cases
 
-rev_case = int(config.get('Cases', 'Revolution_Case'))
+rev1_case = int(config.get('Cases', 'Revolution_Case'))
 rec_case = int(config.get('Cases', 'Recoil_Case'))
 dnn_case = int(config.get('Cases', 'Dreams_And_Nightmares_Case'))
 rip_case = int(config.get('Cases', 'Operation_Riptide_Case'))
@@ -79,14 +79,14 @@ woff_case = int(config.get('Cases', 'Winter_Offensive_Weapon_Case'))
 ######################################## DISPLAY CAPSULE PRICES ######################################################
 
 for capsule in capsules:
-    print(f'-------------{capsule} capsule-----------------')
+    print(f'-------------{capsule} Capsule-----------------'[:41])
     url = f'https://steamcommunity.com/market/search?q={capsule}+capsule'
     page = requests.get(url)
     soup = BeautifulSoup(page.content, 'html.parser')
     capsule_name = ['Legends', 'Challengers', 'Contenders', 'Champions Autographs']
     count = 0
 
-    if(capsule == 'antwerp'):
+    if(capsule == 'Antwerp'):
         hrefs = ['https://steamcommunity.com/market/listings/730/Antwerp%202022%20Legends%20Sticker%20Capsule'
                 ,'https://steamcommunity.com/market/listings/730/Antwerp%202022%20Challengers%20Sticker%20Capsule'
                 ,'https://steamcommunity.com/market/listings/730/Antwerp%202022%20Contenders%20Sticker%20Capsule'
@@ -102,7 +102,7 @@ for capsule in capsules:
             total = total + (ant[count] * float(data_raw) )
             count = count + 1
 
-    if(capsule == 'stockholm'):
+    if(capsule == 'Stockholm'):
         hrefs = ['https://steamcommunity.com/market/listings/730/Stockholm%202021%20Legends%20Sticker%20Capsule'
                 ,'https://steamcommunity.com/market/listings/730/Stockholm%202021%20Challengers%20Sticker%20Capsule'
                 ,'https://steamcommunity.com/market/listings/730/Stockholm%202021%20Contenders%20Sticker%20Capsule'
@@ -118,7 +118,7 @@ for capsule in capsules:
             total = total + (st[count] * float(data_raw) )
             count = count + 1
         
-    if(capsule == 'rio'):
+    if(capsule == 'Rio'):
         hrefs = ['https://steamcommunity.com/market/listings/730/Rio%202022%20Legends%20Sticker%20Capsule'
                 ,'https://steamcommunity.com/market/listings/730/Rio%202022%20Challengers%20Sticker%20Capsule'
                 ,'https://steamcommunity.com/market/listings/730/Rio%202022%20Contenders%20Sticker%20Capsule'
@@ -136,9 +136,19 @@ for capsule in capsules:
 
 ##################################### DISPLAY OTHER ITEMS ###############################################################
 
+if(rev1_case != 0):
+    page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
+    soup = BeautifulSoup(page.content, 'html.parser')
+    price = soup.find('span', attrs={'class':'normal_price'})
+    data = price.text.split()[2]
+    data_raw = float(data.replace('$', ''))
+    print('------------Revolution Case--------------')
+    print(data + ' --> ' + str(rev1_case * data_raw) + ' (' + str(rev1_case) + ')' )
+    total += (rev1_case * data_raw)
+
 ##################################### PRINT TOTAL #######################################################################
 
-print('-----------------------------------')
+print('-----------------------------------------')
 print('Total in USD')
 print(float(f'{total:.2f}'))
 
