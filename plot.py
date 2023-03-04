@@ -2,6 +2,7 @@ import csv
 import datetime
 import matplotlib.pyplot as plt
 from matplotlib.dates import DateFormatter
+import os
 
 def parse_row(row):
     date_str, price_str = row
@@ -14,6 +15,10 @@ dates = []
 dollars = []
 euros = []
 row_num = 0
+
+if not os.path.isfile(filename):
+    open(filename, "w").close()
+
 with open(filename, 'r', newline='', encoding = 'utf-8') as csvfile:
     reader = csv.reader(csvfile)
     for row in reader:
