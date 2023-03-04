@@ -146,6 +146,25 @@ if(rio[0] != 0 or rio[1] != 0 or rio[2] != 0 or rio[3] != 0):
 
 ##################################### DISPLAY CASES ###############################################################
 
+/*
+case_amounts = []
+case_names = []
+case_links = []
+case_hrefs = []
+
+for i in range(case_amounts.length):
+	if(case_amounts[i] != 0):
+    page = requests.get(case_links[i])
+    soup = BeautifulSoup(page.content, 'html.parser')
+    listing = soup.find('a', attrs={'href':f'{case_hrefs[i]}')
+    price = listing.find('span', attrs={'class':'normal_price'})
+    data = price.text.split()[2]
+    data_raw = float(data.replace('$', ''))
+    print('\033[35m' + f'------------{case_names[i]}------------------'[:41] + '\033[0m')
+    print(data + ' --> $' + str(int(case_amounts[i] * data_raw)) + ' (' + str(case_amounts[i]) + ')' )
+    total += (case_amounts[i] * data_raw)
+*/
+
 if(rev1_case != 0):
     page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
     soup = BeautifulSoup(page.content, 'html.parser')
