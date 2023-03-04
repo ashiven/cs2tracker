@@ -5,6 +5,7 @@ import datetime
 import os
 import configparser
 import time
+from colorama import init, Fore, Style
 
 ####################################### READ CONFIG AND SET VARIABLES #################################################
 
@@ -12,6 +13,10 @@ config = configparser.ConfigParser()
 config.read('config.ini')
 
 total = 0
+
+## initiate colorama
+
+init()
 
 ## sticker capsules
 
@@ -32,6 +37,8 @@ rio_c = int(config.get('Rio', 'Rio_Challengers'))
 rio_co = int(config.get('Rio', 'Rio_Contenders'))
 rio_au = int(config.get('Rio', 'Rio_Champions_Autographs'))
 rio = [rio_l, rio_c, rio_co, rio_au]
+
+capsule_name = [Fore.BLUE + 'Legends' + Style.RESET_ALL, Fore.BLUE + 'Challengers' + Style.RESET_ALL, Fore.BLUE + 'Contenders' + Style.RESET_ALL, Fore.BLUE + 'Champions Autographs' + Style.RESET_ALL]
 
 ## cases
 
@@ -85,13 +92,12 @@ session.headers.update({'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)
 if(ant[0] != 0 or ant[1] != 0 or ant[2] != 0 or ant[3] != 0):
     page = session.get('https://steamcommunity.com/market/search?q=antwerp+capsule')
     soup = BeautifulSoup(page.content, 'html.parser')
-    capsule_name = ['\033[34mLegends\033[0m', '\033[34mChallengers\033[0m', '\033[34mContenders\033[0m', '\033[34mChampions Autographs\033[0m']
     count = 0
     hrefs = ['https://steamcommunity.com/market/listings/730/Antwerp%202022%20Legends%20Sticker%20Capsule'
             ,'https://steamcommunity.com/market/listings/730/Antwerp%202022%20Challengers%20Sticker%20Capsule'
             ,'https://steamcommunity.com/market/listings/730/Antwerp%202022%20Contenders%20Sticker%20Capsule'
             ,'https://steamcommunity.com/market/listings/730/Antwerp%202022%20Champions%20Autograph%20Capsule']
-    print('\033[35m------------Antwerp Capsule--------------\033[0m')
+    print(Fore.MAGENTA + '------------Antwerp Capsule--------------' + Style.RESET_ALL)
     for href in hrefs:
         if(ant[count] != 0):
             listing = soup.find('a', attrs={'href':f'{href}'})
@@ -109,13 +115,12 @@ if(ant[0] != 0 or ant[1] != 0 or ant[2] != 0 or ant[3] != 0):
 if(st[0] != 0 or st[1] != 0 or st[2] != 0 or st[3] != 0):
     page = session.get('https://steamcommunity.com/market/search?q=stockholm+capsule')
     soup = BeautifulSoup(page.content, 'html.parser')
-    capsule_name = ['\033[34mLegends\033[0m', '\033[34mChallengers\033[0m', '\033[34mContenders\033[0m', '\033[34mChampions Autographs\033[0m']
     count = 0
     hrefs = ['https://steamcommunity.com/market/listings/730/Stockholm%202021%20Legends%20Sticker%20Capsule'
             ,'https://steamcommunity.com/market/listings/730/Stockholm%202021%20Challengers%20Sticker%20Capsule'
             ,'https://steamcommunity.com/market/listings/730/Stockholm%202021%20Contenders%20Sticker%20Capsule'
             ,'https://steamcommunity.com/market/listings/730/Stockholm%202021%20Champions%20Autograph%20Capsule']
-    print('\033[35m------------Stockholm Capsule------------\033[0m')
+    print(Fore.MAGENTA + '------------Stockholm Capsule------------' + Style.RESET_ALL)
     for href in hrefs:
         if(st[count] != 0):
             listing = soup.find('a', attrs={'href':f'{href}'})
@@ -133,13 +138,12 @@ if(st[0] != 0 or st[1] != 0 or st[2] != 0 or st[3] != 0):
 if(rio[0] != 0 or rio[1] != 0 or rio[2] != 0 or rio[3] != 0):
     page = session.get('https://steamcommunity.com/market/search?q=rio+capsule')
     soup = BeautifulSoup(page.content, 'html.parser')
-    capsule_name = ['\033[34mLegends\033[0m', '\033[34mChallengers\033[0m', '\033[34mContenders\033[0m', '\033[34mChampions Autographs\033[0m']
     count = 0
     hrefs = ['https://steamcommunity.com/market/listings/730/Rio%202022%20Legends%20Sticker%20Capsule'
             ,'https://steamcommunity.com/market/listings/730/Rio%202022%20Challengers%20Sticker%20Capsule'
             ,'https://steamcommunity.com/market/listings/730/Rio%202022%20Contenders%20Sticker%20Capsule'
             ,'https://steamcommunity.com/market/listings/730/Rio%202022%20Champions%20Autograph%20Capsule']
-    print('\033[35m------------Rio Capsule------------------\033[0m')
+    print(Fore.MAGENTA + '------------Rio Capsule------------------' + Style.RESET_ALL)
     for href in hrefs:
         if(rio[count] != 0):
             listing = soup.find('a', attrs={'href':f'{href}'})
@@ -163,7 +167,7 @@ case_amounts = [rev1_case,rec_case,dnn_case,rip_case,snk_case,brk_case,frac_case
 case_names = ['Revolution Case','Recoil Case','Dreams And Nightmares Case','Operation Riptide Case','Snakebite Case','Operation Broken Fang Case','Fracture Case','Chroma Case',
                 'Chroma 2 Case','Chroma 3 Case','Clutch Case','CSGO Weapon Case','CSGO Weapon Case 2','CSGO Weapon Case 3','CS20 Case','Danger Zone Case','eSports 2013 Case','eSports 2013 Winter Case',
                 'eSports 2014 Summer Case','Falchion Case','Gamma Case','Gamma 2 Case','Glove Case','Horizon Case','Huntsman Weapon Case','Operation Bravo Case','Operation Breakout Weapon Case',
-                'Operation Hydra Case','Operation Phoenix Weapon Case','Operation Vanguard Weapon Case','Operation Wildfire Case','Prisma Case','Prisma 2 Case','Revolver Case','Shadow Case',
+                'Operation Hydra Case','Operation Phoenix Case','Operation Vanguard Weapon Case','Operation Wildfire Case','Prisma Case','Prisma 2 Case','Revolver Case','Shadow Case',
                 'Shattered Web Case','Spectrum Case','Spectrum 2 Case','Winter Offensive Weapon Case']
 case_links = ['https://steamcommunity.com/market/search?q=revolution+case',
                 'https://steamcommunity.com/market/search?q=recoil+case',
@@ -250,7 +254,7 @@ for i in range(len(case_amounts)):
         soup = BeautifulSoup(page.content, 'html.parser')
         listing = soup.find('a', attrs={'href':case_hrefs[i]})
         if listing is None:
-            print('\033[35m' + f'------------{case_names[i]}-----------------------------------'[:41] + '\033[0m')
+            print(Fore.MAGENTA + f'------------{case_names[i]}-----------------------------------'[:41] + Style.RESET_ALL)
             print('[!] Failed to load.(Too many requests)')
             break
         price = listing.find('span', attrs={'class':'normal_price'})
@@ -264,7 +268,7 @@ for i in range(len(case_amounts)):
 
 ##################################### PRINT TOTAL #######################################################################
 
-print('\033[32m------------USD Total--------------------\033[0m')
+print(Fore.GREEN + '------------USD Total--------------------' + Style.RESET_ALL)
 print('$' + str(float(f'{total:.2f}')))
 
 url2 = 'https://www.xe.com/de/currencyconverter/convert/?Amount=1&From=EUR&To=USD'
@@ -275,9 +279,9 @@ rate2 = rate1.text.split()
 rate3 = rate2[3].replace(',', '.')
 rate = float(rate3)
 eur_total = rate * total
-print('\033[32m------------EUR Total--------------------\033[0m')
+print(Fore.GREEN + '------------EUR Total--------------------' + Style.RESET_ALL)
 print('€' + str(float(f'{eur_total:.2f}')))
-print('\033[32m-----------------------------------------\033[0m')
+print(Fore.GREEN + '-----------------------------------------' + Style.RESET_ALL)
 
 
 
