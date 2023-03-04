@@ -1,6 +1,7 @@
 import tkinter as tk
 import subprocess
 
+
 def plot():
     subprocess.call(["python", "plot.py"])
 
