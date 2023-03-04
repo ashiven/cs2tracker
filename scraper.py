@@ -4,6 +4,7 @@ import csv
 import datetime
 import os
 import configparser
+import time
 
 ####################################### READ CONFIG AND SET VARIABLES #################################################
 
@@ -79,511 +80,182 @@ woff_case = int(config.get('Cases', 'Winter_Offensive_Weapon_Case'))
 ######################################## DISPLAY CAPSULE PRICES ######################################################
 
 if(ant[0] != 0 or ant[1] != 0 or ant[2] != 0 or ant[3] != 0):
-    url = f'https://steamcommunity.com/market/search?q=antwerp+capsule'
-    page = requests.get(url)
+    page = requests.get('https://steamcommunity.com/market/search?q=antwerp+capsule')
     soup = BeautifulSoup(page.content, 'html.parser')
     capsule_name = ['\033[34mLegends\033[0m', '\033[34mChallengers\033[0m', '\033[34mContenders\033[0m', '\033[34mChampions Autographs\033[0m']
     count = 0
-    print('\033[35m------------Antwerp Capsule--------------\033[0m')
     hrefs = ['https://steamcommunity.com/market/listings/730/Antwerp%202022%20Legends%20Sticker%20Capsule'
             ,'https://steamcommunity.com/market/listings/730/Antwerp%202022%20Challengers%20Sticker%20Capsule'
             ,'https://steamcommunity.com/market/listings/730/Antwerp%202022%20Contenders%20Sticker%20Capsule'
             ,'https://steamcommunity.com/market/listings/730/Antwerp%202022%20Champions%20Autograph%20Capsule']
+    print('\033[35m------------Antwerp Capsule--------------\033[0m')
     for href in hrefs:
         if(ant[count] != 0):
             listing = soup.find('a', attrs={'href':f'{href}'})
+            if listing is None:
+                print('[!] Failed to load.(Too many requests)')
+                break
             price = listing.find('span', attrs={'class':'normal_price'})
             print(capsule_name[count]) 
             data = price.text.split()[2]
             data_raw = data.replace('$', '')
-            print(*[data, '--> $' + str(int(ant[count] * float(data_raw))) + f' ({ant[count]})' ])
+            print(*[data, '--> $' + str(round(float(ant[count] * float(data_raw)), 2)) + f' ({ant[count]})' ])
             total = total + (ant[count] * float(data_raw) )
         count = count + 1
 
 if(st[0] != 0 or st[1] != 0 or st[2] != 0 or st[3] != 0):
-    url = f'https://steamcommunity.com/market/search?q=stockholm+capsule'
-    page = requests.get(url)
+    page = requests.get('https://steamcommunity.com/market/search?q=stockholm+capsule')
     soup = BeautifulSoup(page.content, 'html.parser')
     capsule_name = ['\033[34mLegends\033[0m', '\033[34mChallengers\033[0m', '\033[34mContenders\033[0m', '\033[34mChampions Autographs\033[0m']
     count = 0
-    print('\033[35m------------Stockholm Capsule------------\033[0m')
     hrefs = ['https://steamcommunity.com/market/listings/730/Stockholm%202021%20Legends%20Sticker%20Capsule'
             ,'https://steamcommunity.com/market/listings/730/Stockholm%202021%20Challengers%20Sticker%20Capsule'
             ,'https://steamcommunity.com/market/listings/730/Stockholm%202021%20Contenders%20Sticker%20Capsule'
             ,'https://steamcommunity.com/market/listings/730/Stockholm%202021%20Champions%20Autograph%20Capsule']
+    print('\033[35m------------Stockholm Capsule------------\033[0m')
     for href in hrefs:
         if(st[count] != 0):
             listing = soup.find('a', attrs={'href':f'{href}'})
+            if listing is None:
+                print('[!] Failed to load.(Too many requests)')
+                break
             price = listing.find('span', attrs={'class':'normal_price'})
             print(capsule_name[count]) 
             data = price.text.split()[2]
             data_raw = data.replace('$', '')
-            print(*[data, '--> $' + str(int(st[count] * float(data_raw))) + f' ({st[count]})'])
+            print(*[data, '--> $' + str(round(float(st[count] * float(data_raw)), 2)) + f' ({st[count]})'])
             total = total + (st[count] * float(data_raw) )
         count = count + 1
 
 if(rio[0] != 0 or rio[1] != 0 or rio[2] != 0 or rio[3] != 0):
-    url = f'https://steamcommunity.com/market/search?q=rio+capsule'
-    page = requests.get(url)
+    page = requests.get('https://steamcommunity.com/market/search?q=rio+capsule')
     soup = BeautifulSoup(page.content, 'html.parser')
     capsule_name = ['\033[34mLegends\033[0m', '\033[34mChallengers\033[0m', '\033[34mContenders\033[0m', '\033[34mChampions Autographs\033[0m']
     count = 0
-    print('\033[35m------------Rio Capsule------------------\033[0m')
     hrefs = ['https://steamcommunity.com/market/listings/730/Rio%202022%20Legends%20Sticker%20Capsule'
             ,'https://steamcommunity.com/market/listings/730/Rio%202022%20Challengers%20Sticker%20Capsule'
             ,'https://steamcommunity.com/market/listings/730/Rio%202022%20Contenders%20Sticker%20Capsule'
             ,'https://steamcommunity.com/market/listings/730/Rio%202022%20Champions%20Autograph%20Capsule']
+    print('\033[35m------------Rio Capsule------------------\033[0m')
     for href in hrefs:
         if(rio[count] != 0):
             listing = soup.find('a', attrs={'href':f'{href}'})
+            if listing is None:
+                print('[!] Failed to load.(Too many requests)')
+                break
             price = listing.find('span', attrs={'class':'normal_price'})
             print(capsule_name[count]) 
             data = price.text.split()[2]
             data_raw = data.replace('$', '')
-            print(*[data, '--> $' + str(int(rio[count] * float(data_raw))) + f' ({rio[count]})' ])
+            print(*[data, '--> $' + str(round(float(rio[count] * float(data_raw)), 2)) + f' ({rio[count]})' ])
             total = total + (rio[count] * float(data_raw) )
         count = count + 1
 
 ##################################### DISPLAY CASES ###############################################################
 
-/*
-case_amounts = []
-case_names = []
-case_links = []
-case_hrefs = []
 
-for i in range(case_amounts.length):
-	if(case_amounts[i] != 0):
-    page = requests.get(case_links[i])
-    soup = BeautifulSoup(page.content, 'html.parser')
-    listing = soup.find('a', attrs={'href':f'{case_hrefs[i]}')
-    price = listing.find('span', attrs={'class':'normal_price'})
-    data = price.text.split()[2]
-    data_raw = float(data.replace('$', ''))
-    print('\033[35m' + f'------------{case_names[i]}------------------'[:41] + '\033[0m')
-    print(data + ' --> $' + str(int(case_amounts[i] * data_raw)) + ' (' + str(case_amounts[i]) + ')' )
-    total += (case_amounts[i] * data_raw)
-*/
+case_amounts = [rev1_case,rec_case,dnn_case,rip_case,snk_case,brk_case,frac_case,chr_case,chr2_case,chr3_case,clt_case,csg_case,csg2_case,csg3_case,cs20_case,dgz_case,
+                esp_case,espw_case,esps_case,flch_case,gam_case,gam2_case,glv_case,hrz_case,hnts_case,brav_case,brkt_case,hydr_case,phnx_case,vngd_case,wldf_case,prsm_case,
+                prsm2_case,rev_case,shdw_case,shwb_case,spec_case,spec2_case,woff_case]
+case_names = ['Revolution Case','Recoil Case','Dreams And Nightmares Case','Operation Riptide Case','Snakebite Case','Operation Broken Fang Case','Fracture Case','Chroma Case',
+                'Chroma 2 Case','Chroma 3 Case','Clutch Case','CSGO Weapon Case','CSGO Weapon Case 2','CSGO Weapon Case 3','CS20 Case','Danger Zone Case','eSports 2013 Case','eSports 2013 Winter Case',
+                'eSports 2014 Summer Case','Falchion Case','Gamma Case','Gamma 2 Case','Glove Case','Horizon Case','Huntsman Weapon Case','Operation Bravo Case','Operation Breakout Weapon Case',
+                'Operation Hydra Case','Operation Phoenix Weapon Case','Operation Vanguard Weapon Case','Operation Wildfire Case','Prisma Case','Prisma 2 Case','Revolver Case','Shadow Case',
+                'Shattered Web Case','Spectrum Case','Spectrum 2 Case','Winter Offensive Weapon Case']
+case_links = ['https://steamcommunity.com/market/search?q=revolution+case',
+                'https://steamcommunity.com/market/search?q=recoil+case',
+                'https://steamcommunity.com/market/search?q=dreams+and+nightmares+case',
+                'https://steamcommunity.com/market/search?q=operation+riptide+case',
+                'https://steamcommunity.com/market/search?q=snakebite+case',
+                'https://steamcommunity.com/market/search?q=broken+fang+case',
+                'https://steamcommunity.com/market/search?q=fracture+case',
+                'https://steamcommunity.com/market/search?q=chroma+case',
+                'https://steamcommunity.com/market/search?q=chroma+case',
+                'https://steamcommunity.com/market/search?q=chroma+case',
+                'https://steamcommunity.com/market/search?q=clutch+case',
+                'https://steamcommunity.com/market/search?q=csgo+weapon+case',
+                'https://steamcommunity.com/market/search?q=csgo+weapon+case',
+                'https://steamcommunity.com/market/search?q=csgo+weapon+case',
+                'https://steamcommunity.com/market/search?q=cs20+case',
+                'https://steamcommunity.com/market/search?q=danger+zone+case',
+                'https://steamcommunity.com/market/search?q=esports+case',
+                'https://steamcommunity.com/market/search?q=esports+case',
+                'https://steamcommunity.com/market/search?q=esports+case',
+                'https://steamcommunity.com/market/search?q=falchion+case',
+                'https://steamcommunity.com/market/search?q=gamma+case',
+                'https://steamcommunity.com/market/search?q=glove+case',
+                'https://steamcommunity.com/market/search?q=horizon+case',
+                'https://steamcommunity.com/market/search?q=huntsman+weapon+case',
+                'https://steamcommunity.com/market/search?q=operation+bravo+case',
+                'https://steamcommunity.com/market/search?q=operation+breakout+case',
+                'https://steamcommunity.com/market/search?q=operation+hydra+case',
+                'https://steamcommunity.com/market/search?q=operation+phoenix+case',
+                'https://steamcommunity.com/market/search?q=operation+vanguard+case',
+                'https://steamcommunity.com/market/search?q=operation+wildfire+case',
+                'https://steamcommunity.com/market/search?q=prisma+case',
+                'https://steamcommunity.com/market/search?q=prisma+case',
+                'https://steamcommunity.com/market/search?q=revolver+case',
+                'https://steamcommunity.com/market/search?q=shadow+case',
+                'https://steamcommunity.com/market/search?q=shattered+web+case',
+                'https://steamcommunity.com/market/search?q=spectrum+case',
+                'https://steamcommunity.com/market/search?q=spectrum+case',
+                'https://steamcommunity.com/market/search?q=winter+offensive+case']
+case_hrefs = ['https://steamcommunity.com/market/listings/730/Revolution%20Case',
+                'https://steamcommunity.com/market/listings/730/Recoil%20Case',
+                'https://steamcommunity.com/market/listings/730/Dreams%20%26%20Nightmares%20Case',
+                'https://steamcommunity.com/market/listings/730/Operation%20Riptide%20Case',
+                'https://steamcommunity.com/market/listings/730/Snakebite%20Case',
+                'https://steamcommunity.com/market/listings/730/Operation%20Broken%20Fang%20Case',
+                'https://steamcommunity.com/market/listings/730/Fracture%20Case',
+                'https://steamcommunity.com/market/listings/730/Chroma%20Case',
+                'https://steamcommunity.com/market/listings/730/Chroma%202%20Case',
+                'https://steamcommunity.com/market/listings/730/Chroma%203%20Case',
+                'https://steamcommunity.com/market/listings/730/Clutch%20Case',
+                'https://steamcommunity.com/market/listings/730/CS%3AGO%20Weapon%20Case',
+                'https://steamcommunity.com/market/listings/730/CS%3AGO%20Weapon%20Case%202',
+                'https://steamcommunity.com/market/listings/730/CS%3AGO%20Weapon%20Case%203',
+                'https://steamcommunity.com/market/listings/730/CS20%20Case',
+                'https://steamcommunity.com/market/listings/730/Danger%20Zone%20Case',
+                'https://steamcommunity.com/market/listings/730/eSports%202013%20Case',
+                'https://steamcommunity.com/market/listings/730/eSports%202013%20Winter%20Case',
+                'https://steamcommunity.com/market/listings/730/eSports%202014%20Summer%20Case',
+                'https://steamcommunity.com/market/listings/730/Falchion%20Case',
+                'https://steamcommunity.com/market/listings/730/Gamma%20Case',
+                'https://steamcommunity.com/market/listings/730/Gamma%202%20Case',
+                'https://steamcommunity.com/market/listings/730/Glove%20Case',
+                'https://steamcommunity.com/market/listings/730/Horizon%20Case',
+                'https://steamcommunity.com/market/listings/730/Huntsman%20Weapon%20Case',
+                'https://steamcommunity.com/market/listings/730/Operation%20Bravo%20Case',
+                'https://steamcommunity.com/market/listings/730/Operation%20Breakout%20Weapon%20Case',
+                'https://steamcommunity.com/market/listings/730/Operation%20Hydra%20Case',
+                'https://steamcommunity.com/market/listings/730/Operation%20Phoenix%20Weapon%20Case',
+                'https://steamcommunity.com/market/listings/730/Operation%20Vanguard%20Weapon%20Case',
+                'https://steamcommunity.com/market/listings/730/Operation%20Wildfire%20Case',
+                'https://steamcommunity.com/market/listings/730/Prisma%20Case',
+                'https://steamcommunity.com/market/listings/730/Prisma%202%20Case',
+                'https://steamcommunity.com/market/listings/730/Revolver%20Case',
+                'https://steamcommunity.com/market/listings/730/Shadow%20Case',
+                'https://steamcommunity.com/market/listings/730/Shattered%20Web%20Case',
+                'https://steamcommunity.com/market/listings/730/Spectrum%20Case',
+                'https://steamcommunity.com/market/listings/730/Spectrum%202%20Case',
+                'https://steamcommunity.com/market/listings/730/Winter%20Offensive%20Weapon%20Case']
 
-if(rev1_case != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=revolution+case')
-    soup = BeautifulSoup(page.content, 'html.parser')
-    price = soup.find('span', attrs={'class':'normal_price'})
-    data = price.text.split()[2]
-    data_raw = float(data.replace('$', ''))
-    print('\033[35m------------Revolution Case--------------\033[0m')
-    print(data + ' --> $' + str(int(rev1_case * data_raw)) + ' (' + str(rev1_case) + ')' )
-    total += (rev1_case * data_raw)
+for i in range(len(case_amounts)):
+    if(case_amounts[i] != 0):
+        page = requests.get(case_links[i])
+        soup = BeautifulSoup(page.content, 'html.parser')
+        listing = soup.find('a', attrs={'href':case_hrefs[i]})
+        if listing is None:
+            print('\033[35m' + f'------------{case_names[i]}-----------------------------------'[:41] + '\033[0m')
+            print('[!] Failed to load.(Too many requests)')
+            break
+        price = listing.find('span', attrs={'class':'normal_price'})
+        data = price.text.split()[2]
+        data_raw = float(data.replace('$', ''))
+        print('\033[35m' + f'------------{case_names[i]}-----------------------------------'[:41] + '\033[0m')
+        print(data + ' --> $' + str(round(float(case_amounts[i] * data_raw), 2)) + ' (' + str(case_amounts[i]) + ')' )
+        total += (case_amounts[i] * data_raw)
 
-if(rec_case != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=recoil+case')
-    soup = BeautifulSoup(page.content, 'html.parser')
-    listing = soup.find('a', attrs={'href':'https://steamcommunity.com/market/listings/730/Recoil%20Case'})
-    price = listing.find('span', attrs={'class':'normal_price'})
-    data = price.text.split()[2]
-    data_raw = float(data.replace('$', ''))
-    print('\033[35m------------Recoil Case------------------\033[0m')
-    print(data + ' --> $' + str(int(rec_case * data_raw)) + ' (' + str(rec_case) + ')' )
-    total += (rec_case * data_raw)
-
-if(dnn_case != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=dreams+and+nightmares+case')
-    soup = BeautifulSoup(page.content, 'html.parser')
-    price = soup.find('span', attrs={'class':'normal_price'})
-    data = price.text.split()[2]
-    data_raw = float(data.replace('$', ''))
-    print('\033[35m------------Dreams & Nightmares Case-----\033[0m')
-    print(data + ' --> $' + str(int(dnn_case * data_raw)) + ' (' + str(dnn_case) + ')' )
-    total += (dnn_case * data_raw)
-
-if(rip_case != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=operation+riptide+case')
-    soup = BeautifulSoup(page.content, 'html.parser')
-    price = soup.find('span', attrs={'class':'normal_price'})
-    data = price.text.split()[2]
-    data_raw = float(data.replace('$', ''))
-    print('\033[35m------------Riptide Case-----------------\033[0m')
-    print(data + ' --> $' + str(int(rip_case * data_raw)) + ' (' + str(rip_case) + ')' )
-    total += (rip_case * data_raw)
-
-if(snk_case != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=snakebite+case')
-    soup = BeautifulSoup(page.content, 'html.parser')
-    price = soup.find('span', attrs={'class':'normal_price'})
-    data = price.text.split()[2]
-    data_raw = float(data.replace('$', ''))
-    print('\033[35m------------Snakebite Case---------------\033[0m')
-    print(data + ' --> $' + str(int(snk_case * data_raw)) + ' (' + str(snk_case) + ')' )
-    total += (snk_case * data_raw)
-
-if(brk_case != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=broken+fang+case')
-    soup = BeautifulSoup(page.content, 'html.parser')
-    price = soup.find('span', attrs={'class':'normal_price'})
-    data = price.text.split()[2]
-    data_raw = float(data.replace('$', ''))
-    print('\033[35m------------Broken Fang Case-------------\033[0m')
-    print(data + ' --> $' + str(int(brk_case * data_raw)) + ' (' + str(brk_case) + ')' )
-    total += (brk_case * data_raw)
-
-if(frac_case != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=fracture+case')
-    soup = BeautifulSoup(page.content, 'html.parser')
-    price = soup.find('span', attrs={'class':'normal_price'})
-    data = price.text.split()[2]
-    data_raw = float(data.replace('$', ''))
-    print('\033[35m------------Fracture Case----------------\033[0m')
-    print(data + ' --> $' + str(int(frac_case * data_raw)) + ' (' + str(frac_case) + ')' )
-    total += (frac_case * data_raw)
-
-if(chr_case != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=chroma+case')
-    soup = BeautifulSoup(page.content, 'html.parser')
-    listing = soup.find('a', attrs={'href':'https://steamcommunity.com/market/listings/730/Chroma%20Case'})
-    price = listing.find('span', attrs={'class':'normal_price'})
-    data = price.text.split()[2]
-    data_raw = float(data.replace('$', ''))
-    print('\033[35m------------Chroma Case------------------\033[0m')
-    print(data + ' --> $' + str(int(chr_case * data_raw)) + ' (' + str(chr_case) + ')' )
-    total += (chr_case * data_raw)
-
-if(chr2_case != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=chroma+case')
-    soup = BeautifulSoup(page.content, 'html.parser')
-    listing = soup.find('a', attrs={'href':'https://steamcommunity.com/market/listings/730/Chroma%202%20Case'})
-    price = listing.find('span', attrs={'class':'normal_price'})
-    data = price.text.split()[2]
-    data_raw = float(data.replace('$', ''))
-    print('\033[35m------------Chroma 2 Case----------------\033[0m')
-    print(data + ' --> $' + str(int(chr2_case * data_raw)) + ' (' + str(chr2_case) + ')' )
-    total += (chr2_case * data_raw)
-
-if(chr3_case != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=chroma+case')
-    soup = BeautifulSoup(page.content, 'html.parser')
-    listing = soup.find('a', attrs={'href':'https://steamcommunity.com/market/listings/730/Chroma%203%20Case'})
-    price = listing.find('span', attrs={'class':'normal_price'})
-    data = price.text.split()[2]
-    data_raw = float(data.replace('$', ''))
-    print('\033[35m------------Chroma 3 Case----------------\033[0m')
-    print(data + ' --> $' + str(int(chr3_case * data_raw)) + ' (' + str(chr3_case) + ')' )
-    total += (chr3_case * data_raw)
-
-if(clt_case != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=clutch+case')
-    soup = BeautifulSoup(page.content, 'html.parser')
-    listing = soup.find('a', attrs={'href':'https://steamcommunity.com/market/listings/730/Clutch%20Case'})
-    price = listing.find('span', attrs={'class':'normal_price'})
-    data = price.text.split()[2]
-    data_raw = float(data.replace('$', ''))
-    print('\033[35m------------Clutch Case------------------\033[0m')
-    print(data + ' --> $' + str(int(clt_case * data_raw)) + ' (' + str(clt_case) + ')' )
-    total += (clt_case * data_raw)
-
-if(csg_case != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=csgo+weapon+case')
-    soup = BeautifulSoup(page.content, 'html.parser')
-    listing = soup.find('a', attrs={'href':'https://steamcommunity.com/market/listings/730/CS%3AGO%20Weapon%20Case'})
-    price = listing.find('span', attrs={'class':'normal_price'})
-    data = price.text.split()[2]
-    data_raw = float(data.replace('$', ''))
-    print('\033[35m------------CSGO Weapon Case-------------\033[0m')
-    print(data + ' --> $' + str(int(csg_case * data_raw)) + ' (' + str(csg_case) + ')' )
-    total += (csg_case * data_raw)
-
-if(csg2_case != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=csgo+weapon+case')
-    soup = BeautifulSoup(page.content, 'html.parser')
-    listing = soup.find('a', attrs={'href':'https://steamcommunity.com/market/listings/730/CS%3AGO%20Weapon%20Case%202'})
-    price = listing.find('span', attrs={'class':'normal_price'})
-    data = price.text.split()[2]
-    data_raw = float(data.replace('$', ''))
-    print('\033[35m------------CSGO Weapon Case 2-----------\033[0m')
-    print(data + ' --> $' + str(int(csg2_case * data_raw)) + ' (' + str(csg2_case) + ')' )
-    total += (csg2_case * data_raw)
-
-if(csg3_case != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=csgo+weapon+case')
-    soup = BeautifulSoup(page.content, 'html.parser')
-    listing = soup.find('a', attrs={'href':'https://steamcommunity.com/market/listings/730/CS%3AGO%20Weapon%20Case%203'})
-    price = listing.find('span', attrs={'class':'normal_price'})
-    data = price.text.split()[2]
-    data_raw = float(data.replace('$', ''))
-    print('\033[35m------------CSGO Weapon Case 3-----------\033[0m')
-    print(data + ' --> $' + str(int(csg3_case * data_raw)) + ' (' + str(csg3_case) + ')' )
-    total += (csg3_case * data_raw)
-
-if(cs20_case != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=cs20+case')
-    soup = BeautifulSoup(page.content, 'html.parser')
-    listing = soup.find('a', attrs={'href':'https://steamcommunity.com/market/listings/730/CS20%20Case'})
-    price = listing.find('span', attrs={'class':'normal_price'})
-    data = price.text.split()[2]
-    data_raw = float(data.replace('$', ''))
-    print('\033[35m------------CS20 Case--------------------\033[0m')
-    print(data + ' --> $' + str(int(cs20_case * data_raw)) + ' (' + str(cs20_case) + ')' )
-    total += (cs20_case * data_raw)
-
-if(dgz_case != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=danger+zone+case')
-    soup = BeautifulSoup(page.content, 'html.parser')
-    listing = soup.find('a', attrs={'href':'https://steamcommunity.com/market/listings/730/Danger%20Zone%20Case'})
-    price = listing.find('span', attrs={'class':'normal_price'})
-    data = price.text.split()[2]
-    data_raw = float(data.replace('$', ''))
-    print('\033[35m------------Danger Zone Case-------------\033[0m')
-    print(data + ' --> $' + str(int(dgz_case * data_raw)) + ' (' + str(dgz_case) + ')' )
-    total += (dgz_case * data_raw)
-
-if(esp_case != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=esports+case')
-    soup = BeautifulSoup(page.content, 'html.parser')
-    listing = soup.find('a', attrs={'href':'https://steamcommunity.com/market/listings/730/eSports%202013%20Case'})
-    price = listing.find('span', attrs={'class':'normal_price'})
-    data = price.text.split()[2]
-    data_raw = float(data.replace('$', ''))
-    print('\033[35m------------eSports 2013 Case------------\033[0m')
-    print(data + ' --> $' + str(int(esp_case * data_raw)) + ' (' + str(esp_case) + ')' )
-    total += (esp_case * data_raw)
-
-if(espw_case != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=esports+case')
-    soup = BeautifulSoup(page.content, 'html.parser')
-    listing = soup.find('a', attrs={'href':'https://steamcommunity.com/market/listings/730/eSports%202013%20Winter%20Case'})
-    price = listing.find('span', attrs={'class':'normal_price'})
-    data = price.text.split()[2]
-    data_raw = float(data.replace('$', ''))
-    print('\033[35m------------eSports 2013 Winter Case-----\033[0m')
-    print(data + ' --> $' + str(int(espw_case * data_raw)) + ' (' + str(espw_case) + ')' )
-    total += (espw_case * data_raw)
-
-if(esps_case != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=esports+case')
-    soup = BeautifulSoup(page.content, 'html.parser')
-    listing = soup.find('a', attrs={'href':'https://steamcommunity.com/market/listings/730/eSports%202014%20Summer%20Case'})
-    price = listing.find('span', attrs={'class':'normal_price'})
-    data = price.text.split()[2]
-    data_raw = float(data.replace('$', ''))
-    print('\033[35m------------eSports 2014 Summer Case-----\033[0m')
-    print(data + ' --> $' + str(int(esps_case * data_raw)) + ' (' + str(esps_case) + ')' )
-    total += (esps_case * data_raw)
-
-if(flch_case != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=falchion+case')
-    soup = BeautifulSoup(page.content, 'html.parser')
-    listing = soup.find('a', attrs={'href':'https://steamcommunity.com/market/listings/730/Falchion%20Case'})
-    price = listing.find('span', attrs={'class':'normal_price'})
-    data = price.text.split()[2]
-    data_raw = float(data.replace('$', ''))
-    print('\033[35m------------Falchion Case----------------\033[0m')
-    print(data + ' --> $' + str(int(flch_case * data_raw)) + ' (' + str(flch_case) + ')' )
-    total += (flch_case * data_raw)
-
-if(gam_case != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=gamma+case')
-    soup = BeautifulSoup(page.content, 'html.parser')
-    listing = soup.find('a', attrs={'href':'https://steamcommunity.com/market/listings/730/Gamma%20Case'})
-    price = listing.find('span', attrs={'class':'normal_price'})
-    data = price.text.split()[2]
-    data_raw = float(data.replace('$', ''))
-    print('\033[35m------------Gamma Case-------------------\033[0m')
-    print(data + ' --> $' + str(int(gam_case * data_raw)) + ' (' + str(gam_case) + ')' )
-    total += (gam_case * data_raw)
-
-if(gam2_case != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=gamma+case')
-    soup = BeautifulSoup(page.content, 'html.parser')
-    listing = soup.find('a', attrs={'href':'https://steamcommunity.com/market/listings/730/Gamma%202%20Case'})
-    price = listing.find('span', attrs={'class':'normal_price'})
-    data = price.text.split()[2]
-    data_raw = float(data.replace('$', ''))
-    print('\033[35m------------Gamma 2 Case-----------------\033[0m')
-    print(data + ' --> $' + str(int(gam2_case * data_raw)) + ' (' + str(gam2_case) + ')' )
-    total += (gam2_case * data_raw)
-
-if(glv_case != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=glove+case')
-    soup = BeautifulSoup(page.content, 'html.parser')
-    listing = soup.find('a', attrs={'href':'https://steamcommunity.com/market/listings/730/Glove%20Case'})
-    price = listing.find('span', attrs={'class':'normal_price'})
-    data = price.text.split()[2]
-    data_raw = float(data.replace('$', ''))
-    print('\033[35m------------Glove Case-------------------\033[0m')
-    print(data + ' --> $' + str(int(glv_case * data_raw)) + ' (' + str(glv_case) + ')' )
-    total += (glv_case * data_raw)
-
-if(hrz_case != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=horizon+case')
-    soup = BeautifulSoup(page.content, 'html.parser')
-    listing = soup.find('a', attrs={'href':'https://steamcommunity.com/market/listings/730/Horizon%20Case'})
-    price = listing.find('span', attrs={'class':'normal_price'})
-    data = price.text.split()[2]
-    data_raw = float(data.replace('$', ''))
-    print('\033[35m------------Horizon Case-----------------\033[0m')
-    print(data + ' --> $' + str(int(hrz_case * data_raw)) + ' (' + str(hrz_case) + ')' )
-    total += (hrz_case * data_raw)
-
-if(hnts_case != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=huntsman+weapon+case')
-    soup = BeautifulSoup(page.content, 'html.parser')
-    price = soup.find('span', attrs={'class':'normal_price'})
-    data = price.text.split()[2]
-    data_raw = float(data.replace('$', ''))
-    print('\033[35m------------Huntsman Case----------------\033[0m')
-    print(data + ' --> $' + str(int(hnts_case * data_raw)) + ' (' + str(hnts_case) + ')' )
-    total += (hnts_case * data_raw)
-
-if(brav_case != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=operation+bravo+case')
-    soup = BeautifulSoup(page.content, 'html.parser')
-    price = soup.find('span', attrs={'class':'normal_price'})
-    data = price.text.split()[2]
-    data_raw = float(data.replace('$', ''))
-    print('\033[35m------------Operation Bravo Case---------\033[0m')
-    print(data + ' --> $' + str(int(brav_case * data_raw)) + ' (' + str(brav_case) + ')' )
-    total += (brav_case * data_raw)
-
-if(brkt_case != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=operation+breakout+case')
-    soup = BeautifulSoup(page.content, 'html.parser')
-    listing = soup.find('a', attrs={'href':'https://steamcommunity.com/market/listings/730/Operation%20Breakout%20Weapon%20Case'})
-    price = listing.find('span', attrs={'class':'normal_price'})
-    data = price.text.split()[2]
-    data_raw = float(data.replace('$', ''))
-    print('\033[35m------------Operation Breakout Case------\033[0m')
-    print(data + ' --> $' + str(int(brkt_case * data_raw)) + ' (' + str(brkt_case) + ')' )
-    total += (brkt_case * data_raw)
-
-if(hydr_case != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=operation+hydra+case')
-    soup = BeautifulSoup(page.content, 'html.parser')
-    listing = soup.find('a', attrs={'href':'https://steamcommunity.com/market/listings/730/Operation%20Hydra%20Case'})
-    price = listing.find('span', attrs={'class':'normal_price'})
-    data = price.text.split()[2]
-    data_raw = float(data.replace('$', ''))
-    print('\033[35m------------Operation Hydra Case---------\033[0m')
-    print(data + ' --> $' + str(int(hydr_case * data_raw)) + ' (' + str(hydr_case) + ')' )
-    total += (hydr_case * data_raw)
-
-if(phnx_case != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=operation+phoenix+case')
-    soup = BeautifulSoup(page.content, 'html.parser')
-    listing = soup.find('a', attrs={'href':'https://steamcommunity.com/market/listings/730/Operation%20Phoenix%20Weapon%20Case'})
-    price = listing.find('span', attrs={'class':'normal_price'})
-    data = price.text.split()[2]
-    data_raw = float(data.replace('$', ''))
-    print('\033[35m------------Operation Phoenix Case-------\033[0m')
-    print(data + ' --> $' + str(int(phnx_case * data_raw)) + ' (' + str(phnx_case) + ')' )
-    total += (phnx_case * data_raw)
-
-if(vngd_case != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=operation+vanguard+case')
-    soup = BeautifulSoup(page.content, 'html.parser')
-    listing = soup.find('a', attrs={'href':'https://steamcommunity.com/market/listings/730/Operation%20Vanguard%20Weapon%20Case'})
-    price = listing.find('span', attrs={'class':'normal_price'})
-    data = price.text.split()[2]
-    data_raw = float(data.replace('$', ''))
-    print('\033[35m------------Operation Vanguard Case------\033[0m')
-    print(data + ' --> $' + str(int(vngd_case * data_raw)) + ' (' + str(vngd_case) + ')' )
-    total += (vngd_case * data_raw)
-
-if(wldf_case != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=operation+wildfire+case')
-    soup = BeautifulSoup(page.content, 'html.parser')
-    listing = soup.find('a', attrs={'href':'https://steamcommunity.com/market/listings/730/Operation%20Wildfire%20Case'})
-    price = listing.find('span', attrs={'class':'normal_price'})
-    data = price.text.split()[2]
-    data_raw = float(data.replace('$', ''))
-    print('\033[35m------------Operation Wildfire Case------\033[0m')
-    print(data + ' --> $' + str(int(wldf_case * data_raw)) + ' (' + str(wldf_case) + ')' )
-    total += (wldf_case * data_raw)
-
-if(prsm_case != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=prisma+case')
-    soup = BeautifulSoup(page.content, 'html.parser')
-    listing = soup.find('a', attrs={'href':'https://steamcommunity.com/market/listings/730/Prisma%20Case'})
-    price = listing.find('span', attrs={'class':'normal_price'})
-    data = price.text.split()[2]
-    data_raw = float(data.replace('$', ''))
-    print('\033[35m------------Prisma Case------------------\033[0m')
-    print(data + ' --> $' + str(int(prsm_case * data_raw)) + ' (' + str(prsm_case) + ')' )
-    total += (prsm_case * data_raw)
-
-if(prsm2_case != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=prisma+case')
-    soup = BeautifulSoup(page.content, 'html.parser')
-    listing = soup.find('a', attrs={'href':'https://steamcommunity.com/market/listings/730/Prisma%202%20Case'})
-    price = listing.find('span', attrs={'class':'normal_price'})
-    data = price.text.split()[2]
-    data_raw = float(data.replace('$', ''))
-    print('\033[35m------------Prisma 2 Case----------------\033[0m')
-    print(data + ' --> $' + str(int(prsm2_case * data_raw)) + ' (' + str(prsm2_case) + ')' )
-    total += (prsm2_case * data_raw)
-
-if(rev_case != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=revolver+case')
-    soup = BeautifulSoup(page.content, 'html.parser')
-    listing = soup.find('a', attrs={'href':'https://steamcommunity.com/market/listings/730/Revolver%20Case'})
-    price = listing.find('span', attrs={'class':'normal_price'})
-    data = price.text.split()[2]
-    data_raw = float(data.replace('$', ''))
-    print('\033[35m------------Revolver Case----------------\033[0m')
-    print(data + ' --> $' + str(int(rev_case * data_raw)) + ' (' + str(rev_case) + ')' )
-    total += (rev_case * data_raw)
-
-if(shdw_case != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=shadow+case')
-    soup = BeautifulSoup(page.content, 'html.parser')
-    listing = soup.find('a', attrs={'href':'https://steamcommunity.com/market/listings/730/Shadow%20Case'})
-    price = listing.find('span', attrs={'class':'normal_price'})
-    data = price.text.split()[2]
-    data_raw = float(data.replace('$', ''))
-    print('\033[35m------------Shadow Case------------------\033[0m')
-    print(data + ' --> $' + str(int(shdw_case * data_raw)) + ' (' + str(shdw_case) + ')' )
-    total += (shdw_case * data_raw)
-
-if(shwb_case != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=shattered+web+case')
-    soup = BeautifulSoup(page.content, 'html.parser')
-    price = soup.find('span', attrs={'class':'normal_price'})
-    data = price.text.split()[2]
-    data_raw = float(data.replace('$', ''))
-    print('\033[35m------------Shattered Web Case-----------\033[0m')
-    print(data + ' --> $' + str(int(shwb_case * data_raw)) + ' (' + str(shwb_case) + ')' )
-    total += (shwb_case * data_raw)
-
-if(spec_case != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=spectrum+case')
-    soup = BeautifulSoup(page.content, 'html.parser')
-    listing = soup.find('a', attrs={'href':'https://steamcommunity.com/market/listings/730/Spectrum%20Case'})
-    price = listing.find('span', attrs={'class':'normal_price'})
-    data = price.text.split()[2]
-    data_raw = float(data.replace('$', ''))
-    print('\033[35m------------Spectrum Case----------------\033[0m')
-    print(data + ' --> $' + str(int(spec_case * data_raw)) + ' (' + str(spec_case) + ')' )
-    total += (spec_case * data_raw)
-
-if(spec2_case != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=spectrum+case')
-    soup = BeautifulSoup(page.content, 'html.parser')
-    listing = soup.find('a', attrs={'href':'https://steamcommunity.com/market/listings/730/Spectrum%202%20Case'})
-    price = listing.find('span', attrs={'class':'normal_price'})
-    data = price.text.split()[2]
-    data_raw = float(data.replace('$', ''))
-    print('\033[35m------------Spectrum 2 Case--------------\033[0m')
-    print(data + ' --> $' + str(int(spec2_case * data_raw)) + ' (' + str(spec2_case) + ')' )
-    total += (spec2_case * data_raw)
-
-if(woff_case != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=winter+offensive+case')
-    soup = BeautifulSoup(page.content, 'html.parser')
-    listing = soup.find('a', attrs={'href':'https://steamcommunity.com/market/listings/730/Winter%20Offensive%20Weapon%20Case'})
-    price = listing.find('span', attrs={'class':'normal_price'})
-    data = price.text.split()[2]
-    data_raw = float(data.replace('$', ''))
-    print('\033[35m------------Winter Offensive Case--------\033[0m')
-    print(data + ' --> $' + str(int(woff_case * data_raw)) + ' (' + str(woff_case) + ')' )
-    total += (woff_case * data_raw)
 
 ##################################### PRINT TOTAL #######################################################################
 
