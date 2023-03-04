@@ -14,7 +14,6 @@ config.read('config.ini')
 total = 0
 
 ## sticker capsules
-capsule_name = ['\033[34mLegends\033[0m', '\033[34mChallengers\033[0m', '\033[34mContenders\033[0m', '\033[34mChampions Autographs\033[0m']
 
 ant_l = int(config.get('Antwerp', 'Antwerp_Legends'))
 ant_c = int(config.get('Antwerp', 'Antwerp_Challengers'))
@@ -75,6 +74,8 @@ shwb_case = int(config.get('Cases', 'Shattered_Web_Case'))
 spec_case = int(config.get('Cases', 'Spectrum_Case'))
 spec2_case = int(config.get('Cases', 'Spectrum_2_Case'))
 woff_case = int(config.get('Cases', 'Winter_Offensive_Weapon_Case'))
+
+## create requests session
 
 session = requests.Session()
 session.headers.update({'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36'})

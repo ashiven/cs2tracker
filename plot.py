@@ -36,7 +36,6 @@ ax.plot(datesp, dollars, label='Dollars')
 ax.plot(datesp, euros, label='Euros')
 ax.set_xlabel('Date')
 ax.set_ylabel('Price')
-ax.set_title('Price over Time')
 ax.legend()
 
 date_form = DateFormatter("%d-%m-%Y")
