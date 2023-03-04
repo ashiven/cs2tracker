@@ -273,14 +273,14 @@ for i in range(len(case_amounts)):
         if listing is None:
             print(Fore.MAGENTA + f'------------{case_names[i]}-----------------------------------'[:41] + Style.RESET_ALL)
             print('[!] Failed to load.(Too many requests)')
-            break
-        price = listing.find('span', attrs={'class':'normal_price'})
-        data = price.text.split()[2]
-        data_raw = float(data.replace('$', ''))
-        print('\033[35m' + f'------------{case_names[i]}-----------------------------------'[:41] + '\033[0m')
-        print(data + ' --> $' + str(round(float(case_amounts[i] * data_raw), 2)) + ' (' + str(case_amounts[i]) + ')' )
-        total += (case_amounts[i] * data_raw)
-        time.sleep(1)
+        else:
+            price = listing.find('span', attrs={'class':'normal_price'})
+            data = price.text.split()[2]
+            data_raw = float(data.replace('$', ''))
+            print('\033[35m' + f'------------{case_names[i]}-----------------------------------'[:41] + '\033[0m')
+            print(data + ' --> $' + str(round(float(case_amounts[i] * data_raw), 2)) + ' (' + str(case_amounts[i]) + ')' )
+            total += (case_amounts[i] * data_raw)
+            time.sleep(1)
 
 
 ##################################### PRINT TOTAL #######################################################################
