@@ -96,7 +96,7 @@ session.headers.update({'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)
 
 ######################################## DISPLAY CAPSULE PRICES ######################################################
 
-if(ant[0] != 0 or ant[1] != 0 or ant[2] != 0 or ant[3] != 0):
+if(ant[0] > 0 or ant[1] > 0 or ant[2] > 0 or ant[3] > 0 or ant[4] > 0 or ant[5] > 0 or ant[6] > 0):
     page = session.get('https://steamcommunity.com/market/search?q=antwerp+capsule')
     soup = BeautifulSoup(page.content, 'html.parser')
     count = 0
@@ -109,7 +109,7 @@ if(ant[0] != 0 or ant[1] != 0 or ant[2] != 0 or ant[3] != 0):
             ,'https://steamcommunity.com/market/listings/730/Antwerp%202022%20Contenders%20Autograph%20Capsule']
     print(Fore.MAGENTA + '------------Antwerp Capsule--------------' + Style.RESET_ALL)
     for href in hrefs:
-        if(ant[count] != 0):
+        if(ant[count] > 0):
             listing = soup.find('a', attrs={'href':f'{href}'})
             if listing is None:
                 print('[!] Failed to load.(Too many requests)')
@@ -122,7 +122,7 @@ if(ant[0] != 0 or ant[1] != 0 or ant[2] != 0 or ant[3] != 0):
             total = total + (ant[count] * float(data_raw) )
         count = count + 1
 
-if(st[0] != 0 or st[1] != 0 or st[2] != 0 or st[3] != 0):
+if(st[0] > 0 or st[1] > 0 or st[2] > 0 or st[3] > 0 or st[4] > 0):
     page = session.get('https://steamcommunity.com/market/search?q=stockholm+capsule')
     soup = BeautifulSoup(page.content, 'html.parser')
     count = 0
@@ -133,7 +133,7 @@ if(st[0] != 0 or st[1] != 0 or st[2] != 0 or st[3] != 0):
             ,'https://steamcommunity.com/market/listings/730/Stockholm%202021%20Finalists%20Autograph%20Capsule']
     print(Fore.MAGENTA + '------------Stockholm Capsule------------' + Style.RESET_ALL)
     for href in hrefs:
-        if(st[count] != 0):
+        if(st[count] > 0):
             listing = soup.find('a', attrs={'href':f'{href}'})
             if listing is None:
                 print('[!] Failed to load.(Too many requests)')
@@ -146,7 +146,7 @@ if(st[0] != 0 or st[1] != 0 or st[2] != 0 or st[3] != 0):
             total = total + (st[count] * float(data_raw) )
         count = count + 1
 
-if(rio[0] != 0 or rio[1] != 0 or rio[2] != 0 or rio[3] != 0):
+if(rio[0] > 0 or rio[1] > 0 or rio[2] > 0 or rio[3] > 0 or rio[4] > 0 or rio[5] > 0 or rio[6] > 0):
     page = session.get('https://steamcommunity.com/market/search?q=rio+capsule')
     soup = BeautifulSoup(page.content, 'html.parser')
     count = 0
@@ -159,7 +159,7 @@ if(rio[0] != 0 or rio[1] != 0 or rio[2] != 0 or rio[3] != 0):
             ,'https://steamcommunity.com/market/listings/730/Rio%202022%20Contenders%20Autograph%20Capsule']
     print(Fore.MAGENTA + '------------Rio Capsule------------------' + Style.RESET_ALL)
     for href in hrefs:
-        if(rio[count] != 0):
+        if(rio[count] > 0):
             listing = soup.find('a', attrs={'href':f'{href}'})
             if listing is None:
                 print('[!] Failed to load.(Too many requests)')
@@ -263,7 +263,7 @@ case_hrefs = ['https://steamcommunity.com/market/listings/730/Revolution%20Case'
                 'https://steamcommunity.com/market/listings/730/Winter%20Offensive%20Weapon%20Case']
 
 for i in range(len(case_amounts)):
-    if(case_amounts[i] != 0):
+    if(case_amounts[i] > 0):
         page = session.get(case_links[i])
         soup = BeautifulSoup(page.content, 'html.parser')
         listing = soup.find('a', attrs={'href':case_hrefs[i]})
