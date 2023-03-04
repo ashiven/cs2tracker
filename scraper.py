@@ -76,11 +76,13 @@ spec_case = int(config.get('Cases', 'Spectrum_Case'))
 spec2_case = int(config.get('Cases', 'Spectrum_2_Case'))
 woff_case = int(config.get('Cases', 'Winter_Offensive_Weapon_Case'))
 
+session = requests.Session()
+session.headers.update({'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36'})
 
 ######################################## DISPLAY CAPSULE PRICES ######################################################
 
 if(ant[0] != 0 or ant[1] != 0 or ant[2] != 0 or ant[3] != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=antwerp+capsule')
+    page = session.get('https://steamcommunity.com/market/search?q=antwerp+capsule')
     soup = BeautifulSoup(page.content, 'html.parser')
     capsule_name = ['\033[34mLegends\033[0m', '\033[34mChallengers\033[0m', '\033[34mContenders\033[0m', '\033[34mChampions Autographs\033[0m']
     count = 0
@@ -104,7 +106,7 @@ if(ant[0] != 0 or ant[1] != 0 or ant[2] != 0 or ant[3] != 0):
         count = count + 1
 
 if(st[0] != 0 or st[1] != 0 or st[2] != 0 or st[3] != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=stockholm+capsule')
+    page = session.get('https://steamcommunity.com/market/search?q=stockholm+capsule')
     soup = BeautifulSoup(page.content, 'html.parser')
     capsule_name = ['\033[34mLegends\033[0m', '\033[34mChallengers\033[0m', '\033[34mContenders\033[0m', '\033[34mChampions Autographs\033[0m']
     count = 0
@@ -128,7 +130,7 @@ if(st[0] != 0 or st[1] != 0 or st[2] != 0 or st[3] != 0):
         count = count + 1
 
 if(rio[0] != 0 or rio[1] != 0 or rio[2] != 0 or rio[3] != 0):
-    page = requests.get('https://steamcommunity.com/market/search?q=rio+capsule')
+    page = session.get('https://steamcommunity.com/market/search?q=rio+capsule')
     soup = BeautifulSoup(page.content, 'html.parser')
     capsule_name = ['\033[34mLegends\033[0m', '\033[34mChallengers\033[0m', '\033[34mContenders\033[0m', '\033[34mChampions Autographs\033[0m']
     count = 0
@@ -182,6 +184,7 @@ case_links = ['https://steamcommunity.com/market/search?q=revolution+case',
                 'https://steamcommunity.com/market/search?q=esports+case',
                 'https://steamcommunity.com/market/search?q=esports+case',
                 'https://steamcommunity.com/market/search?q=falchion+case',
+                'https://steamcommunity.com/market/search?q=gamma+case',
                 'https://steamcommunity.com/market/search?q=gamma+case',
                 'https://steamcommunity.com/market/search?q=glove+case',
                 'https://steamcommunity.com/market/search?q=horizon+case',
@@ -242,7 +245,7 @@ case_hrefs = ['https://steamcommunity.com/market/listings/730/Revolution%20Case'
 
 for i in range(len(case_amounts)):
     if(case_amounts[i] != 0):
-        page = requests.get(case_links[i])
+        page = session.get(case_links[i])
         soup = BeautifulSoup(page.content, 'html.parser')
         listing = soup.find('a', attrs={'href':case_hrefs[i]})
         if listing is None:
@@ -255,6 +258,7 @@ for i in range(len(case_amounts)):
         print('\033[35m' + f'------------{case_names[i]}-----------------------------------'[:41] + '\033[0m')
         print(data + ' --> $' + str(round(float(case_amounts[i] * data_raw), 2)) + ' (' + str(case_amounts[i]) + ')' )
         total += (case_amounts[i] * data_raw)
+        time.sleep(1)
 
 
 ##################################### PRINT TOTAL #######################################################################
@@ -263,7 +267,7 @@ print('\033[32m------------USD Total--------------------\033[0m')
 print('$' + str(float(f'{total:.2f}')))
 
 url2 = 'https://www.xe.com/de/currencyconverter/convert/?Amount=1&From=EUR&To=USD'
-page2 = requests.get(url2)
+page2 = session.get(url2)
 soup2 = BeautifulSoup(page2.content, 'html.parser')
 rate1 = soup2.find('div', attrs={'class':'unit-rates___StyledDiv-sc-1dk593y-0 dEqdnx'})
 rate2 = rate1.text.split()
