@@ -103,7 +103,10 @@ if(ant[0] != 0 or ant[1] != 0 or ant[2] != 0 or ant[3] != 0):
     hrefs = ['https://steamcommunity.com/market/listings/730/Antwerp%202022%20Legends%20Sticker%20Capsule'
             ,'https://steamcommunity.com/market/listings/730/Antwerp%202022%20Challengers%20Sticker%20Capsule'
             ,'https://steamcommunity.com/market/listings/730/Antwerp%202022%20Contenders%20Sticker%20Capsule'
-            ,'https://steamcommunity.com/market/listings/730/Antwerp%202022%20Champions%20Autograph%20Capsule']
+            ,'https://steamcommunity.com/market/listings/730/Antwerp%202022%20Champions%20Autograph%20Capsule'
+            ,'https://steamcommunity.com/market/listings/730/Antwerp%202022%20Challengers%20Autograph%20Capsule'
+            ,'https://steamcommunity.com/market/listings/730/Antwerp%202022%20Legends%20Autograph%20Capsule'
+            ,'https://steamcommunity.com/market/listings/730/Antwerp%202022%20Contenders%20Autograph%20Capsule']
     print(Fore.MAGENTA + '------------Antwerp Capsule--------------' + Style.RESET_ALL)
     for href in hrefs:
         if(ant[count] != 0):
@@ -126,7 +129,8 @@ if(st[0] != 0 or st[1] != 0 or st[2] != 0 or st[3] != 0):
     hrefs = ['https://steamcommunity.com/market/listings/730/Stockholm%202021%20Legends%20Sticker%20Capsule'
             ,'https://steamcommunity.com/market/listings/730/Stockholm%202021%20Challengers%20Sticker%20Capsule'
             ,'https://steamcommunity.com/market/listings/730/Stockholm%202021%20Contenders%20Sticker%20Capsule'
-            ,'https://steamcommunity.com/market/listings/730/Stockholm%202021%20Champions%20Autograph%20Capsule']
+            ,'https://steamcommunity.com/market/listings/730/Stockholm%202021%20Champions%20Autograph%20Capsule'
+            ,'https://steamcommunity.com/market/listings/730/Stockholm%202021%20Finalists%20Autograph%20Capsule']
     print(Fore.MAGENTA + '------------Stockholm Capsule------------' + Style.RESET_ALL)
     for href in hrefs:
         if(st[count] != 0):
@@ -149,7 +153,10 @@ if(rio[0] != 0 or rio[1] != 0 or rio[2] != 0 or rio[3] != 0):
     hrefs = ['https://steamcommunity.com/market/listings/730/Rio%202022%20Legends%20Sticker%20Capsule'
             ,'https://steamcommunity.com/market/listings/730/Rio%202022%20Challengers%20Sticker%20Capsule'
             ,'https://steamcommunity.com/market/listings/730/Rio%202022%20Contenders%20Sticker%20Capsule'
-            ,'https://steamcommunity.com/market/listings/730/Rio%202022%20Champions%20Autograph%20Capsule']
+            ,'https://steamcommunity.com/market/listings/730/Rio%202022%20Champions%20Autograph%20Capsule'
+            ,'https://steamcommunity.com/market/listings/730/Rio%202022%20Challengers%20Autograph%20Capsule'
+            ,'https://steamcommunity.com/market/listings/730/Rio%202022%20Legends%20Autograph%20Capsule'
+            ,'https://steamcommunity.com/market/listings/730/Rio%202022%20Contenders%20Autograph%20Capsule']
     print(Fore.MAGENTA + '------------Rio Capsule------------------' + Style.RESET_ALL)
     for href in hrefs:
         if(rio[count] != 0):
