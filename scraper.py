@@ -24,19 +24,26 @@ ant_l = int(config.get('Antwerp', 'Antwerp_Legends'))
 ant_c = int(config.get('Antwerp', 'Antwerp_Challengers'))
 ant_co = int(config.get('Antwerp', 'Antwerp_Contenders'))
 ant_au = int(config.get('Antwerp', 'Antwerp_Champions_Autographs'))
-ant = [ant_l, ant_c, ant_co, ant_au]
+ant_au_c = int(config.get('Antwerp', 'Antwerp_Challengers_Autographs'))
+ant_au_l = int(config.get('Antwerp', 'Antwerp_Legends_Autographs'))
+ant_au_co = int(config.get('Antwerp', 'Antwerp_Contenders_Autographs'))
+ant = [ant_l, ant_c, ant_co, ant_au, ant_au_c, ant_au_l, ant_au_co]
 
 st_l = int(config.get('Stockholm', 'Stockholm_Legends'))
 st_c = int(config.get('Stockholm', 'Stockholm_Challengers'))
 st_co = int(config.get('Stockholm', 'Stockholm_Contenders'))
 st_au = int(config.get('Stockholm', 'Stockholm_Champions_Autographs'))
-st = [st_l, st_c, st_co, st_au]
+st_au_f = int(config.get('Stockholm', 'Stockholm_Finalists_Autographs'))
+st = [st_l, st_c, st_co, st_au, st_au_f]
 
 rio_l = int(config.get('Rio', 'Rio_Legends'))
 rio_c = int(config.get('Rio', 'Rio_Challengers'))
 rio_co = int(config.get('Rio', 'Rio_Contenders'))
 rio_au = int(config.get('Rio', 'Rio_Champions_Autographs'))
-rio = [rio_l, rio_c, rio_co, rio_au]
+rio_au_c = int(config.get('Rio', 'Rio_Challengers_Autographs'))
+rio_au_l = int(config.get('Rio', 'Rio_Legends_Autographs'))
+rio_au_co = int(config.get('Rio', 'Rio_Contenders_Autographs'))
+rio = [rio_l, rio_c, rio_co, rio_au, rio_au_c, rio_au_l, rio_au_co]
 
 capsule_name = [Fore.BLUE + 'Legends' + Style.RESET_ALL, Fore.BLUE + 'Challengers' + Style.RESET_ALL, Fore.BLUE + 'Contenders' + Style.RESET_ALL, Fore.BLUE + 'Champions Autographs' + Style.RESET_ALL]
 
