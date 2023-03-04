@@ -20,6 +20,11 @@ init()
 
 ## sticker capsules
 
+rmr_l = int(config.get('2020 RMR', 'RMR_Legends'))
+rmr_c = int(config.get('2020 RMR', 'RMR_Challengers'))
+rmr_co = int(config.get('2020 RMR', 'RMR_Contenders'))
+rmr = [rmr_l, rmr_c, rmr_co]
+
 ant_l = int(config.get('Antwerp', 'Antwerp_Legends'))
 ant_c = int(config.get('Antwerp', 'Antwerp_Challengers'))
 ant_co = int(config.get('Antwerp', 'Antwerp_Contenders'))
@@ -96,31 +101,27 @@ session = requests.Session()
 session.headers.update({'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36'})
 
 ######################################## DISPLAY CAPSULE PRICES ######################################################
-
-if(ant[0] > 0 or ant[1] > 0 or ant[2] > 0 or ant[3] > 0 or ant[4] > 0 or ant[5] > 0 or ant[6] > 0):
-    page = session.get('https://steamcommunity.com/market/search?q=antwerp+capsule')
+if(rmr[0] > 0 or rmr[1] > 0 or rmr[2] > 0):
+    page = session.get('https://steamcommunity.com/market/search?q=2020+rmr')
     soup = BeautifulSoup(page.content, 'html.parser')
     count = 0
-    hrefs = ['https://steamcommunity.com/market/listings/730/Antwerp%202022%20Legends%20Sticker%20Capsule'
-            ,'https://steamcommunity.com/market/listings/730/Antwerp%202022%20Challengers%20Sticker%20Capsule'
-            ,'https://steamcommunity.com/market/listings/730/Antwerp%202022%20Contenders%20Sticker%20Capsule'
-            ,'https://steamcommunity.com/market/listings/730/Antwerp%202022%20Champions%20Autograph%20Capsule'
-            ,'https://steamcommunity.com/market/listings/730/Antwerp%202022%20Challengers%20Autograph%20Capsule'
-            ,'https://steamcommunity.com/market/listings/730/Antwerp%202022%20Legends%20Autograph%20Capsule'
-            ,'https://steamcommunity.com/market/listings/730/Antwerp%202022%20Contenders%20Autograph%20Capsule']
-    print(Fore.MAGENTA + '------------Antwerp Capsule--------------' + Style.RESET_ALL)
+    capsule_namest = [Fore.BLUE + 'Legends' + Style.RESET_ALL, Fore.BLUE + 'Challengers' + Style.RESET_ALL, Fore.BLUE + 'Contenders' + Style.RESET_ALL]
+    hrefs = ['https://steamcommunity.com/market/listings/730/2020%20RMR%20Legends'
+            ,'https://steamcommunity.com/market/listings/730/2020%20RMR%20Challengers'
+            ,'https://steamcommunity.com/market/listings/730/2020%20RMR%20Contenders']
+    print(Fore.MAGENTA + '------------2020 RMR Capsule-------------' + Style.RESET_ALL)
     for href in hrefs:
-        if(ant[count] > 0):
+        if(rmr[count] > 0):
             listing = soup.find('a', attrs={'href':f'{href}'})
             if listing is None:
                 print('[!] Failed to load.(Too many requests)')
                 break
             price = listing.find('span', attrs={'class':'normal_price'})
-            print(capsule_name[count]) 
+            print(capsule_namest[count]) 
             data = price.text.split()[2]
             data_raw = data.replace('$', '')
-            print(*[data, '--> $' + str(round(float(ant[count] * float(data_raw)), 2)) + f' ({ant[count]})' ])
-            total = total + (ant[count] * float(data_raw) )
+            print(*[data, '--> $' + str(round(float(rmr[count] * float(data_raw)), 2)) + f' ({rmr[count]})'])
+            total = total + (rmr[count] * float(data_raw) )
         count = count + 1
 
 if(st[0] > 0 or st[1] > 0 or st[2] > 0 or st[3] > 0 or st[4] > 0):
@@ -147,6 +148,32 @@ if(st[0] > 0 or st[1] > 0 or st[2] > 0 or st[3] > 0 or st[4] > 0):
             data_raw = data.replace('$', '')
             print(*[data, '--> $' + str(round(float(st[count] * float(data_raw)), 2)) + f' ({st[count]})'])
             total = total + (st[count] * float(data_raw) )
+        count = count + 1
+
+if(ant[0] > 0 or ant[1] > 0 or ant[2] > 0 or ant[3] > 0 or ant[4] > 0 or ant[5] > 0 or ant[6] > 0):
+    page = session.get('https://steamcommunity.com/market/search?q=antwerp+capsule')
+    soup = BeautifulSoup(page.content, 'html.parser')
+    count = 0
+    hrefs = ['https://steamcommunity.com/market/listings/730/Antwerp%202022%20Legends%20Sticker%20Capsule'
+            ,'https://steamcommunity.com/market/listings/730/Antwerp%202022%20Challengers%20Sticker%20Capsule'
+            ,'https://steamcommunity.com/market/listings/730/Antwerp%202022%20Contenders%20Sticker%20Capsule'
+            ,'https://steamcommunity.com/market/listings/730/Antwerp%202022%20Champions%20Autograph%20Capsule'
+            ,'https://steamcommunity.com/market/listings/730/Antwerp%202022%20Challengers%20Autograph%20Capsule'
+            ,'https://steamcommunity.com/market/listings/730/Antwerp%202022%20Legends%20Autograph%20Capsule'
+            ,'https://steamcommunity.com/market/listings/730/Antwerp%202022%20Contenders%20Autograph%20Capsule']
+    print(Fore.MAGENTA + '------------Antwerp Capsule--------------' + Style.RESET_ALL)
+    for href in hrefs:
+        if(ant[count] > 0):
+            listing = soup.find('a', attrs={'href':f'{href}'})
+            if listing is None:
+                print('[!] Failed to load.(Too many requests)')
+                break
+            price = listing.find('span', attrs={'class':'normal_price'})
+            print(capsule_name[count]) 
+            data = price.text.split()[2]
+            data_raw = data.replace('$', '')
+            print(*[data, '--> $' + str(round(float(ant[count] * float(data_raw)), 2)) + f' ({ant[count]})' ])
+            total = total + (ant[count] * float(data_raw) )
         count = count + 1
 
 if(rio[0] > 0 or rio[1] > 0 or rio[2] > 0 or rio[3] > 0 or rio[4] > 0 or rio[5] > 0 or rio[6] > 0):
@@ -183,9 +210,9 @@ case_amounts = [rev1_case,rec_case,dnn_case,rip_case,snk_case,brk_case,frac_case
                 prsm2_case,rev_case,shdw_case,shwb_case,spec_case,spec2_case,woff_case]
 case_names = ['Revolution Case','Recoil Case','Dreams And Nightmares Case','Operation Riptide Case','Snakebite Case','Operation Broken Fang Case','Fracture Case','Chroma Case',
                 'Chroma 2 Case','Chroma 3 Case','Clutch Case','CSGO Weapon Case','CSGO Weapon Case 2','CSGO Weapon Case 3','CS20 Case','Danger Zone Case','eSports 2013 Case','eSports 2013 Winter Case',
-                'eSports 2014 Summer Case','Falchion Case','Gamma Case','Gamma 2 Case','Glove Case','Horizon Case','Huntsman Weapon Case','Operation Bravo Case','Operation Breakout Weapon Case',
-                'Operation Hydra Case','Operation Phoenix Case','Operation Vanguard Weapon Case','Operation Wildfire Case','Prisma Case','Prisma 2 Case','Revolver Case','Shadow Case',
-                'Shattered Web Case','Spectrum Case','Spectrum 2 Case','Winter Offensive Weapon Case']
+                'eSports 2014 Summer Case','Falchion Case','Gamma Case','Gamma 2 Case','Glove Case','Horizon Case','Huntsman Case','Operation Bravo Case','Operation Breakout Case',
+                'Operation Hydra Case','Operation Phoenix Case','Operation Vanguard Case','Operation Wildfire Case','Prisma Case','Prisma 2 Case','Revolver Case','Shadow Case',
+                'Shattered Web Case','Spectrum Case','Spectrum 2 Case','Winter Offensive Case']
 case_links = ['https://steamcommunity.com/market/search?q=revolution+case',
                 'https://steamcommunity.com/market/search?q=recoil+case',
                 'https://steamcommunity.com/market/search?q=dreams+and+nightmares+case',
