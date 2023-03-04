@@ -45,7 +45,8 @@ rio_au_l = int(config.get('Rio', 'Rio_Legends_Autographs'))
 rio_au_co = int(config.get('Rio', 'Rio_Contenders_Autographs'))
 rio = [rio_l, rio_c, rio_co, rio_au, rio_au_c, rio_au_l, rio_au_co]
 
-capsule_name = [Fore.BLUE + 'Legends' + Style.RESET_ALL, Fore.BLUE + 'Challengers' + Style.RESET_ALL, Fore.BLUE + 'Contenders' + Style.RESET_ALL, Fore.BLUE + 'Champions Autographs' + Style.RESET_ALL]
+capsule_name = [Fore.BLUE + 'Legends' + Style.RESET_ALL, Fore.BLUE + 'Challengers' + Style.RESET_ALL, Fore.BLUE + 'Contenders' + Style.RESET_ALL, Fore.BLUE + 'Champions Autographs' + Style.RESET_ALL,
+                Fore.BLUE + 'Challengers Autographs' + Style.RESET_ALL, Fore.BLUE + 'Legends Autographs' + Style.RESET_ALL, Fore.BLUE + 'Contenders Autographs' + Style.RESET_ALL]
 
 ## cases
 
@@ -126,6 +127,8 @@ if(st[0] > 0 or st[1] > 0 or st[2] > 0 or st[3] > 0 or st[4] > 0):
     page = session.get('https://steamcommunity.com/market/search?q=stockholm+capsule')
     soup = BeautifulSoup(page.content, 'html.parser')
     count = 0
+    capsule_namest = [Fore.BLUE + 'Legends' + Style.RESET_ALL, Fore.BLUE + 'Challengers' + Style.RESET_ALL, Fore.BLUE + 'Contenders' + Style.RESET_ALL, Fore.BLUE + 'Champions Autographs' + Style.RESET_ALL,
+                      Fore.BLUE + 'Finalists Autographs' + Style.RESET_ALL]
     hrefs = ['https://steamcommunity.com/market/listings/730/Stockholm%202021%20Legends%20Sticker%20Capsule'
             ,'https://steamcommunity.com/market/listings/730/Stockholm%202021%20Challengers%20Sticker%20Capsule'
             ,'https://steamcommunity.com/market/listings/730/Stockholm%202021%20Contenders%20Sticker%20Capsule'
@@ -139,7 +142,7 @@ if(st[0] > 0 or st[1] > 0 or st[2] > 0 or st[3] > 0 or st[4] > 0):
                 print('[!] Failed to load.(Too many requests)')
                 break
             price = listing.find('span', attrs={'class':'normal_price'})
-            print(capsule_name[count]) 
+            print(capsule_namest[count]) 
             data = price.text.split()[2]
             data_raw = data.replace('$', '')
             print(*[data, '--> $' + str(round(float(st[count] * float(data_raw)), 2)) + f' ({st[count]})'])
