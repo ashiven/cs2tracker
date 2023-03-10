@@ -3,7 +3,7 @@ A simple tool to track the market price of specific CSGO items.
 
 How To Use 
 
-1) Download the repository and save it somewhere on your drive ( For example under C:\CSGOTracker ).
+1) Download the source code under 'Releases' and extract it somewhere on your hard drive ( For example C:\CSGOTracker ).
 2) Create a shortcut for csgotracker.exe and save it on your desktop or wherever you like.
 3) Run the program.
 
