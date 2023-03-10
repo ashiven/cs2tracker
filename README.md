@@ -1,10 +1,6 @@
 # CSGO-Tracker
 A simple tool to track the market price of specific CSGO items.
 
-IMPORTANT
-
-As of now you need to have Python installed and download some of the required modules using Pip for the executable to work. This will be fixed soon.
-
 How To Use 
 
 1) Download the source code under 'Releases' and extract it somewhere on your hard drive ( For example C:\CSGOTracker ).
