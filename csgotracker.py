@@ -10,6 +10,7 @@ import configparser
 import time
 from colorama import init, Fore, Style
 import sys
+from charset_normalizer import md__mypyc
 import requests
 
 
