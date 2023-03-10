@@ -10,6 +10,7 @@ import configparser
 import time
 from colorama import init, Fore, Style
 import sys
+import requests
 
 
 def edit_config():
@@ -68,8 +69,6 @@ def plotter():
     plt.show()
 
 def scraper():
-
-    import requests
 
     ####################################### READ CONFIG AND SET VARIABLES #################################################
 
