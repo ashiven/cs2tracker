@@ -11,11 +11,6 @@ import time
 from colorama import init, Fore, Style
 import sys
 
-def plot():
-    subprocess.call(["python", "csgotracker.py", "plotter"])
-
-def run():
-    subprocess.call(["python", "csgotracker.py", "scraper"])
 
 def edit_config():
     subprocess.call(["notepad", "config.ini"])
@@ -434,9 +429,9 @@ def main():
     label = tk.Label(window, text="Welcome to CSGO Tracker!")
     label.grid(column=0, row=0, pady=50, sticky="NSEW")
 
-    run_button = tk.Button(window, text = "Run!", command = run)
+    run_button = tk.Button(window, text = "Run!", command = scraper)
     edit_button = tk.Button(window, text = "Edit Config", command = edit_config)
-    plot_button = tk.Button(window, text = "Show History(Chart)", command = plot)
+    plot_button = tk.Button(window, text = "Show History(Chart)", command = plotter)
     plotfile_button = tk.Button(window, text = "Show History(File)", command = plotfile)
 
 
