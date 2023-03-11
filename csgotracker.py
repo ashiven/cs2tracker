@@ -155,6 +155,7 @@ def scraper():
     woff_case = int(config.get('Cases', 'Winter_Offensive_Weapon_Case'))
 
     ## proxy key
+    use_proxy = config.get('Proxy API Key', 'Use_Proxy')
     api_key = config.get('Proxy API Key', 'API_Key')
 
     ## create requests session
@@ -165,7 +166,7 @@ def scraper():
     ######################################## DISPLAY CAPSULE PRICES ######################################################
     if(rmr[0] > 0 or rmr[1] > 0 or rmr[2] > 0):
 
-        if api_key != 'Empty':
+        if use_proxy == 'Yes':
             page = requests.get(url="https://steamcommunity.com/market/search?q=2020+rmr",
                                 proxies={"http": f"http://{api_key}:@smartproxy.crawlbase.com:8012", "https": f"http://{api_key}:@smartproxy.crawlbase.com:8012"},
                                 verify=False)
@@ -183,19 +184,23 @@ def scraper():
             if(rmr[count] > 0):
                 listing = soup.find('a', attrs={'href':f'{href}'})
                 if listing is None:
-                    print('[!] Failed to load.(Too many requests)')
+                    print(Fore.RED + '[!] Failed to load.(Too many requests)' + Style.RESET_ALL)
                     break
-                price = listing.find('span', attrs={'class':'normal_price'})
-                print(capsule_namest[count]) 
-                data = price.text.split()[2]
-                data_raw = data.replace('$', '')
-                print(*[data, '--> $' + str(round(float(rmr[count] * float(data_raw)), 2)) + f' ({rmr[count]})'])
-                total = total + (rmr[count] * float(data_raw) )
+                try:
+                    price = listing.find('span', attrs={'class':'normal_price'}) 
+                    data = price.text.split()[2]
+                    data_raw = float(data.replace('$', ''))
+                    print(capsule_namest[count])
+                    print(*[data, '--> $' + str(round(float(rmr[count] * data_raw), 2)) + f' ({rmr[count]})'])
+                    total = total + (rmr[count] * data_raw )
+                except ValueError:
+                    print(Fore.RED + '[!] Failed to load.' + Style.RESET_ALL)
+                    break
             count = count + 1
 
     if(st[0] > 0 or st[1] > 0 or st[2] > 0 or st[3] > 0 or st[4] > 0):
 
-        if api_key != 'Empty':
+        if use_proxy == 'Yes':
             page = requests.get(url="https://steamcommunity.com/market/search?q=stockholm+capsule",
                                 proxies={"http": f"http://{api_key}:@smartproxy.crawlbase.com:8012", "https": f"http://{api_key}:@smartproxy.crawlbase.com:8012"},
                                 verify=False)
@@ -216,19 +221,23 @@ def scraper():
             if(st[count] > 0):
                 listing = soup.find('a', attrs={'href':f'{href}'})
                 if listing is None:
-                    print('[!] Failed to load.(Too many requests)')
+                    print(Fore.RED + '[!] Failed to load.(Too many requests)' + Style.RESET_ALL)
                     break
-                price = listing.find('span', attrs={'class':'normal_price'})
-                print(capsule_namest[count]) 
-                data = price.text.split()[2]
-                data_raw = data.replace('$', '')
-                print(*[data, '--> $' + str(round(float(st[count] * float(data_raw)), 2)) + f' ({st[count]})'])
-                total = total + (st[count] * float(data_raw) )
+                try:
+                    price = listing.find('span', attrs={'class':'normal_price'})
+                    data = price.text.split()[2]
+                    data_raw = float(data.replace('$', ''))
+                    print(capsule_namest[count])
+                    print(*[data, '--> $' + str(round(float(st[count] * data_raw), 2)) + f' ({st[count]})'])
+                    total = total + (st[count] * data_raw )
+                except ValueError:
+                    print(Fore.RED + '[!] Failed to load.' + Style.RESET_ALL)
+                    break
             count = count + 1
 
     if(ant[0] > 0 or ant[1] > 0 or ant[2] > 0 or ant[3] > 0 or ant[4] > 0 or ant[5] > 0 or ant[6] > 0):
 
-        if api_key != 'Empty':
+        if use_proxy == 'Yes':
             page = requests.get(url="https://steamcommunity.com/market/search?q=antwerp+capsule",
                                 proxies={"http": f"http://{api_key}:@smartproxy.crawlbase.com:8012", "https": f"http://{api_key}:@smartproxy.crawlbase.com:8012"},
                                 verify=False)
@@ -249,19 +258,23 @@ def scraper():
             if(ant[count] > 0):
                 listing = soup.find('a', attrs={'href':f'{href}'})
                 if listing is None:
-                    print('[!] Failed to load.(Too many requests)')
+                    print(Fore.RED + '[!] Failed to load.(Too many requests)' + Style.RESET_ALL)
                     break
-                price = listing.find('span', attrs={'class':'normal_price'})
-                print(capsule_name[count]) 
-                data = price.text.split()[2]
-                data_raw = data.replace('$', '')
-                print(*[data, '--> $' + str(round(float(ant[count] * float(data_raw)), 2)) + f' ({ant[count]})' ])
-                total = total + (ant[count] * float(data_raw) )
+                try:
+                    price = listing.find('span', attrs={'class':'normal_price'}) 
+                    data = price.text.split()[2]
+                    data_raw = float(data.replace('$', ''))
+                    print(capsule_name[count])
+                    print(*[data, '--> $' + str(round(float(ant[count] * data_raw), 2)) + f' ({ant[count]})' ])
+                    total = total + (ant[count] * data_raw )
+                except ValueError:
+                    print(Fore.RED + '[!] Failed to load.' + Style.RESET_ALL)
+                    break
             count = count + 1
 
     if(rio[0] > 0 or rio[1] > 0 or rio[2] > 0 or rio[3] > 0 or rio[4] > 0 or rio[5] > 0 or rio[6] > 0):
 
-        if api_key != 'Empty':
+        if use_proxy == 'Yes':
             page = requests.get(url="https://steamcommunity.com/market/search?q=rio+capsule",
                                 proxies={"http": f"http://{api_key}:@smartproxy.crawlbase.com:8012", "https": f"http://{api_key}:@smartproxy.crawlbase.com:8012"},
                                 verify=False)
@@ -282,14 +295,18 @@ def scraper():
             if(rio[count] > 0):
                 listing = soup.find('a', attrs={'href':f'{href}'})
                 if listing is None:
-                    print('[!] Failed to load.(Too many requests)')
+                    print(Fore.RED + '[!] Failed to load.(Too many requests)' + Style.RESET_ALL)
                     break
-                price = listing.find('span', attrs={'class':'normal_price'})
-                print(capsule_name[count]) 
-                data = price.text.split()[2]
-                data_raw = data.replace('$', '')
-                print(*[data, '--> $' + str(round(float(rio[count] * float(data_raw)), 2)) + f' ({rio[count]})' ])
-                total = total + (rio[count] * float(data_raw) )
+                try:
+                    price = listing.find('span', attrs={'class':'normal_price'})
+                    data = price.text.split()[2]
+                    data_raw = float(data.replace('$', ''))
+                    print(capsule_name[count]) 
+                    print(*[data, '--> $' + str(round(float(rio[count] * data_raw), 2)) + f' ({rio[count]})' ])
+                    total = total + (rio[count] * data_raw )
+                except ValueError:
+                    print(Fore.RED + '[!] Failed to load.' + Style.RESET_ALL)
+                    break
             count = count + 1
 
     ##################################### DISPLAY CASES ###############################################################
@@ -385,7 +402,7 @@ def scraper():
     for i in range(len(case_amounts)):
         if(case_amounts[i] > 0):
             
-            if api_key != 'Empty':
+            if use_proxy == 'Yes':
                 page = requests.get(url=case_links[i],
                                     proxies={"http": f"http://{api_key}:@smartproxy.crawlbase.com:8012", "https": f"http://{api_key}:@smartproxy.crawlbase.com:8012"},
                                     verify=False)
@@ -396,15 +413,19 @@ def scraper():
             listing = soup.find('a', attrs={'href':case_hrefs[i]})
             if listing is None:
                 print(Fore.MAGENTA + f'------------{case_names[i]}-----------------------------------'[:41] + Style.RESET_ALL)
-                print('[!] Failed to load.(Too many requests)')
+                print(Fore.RED + '[!] Failed to load.(Too many requests)' + Style.RESET_ALL)
             else:
                 price = listing.find('span', attrs={'class':'normal_price'})
                 data = price.text.split()[2]
-                data_raw = float(data.replace('$', ''))
-                print('\033[35m' + f'------------{case_names[i]}-----------------------------------'[:41] + '\033[0m')
-                print(data + ' --> $' + str(round(float(case_amounts[i] * data_raw), 2)) + ' (' + str(case_amounts[i]) + ')' )
-                total += (case_amounts[i] * data_raw)
-                if api_key == 'Empty':
+                try:
+                    data_raw = float(data.replace('$', ''))
+                    print(Fore.MAGENTA + f'------------{case_names[i]}-----------------------------------'[:41] + Style.RESET_ALL)
+                    print(data + ' --> $' + str(round(float(case_amounts[i] * data_raw), 2)) + ' (' + str(case_amounts[i]) + ')' )
+                    total += (case_amounts[i] * data_raw)
+                except ValueError:
+                    print(Fore.MAGENTA + f'------------{case_names[i]}-----------------------------------'[:41] + Style.RESET_ALL)
+                    print(Fore.RED + '[!] Failed to load.' + Style.RESET_ALL)
+                if use_proxy == 'No':
                     time.sleep(1)
 
 
