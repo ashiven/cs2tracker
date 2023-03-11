@@ -9,9 +9,9 @@ from bs4 import BeautifulSoup
 import configparser
 import time
 from colorama import init, Fore, Style
-import sys
 from charset_normalizer import md__mypyc
 import requests
+import urllib3
 
 def edit_config():
     subprocess.call(["notepad", "config.ini"])
@@ -154,6 +154,9 @@ def scraper():
     spec2_case = int(config.get('Cases', 'Spectrum_2_Case'))
     woff_case = int(config.get('Cases', 'Winter_Offensive_Weapon_Case'))
 
+    ## proxy key
+    api_key = config.get('Proxy API Key', 'API_Key')
+
     ## create requests session
 
     session = requests.Session()
@@ -161,7 +164,14 @@ def scraper():
 
     ######################################## DISPLAY CAPSULE PRICES ######################################################
     if(rmr[0] > 0 or rmr[1] > 0 or rmr[2] > 0):
-        page = session.get('https://steamcommunity.com/market/search?q=2020+rmr')
+
+        if api_key != 'Empty':
+            page = requests.get(url="https://steamcommunity.com/market/search?q=2020+rmr",
+                                proxies={"http": f"http://{api_key}:@smartproxy.crawlbase.com:8012", "https": f"http://{api_key}:@smartproxy.crawlbase.com:8012"},
+                                verify=False)
+        else:
+            page = session.get('https://steamcommunity.com/market/search?q=2020+rmr')
+        
         soup = BeautifulSoup(page.content, 'html.parser')
         count = 0
         capsule_namest = [Fore.BLUE + 'Legends' + Style.RESET_ALL, Fore.BLUE + 'Challengers' + Style.RESET_ALL, Fore.BLUE + 'Contenders' + Style.RESET_ALL]
@@ -184,7 +194,14 @@ def scraper():
             count = count + 1
 
     if(st[0] > 0 or st[1] > 0 or st[2] > 0 or st[3] > 0 or st[4] > 0):
-        page = session.get('https://steamcommunity.com/market/search?q=stockholm+capsule')
+
+        if api_key != 'Empty':
+            page = requests.get(url="https://steamcommunity.com/market/search?q=stockholm+capsule",
+                                proxies={"http": f"http://{api_key}:@smartproxy.crawlbase.com:8012", "https": f"http://{api_key}:@smartproxy.crawlbase.com:8012"},
+                                verify=False)
+        else:
+            page = session.get('https://steamcommunity.com/market/search?q=stockholm+capsule')
+        
         soup = BeautifulSoup(page.content, 'html.parser')
         count = 0
         capsule_namest = [Fore.BLUE + 'Legends' + Style.RESET_ALL, Fore.BLUE + 'Challengers' + Style.RESET_ALL, Fore.BLUE + 'Contenders' + Style.RESET_ALL, Fore.BLUE + 'Champions Autographs' + Style.RESET_ALL,
@@ -210,7 +227,14 @@ def scraper():
             count = count + 1
 
     if(ant[0] > 0 or ant[1] > 0 or ant[2] > 0 or ant[3] > 0 or ant[4] > 0 or ant[5] > 0 or ant[6] > 0):
-        page = session.get('https://steamcommunity.com/market/search?q=antwerp+capsule')
+
+        if api_key != 'Empty':
+            page = requests.get(url="https://steamcommunity.com/market/search?q=antwerp+capsule",
+                                proxies={"http": f"http://{api_key}:@smartproxy.crawlbase.com:8012", "https": f"http://{api_key}:@smartproxy.crawlbase.com:8012"},
+                                verify=False)
+        else:
+            page = session.get('https://steamcommunity.com/market/search?q=antwerp+capsule')
+        
         soup = BeautifulSoup(page.content, 'html.parser')
         count = 0
         hrefs = ['https://steamcommunity.com/market/listings/730/Antwerp%202022%20Legends%20Sticker%20Capsule'
@@ -236,7 +260,14 @@ def scraper():
             count = count + 1
 
     if(rio[0] > 0 or rio[1] > 0 or rio[2] > 0 or rio[3] > 0 or rio[4] > 0 or rio[5] > 0 or rio[6] > 0):
-        page = session.get('https://steamcommunity.com/market/search?q=rio+capsule')
+
+        if api_key != 'Empty':
+            page = requests.get(url="https://steamcommunity.com/market/search?q=rio+capsule",
+                                proxies={"http": f"http://{api_key}:@smartproxy.crawlbase.com:8012", "https": f"http://{api_key}:@smartproxy.crawlbase.com:8012"},
+                                verify=False)
+        else:
+            page = session.get('https://steamcommunity.com/market/search?q=rio+capsule')
+        
         soup = BeautifulSoup(page.content, 'html.parser')
         count = 0
         hrefs = ['https://steamcommunity.com/market/listings/730/Rio%202022%20Legends%20Sticker%20Capsule'
@@ -353,7 +384,14 @@ def scraper():
 
     for i in range(len(case_amounts)):
         if(case_amounts[i] > 0):
-            page = session.get(case_links[i])
+            
+            if api_key != 'Empty':
+                page = requests.get(url=case_links[i],
+                                    proxies={"http": f"http://{api_key}:@smartproxy.crawlbase.com:8012", "https": f"http://{api_key}:@smartproxy.crawlbase.com:8012"},
+                                    verify=False)
+            else:
+                page = session.get(case_links[i])
+        
             soup = BeautifulSoup(page.content, 'html.parser')
             listing = soup.find('a', attrs={'href':case_hrefs[i]})
             if listing is None:
@@ -366,7 +404,8 @@ def scraper():
                 print('\033[35m' + f'------------{case_names[i]}-----------------------------------'[:41] + '\033[0m')
                 print(data + ' --> $' + str(round(float(case_amounts[i] * data_raw), 2)) + ' (' + str(case_amounts[i]) + ')' )
                 total += (case_amounts[i] * data_raw)
-                time.sleep(1)
+                if api_key == 'Empty':
+                    time.sleep(1)
 
 
     ##################################### PRINT TOTAL #######################################################################
@@ -417,6 +456,9 @@ def scraper():
             writer.writerow([today, output2])
 
 def main():
+
+    ## disable warnings for proxy requests
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     ## initiate colorama
     init()
