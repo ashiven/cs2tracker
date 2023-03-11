@@ -13,20 +13,6 @@ import sys
 from charset_normalizer import md__mypyc
 import requests
 
-## initiate colorama
-init()
-
-print(Fore.YELLOW + "              .-')                               .-') _     _  .-')      ('-.                 .-. .-')      ('-.    _  .-')   " + Style.RESET_ALL)
-print(Fore.YELLOW + "             ( OO ).                            (  OO) )   ( \( -O )    ( OO ).-.             \  ( OO )   _(  OO)  ( \( -O )  " + Style.RESET_ALL)
-print(Fore.YELLOW + "   .-----.  (_)---\_)   ,----.      .-'),-----. /     '._   ,------.    / . --. /    .-----.  ,--. ,--.  (,------.  ,------.  " + Style.RESET_ALL)
-print(Fore.YELLOW + "  '  .--./  /    _ |   '  .-./-')  ( OO'  .-.  '|'--...__)  |   /`. '   | \-.  \    '  .--./  |  .'   /   |  .---'  |   /`. ' " + Style.RESET_ALL)
-print(Fore.YELLOW + "  |  |('-.  \  :` `.   |  |_( O- ) /   |  | |  |'--.  .--'  |  /  | | .-'-'  |  |   |  |('-.  |      /,   |  |      |  /  | | " + Style.RESET_ALL)
-print(Fore.YELLOW + " /_) |OO  )  '..`''.)  |  | .--, \ \_) |  |\|  |   |  |     |  |_.' |  \| |_.'  |  /_) |OO  ) |     ' _) (|  '--.   |  |_.' | " + Style.RESET_ALL)
-print(Fore.YELLOW + " ||  |`-'|  .-._)   \ (|  | '. (_/   \ |  | |  |   |  |     |  .  '.'   |  .-.  |  ||  |`-'|  |  .   \    |  .--'   |  .  '.' " + Style.RESET_ALL)
-print(Fore.YELLOW + "(_'  '--'\  \       /  |  '--'  |     `'  '-'  '   |  |     |  |\  \    |  | |  | (_'  '--'\  |  |\   \   |  `---.  |  |\  \  " + Style.RESET_ALL)
-print(Fore.YELLOW + "   `-----'   `-----'    `------'        `-----'    `--'     `--' '--'   `--' `--'    `-----'  `--' '--'   `------'  `--' '--' " + Style.RESET_ALL)
-print(Fore.RED + "[+] Loading.... Please Wait." + Style.RESET_ALL)
-
 def edit_config():
     subprocess.call(["notepad", "config.ini"])
 
@@ -432,7 +418,32 @@ def scraper():
 
 def main():
 
+    ## initiate colorama
+    init()
+
+    #print(Fore.YELLOW + "              .-')                               .-') _     _  .-')      ('-.                 .-. .-')      ('-.    _  .-')   " + Style.RESET_ALL)
+    #print(Fore.YELLOW + "             ( OO ).                            (  OO) )   ( \( -O )    ( OO ).-.             \  ( OO )   _(  OO)  ( \( -O )  " + Style.RESET_ALL)
+    #print(Fore.YELLOW + "   .-----.  (_)---\_)   ,----.      .-'),-----. /     '._   ,------.    / . --. /    .-----.  ,--. ,--.  (,------.  ,------.  " + Style.RESET_ALL)
+    #print(Fore.YELLOW + "  '  .--./  /    _ |   '  .-./-')  ( OO'  .-.  '|'--...__)  |   /`. '   | \-.  \    '  .--./  |  .'   /   |  .---'  |   /`. ' " + Style.RESET_ALL)
+    #print(Fore.YELLOW + "  |  |('-.  \  :` `.   |  |_( O- ) /   |  | |  |'--.  .--'  |  /  | | .-'-'  |  |   |  |('-.  |      /,   |  |      |  /  | | " + Style.RESET_ALL)
+    #print(Fore.YELLOW + " /_) |OO  )  '..`''.)  |  | .--, \ \_) |  |\|  |   |  |     |  |_.' |  \| |_.'  |  /_) |OO  ) |     ' _) (|  '--.   |  |_.' | " + Style.RESET_ALL)
+    #print(Fore.YELLOW + " ||  |`-'|  .-._)   \ (|  | '. (_/   \ |  | |  |   |  |     |  .  '.'   |  .-.  |  ||  |`-'|  |  .   \    |  .--'   |  .  '.' " + Style.RESET_ALL)
+    #print(Fore.YELLOW + "(_'  '--'\  \       /  |  '--'  |     `'  '-'  '   |  |     |  |\  \    |  | |  | (_'  '--'\  |  |\   \   |  `---.  |  |\  \  " + Style.RESET_ALL)
+    #print(Fore.YELLOW + "   `-----'   `-----'    `------'        `-----'    `--'     `--' '--'   `--' `--'    `-----'  `--' '--'   `------'  `--' '--' " + Style.RESET_ALL)
+    #print(Fore.RED + "[+] Welcome to CSGO Tracker!" + Style.RESET_ALL)
+
+    print(Fore.YELLOW + "                                                                              " + Style.RESET_ALL)
+    print(Fore.YELLOW + "    __   _____  ____   ___   ______  ____    ____     __  __  _    ___  ____  " + Style.RESET_ALL)
+    print(Fore.YELLOW + "   /  ] / ___/ /    T /   \ |      T|    \  /    T   /  ]|  l/ ]  /  _]|    \ " + Style.RESET_ALL)
+    print(Fore.YELLOW + "  /  / (   \_ Y   __jY     Y|      ||  D  )Y  o  |  /  / |  ' /  /  [_ |  D  )" + Style.RESET_ALL)
+    print(Fore.YELLOW + " /  /   \__  T|  T  ||  O  |l_j  l_j|    / |     | /  /  |    \ Y    _]|    / " + Style.RESET_ALL)
+    print(Fore.YELLOW + "/   \_  /  \ ||  l_ ||     |  |  |  |    \ |  _  |/   \_ |     Y|   [_ |    \ " + Style.RESET_ALL)
+    print(Fore.YELLOW + "\     | \    ||     |l     !  |  |  |  .  Y|  |  |\     ||  .  ||     T|  .  Y" + Style.RESET_ALL)
+    print(Fore.YELLOW + " \____j  \___jl___,_j \___/   l__j  l__j\_jl__j__j \____jl__j\_jl_____jl__j\_j" + Style.RESET_ALL)
+    print(Fore.YELLOW + "                                                                              " + Style.RESET_ALL)
     print(Fore.RED + "[+] Welcome to CSGO Tracker!" + Style.RESET_ALL)
+    print(Fore.YELLOW + "                                                                              " + Style.RESET_ALL)
+    
     window = tk.Tk()
     window.title("CSGOTracker")
     window.geometry("400x400")
