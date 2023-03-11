@@ -13,6 +13,19 @@ import sys
 from charset_normalizer import md__mypyc
 import requests
 
+## initiate colorama
+init()
+
+print(Fore.YELLOW + "              .-')                               .-') _     _  .-')      ('-.                 .-. .-')      ('-.    _  .-')   " + Style.RESET_ALL)
+print(Fore.YELLOW + "             ( OO ).                            (  OO) )   ( \( -O )    ( OO ).-.             \  ( OO )   _(  OO)  ( \( -O )  " + Style.RESET_ALL)
+print(Fore.YELLOW + "   .-----.  (_)---\_)   ,----.      .-'),-----. /     '._   ,------.    / . --. /    .-----.  ,--. ,--.  (,------.  ,------.  " + Style.RESET_ALL)
+print(Fore.YELLOW + "  '  .--./  /    _ |   '  .-./-')  ( OO'  .-.  '|'--...__)  |   /`. '   | \-.  \    '  .--./  |  .'   /   |  .---'  |   /`. ' " + Style.RESET_ALL)
+print(Fore.YELLOW + "  |  |('-.  \  :` `.   |  |_( O- ) /   |  | |  |'--.  .--'  |  /  | | .-'-'  |  |   |  |('-.  |      /,   |  |      |  /  | | " + Style.RESET_ALL)
+print(Fore.YELLOW + " /_) |OO  )  '..`''.)  |  | .--, \ \_) |  |\|  |   |  |     |  |_.' |  \| |_.'  |  /_) |OO  ) |     ' _) (|  '--.   |  |_.' | " + Style.RESET_ALL)
+print(Fore.YELLOW + " ||  |`-'|  .-._)   \ (|  | '. (_/   \ |  | |  |   |  |     |  .  '.'   |  .-.  |  ||  |`-'|  |  .   \    |  .--'   |  .  '.' " + Style.RESET_ALL)
+print(Fore.YELLOW + "(_'  '--'\  \       /  |  '--'  |     `'  '-'  '   |  |     |  |\  \    |  | |  | (_'  '--'\  |  |\   \   |  `---.  |  |\  \  " + Style.RESET_ALL)
+print(Fore.YELLOW + "   `-----'   `-----'    `------'        `-----'    `--'     `--' '--'   `--' `--'    `-----'  `--' '--'   `------'  `--' '--' " + Style.RESET_ALL)
+print(Fore.RED + "[+] Loading.... Please Wait." + Style.RESET_ALL)
 
 def edit_config():
     subprocess.call(["notepad", "config.ini"])
@@ -77,10 +90,6 @@ def scraper():
     config.read('config.ini')
 
     total = 0
-
-    ## initiate colorama
-
-    init()
 
     ## sticker capsules
 
@@ -422,6 +431,8 @@ def scraper():
             writer.writerow([today, output2])
 
 def main():
+
+    print(Fore.RED + "[+] Welcome to CSGO Tracker!" + Style.RESET_ALL)
     window = tk.Tk()
     window.title("CSGOTracker")
     window.geometry("400x400")
