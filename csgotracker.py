@@ -504,7 +504,7 @@ def main():
     print(Fore.YELLOW + "\     | \    ||     |l     !  |  |  |  .  Y|  |  |\     ||  .  ||     T|  .  Y" + Style.RESET_ALL)
     print(Fore.YELLOW + " \____j  \___jl___,_j \___/   l__j  l__j\_jl__j__j \____jl__j\_jl_____jl__j\_j" + Style.RESET_ALL)
     print(Fore.YELLOW + "                                                                              " + Style.RESET_ALL)
-    print(Fore.RED + "[+] Welcome to CSGO Tracker!" + Style.RESET_ALL)
+    print(Fore.YELLOW + "Version: v1.0.2 - 03/12/2023 - Jannik Novak @ashiven_" + Style.RESET_ALL)
     print(Fore.YELLOW + "                                                                              " + Style.RESET_ALL)
     
     window = tk.Tk()
