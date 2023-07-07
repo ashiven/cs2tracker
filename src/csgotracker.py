@@ -15,13 +15,13 @@ import urllib3
 
 
 def edit_config():
-    subprocess.call(["notepad", "./../config.ini"])
+    subprocess.call(["notepad", "./../data/config.ini"])
 
 
 def plotfile():
-    if not os.path.isfile("./../output.csv"):
-        open("./../output.csv", "w").close()
-    subprocess.call(["notepad", "./../output.csv"])
+    if not os.path.isfile("./../data/output.csv"):
+        open("./../data/output.csv", "w").close()
+    subprocess.call(["notepad", "./../data/output.csv"])
 
 
 def parse_row(row):
@@ -31,7 +31,7 @@ def parse_row(row):
 
 
 def plotter():
-    filename = "./../output.csv"
+    filename = "./../data/output.csv"
 
     dates = []
     dollars = []
@@ -76,7 +76,7 @@ def scraper():
     ####################################### READ CONFIG AND SET VARIABLES #################################################
 
     config = configparser.ConfigParser()
-    config.read("./../config.ini")
+    config.read("./../data/config.ini")
 
     total = 0
 
@@ -752,7 +752,7 @@ def scraper():
 
     ##################################### WRITE TOTAL TO OUTPUT FILE ########################################################
 
-    filename = "./../output.csv"
+    filename = "./../data/output.csv"
     now = datetime.datetime.now()
     date = now.strftime("%Y-%m-%d")
 

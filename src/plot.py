@@ -11,7 +11,7 @@ def parse_row(row):
     return date_str, price
 
 
-filename = "./../output.csv"
+filename = "./../data/output.csv"
 
 dates = []
 dollars = []

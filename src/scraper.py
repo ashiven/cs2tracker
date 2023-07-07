@@ -14,7 +14,7 @@ def main():
     ####################################### READ CONFIG AND SET VARIABLES #################################################
 
     config = configparser.ConfigParser()
-    config.read("./../config.ini")
+    config.read("./../data/config.ini")
 
     total = 0
 
@@ -682,7 +682,7 @@ def main():
 
     ##################################### WRITE TOTAL TO OUTPUT FILE ########################################################
 
-    filename = "./../output.csv"
+    filename = "./../data/output.csv"
     now = datetime.datetime.now()
     date = now.strftime("%Y-%m-%d")
 
