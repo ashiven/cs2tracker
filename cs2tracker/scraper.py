@@ -210,12 +210,15 @@ class Scraper:
                 if capsule_quantities[href_index] > 0:
                     try:
                         listing = soup.find("a", attrs={"href": f"{href}"})
-                        if not listing:
+                        retries = 0
+                        while not listing and retries < 5:
                             self.console.print(
-                                f"[bold red][!] Failed to load page ({page.status_code})"
+                                f"[bold red][!] Failed to load page ({page.status_code}). Retrying...\n"
                             )
-                            self.console.print(page.content.decode("utf-8"))
-                            break
+                            page = self._get_page(capsule_page_url)
+                            soup = BeautifulSoup(page.content, "html.parser")
+                            listing = soup.find("a", attrs={"href": f"{href}"})
+                            retries += 1
 
                         price_span = listing.find(
                             "span", attrs={"class": "normal_price"}
@@ -249,11 +252,15 @@ class Scraper:
                 soup = BeautifulSoup(page.content, "html.parser")
 
                 listing = soup.find("a", attrs={"href": case_hrefs[index]})
-                if not listing:
+                retries = 0
+                while not listing and retries < 5:
                     self.console.print(
-                        f"[bold red][!] Failed to load page ({page.status_code})"
+                        f"[bold red][!] Failed to load page ({page.status_code}). Retrying...\n"
                     )
-                    self.console.print(page.content.decode("utf-8"))
+                    page = self._get_page(case_page_urls[index])
+                    soup = BeautifulSoup(page.content, "html.parser")
+                    listing = soup.find("a", attrs={"href": case_hrefs[index]})
+                    retries += 1
 
                 else:
                     try:

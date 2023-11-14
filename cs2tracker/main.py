@@ -46,7 +46,7 @@ def main():
         + "                                                                              "
     )
     console.print(
-        "[bold yellow]" + "Version: v1.0.2 - 03/12/2023 - Jannik Novak @ashiven_"
+        "[bold yellow]" + "Version: v2.0.1 - 11/14/2023 - Jannik Novak @ashiven_"
     )
     console.print(
         "[bold yellow]"
