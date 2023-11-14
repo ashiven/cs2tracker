@@ -1,0 +1,7 @@
+beautifulsoup4==4.11.1
+CurrencyConverter==0.17.9
+matplotlib==3.7.0
+Requests==2.31.0
+rich==13.6.0
+tenacity==8.2.2
+urllib3==2.1.0
