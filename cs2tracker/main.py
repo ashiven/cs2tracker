@@ -1,6 +1,7 @@
 import urllib3
-from application import Application
 from rich.console import Console
+
+from .application import Application
 
 
 def main():
