@@ -26,10 +26,10 @@ class Application:
         run_button = tk.Button(window, text="Run!", command=self._scrape_prices)
         edit_button = tk.Button(window, text="Edit Config", command=self._edit_config)
         plot_button = tk.Button(
-            window, text="Show History(Chart)", command=self._draw_plot
+            window, text="Show History (Chart)", command=self._draw_plot
         )
         plotfile_button = tk.Button(
-            window, text="Show History(File)", command=self._plot_file
+            window, text="Show History (File)", command=self._plot_file
         )
 
         run_button.grid(row=1, column=0, pady=10, sticky="NSEW")
