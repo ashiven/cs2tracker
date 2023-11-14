@@ -46,8 +46,8 @@ CAPSULE_NAMES_GENERIC = [
 
 CAPSULE_PAGES = [
     "https://steamcommunity.com/market/search?q=2020+rmr",
-    "https://steamcommunity.com/market/search?q=antwerp+capsule",
     "https://steamcommunity.com/market/search?q=stockholm+capsule",
+    "https://steamcommunity.com/market/search?q=antwerp+capsule",
     "https://steamcommunity.com/market/search?q=rio+capsule",
     "https://steamcommunity.com/market/search?q=paris+capsule",
 ]

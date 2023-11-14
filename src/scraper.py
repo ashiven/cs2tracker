@@ -110,9 +110,9 @@ class Scraper:
                 capsule_name = "Stockholm"
                 capsule_quantities = self.stockholm_quantities
                 capsule_hrefs = CAPSULE_HREFS[3:8]
-                capsule_names_generic = (
-                    CAPSULE_NAMES_GENERIC[0:4] + CAPSULE_NAMES_GENERIC[-1]
-                )
+                capsule_names_generic = CAPSULE_NAMES_GENERIC[0:4] + [
+                    CAPSULE_NAMES_GENERIC[-1]
+                ]
             elif "antwerp" in capsule_page_url:
                 capsule_name = "Antwerp"
                 capsule_quantities = self.antwerp_quantities
@@ -129,13 +129,13 @@ class Scraper:
                 capsule_hrefs = CAPSULE_HREFS[22:29]
                 capsule_names_generic = CAPSULE_NAMES_GENERIC[0:7]
 
-                self.scrape_prices_capsule(
-                    capsule_page_url,
-                    capsule_hrefs,
-                    capsule_name,
-                    capsule_names_generic,
-                    capsule_quantities,
-                )
+            self.scrape_prices_capsule(
+                capsule_page_url,
+                capsule_hrefs,
+                capsule_name,
+                capsule_names_generic,
+                capsule_quantities,
+            )
 
         self.scrape_prices_case(
             self.case_quantities, CASE_PAGES, CASE_HREFS, CASE_NAMES
@@ -150,9 +150,7 @@ class Scraper:
         capsule_quantities,
     ):
         if any([quantity > 0 for quantity in capsule_quantities]):
-            self.console.print(
-                +f"[bold magenta]------------{capsule_name}-------------"
-            )
+            self.console.print(f"[bold magenta]------------{capsule_name}-------------")
             page = self.get_page(capsule_page_url)
             soup = BeautifulSoup(page.content, "html.parser")
 
