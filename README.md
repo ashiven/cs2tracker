@@ -1,8 +1,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![PyPI version](https://badge.fury.io/py/cs2tracker.svg)](https://badge.fury.io/py/cs2tracker)
 
 ## About
 
-CS2Tracker is a tool that can be used to keep track of the steam market prices of your CS2 investment.
+**CS2Tracker** is a tool that can be used to keep track of the steam market prices of your CS2 investment.
 
 ## Getting Started
 
@@ -13,7 +14,7 @@ CS2Tracker is a tool that can be used to keep track of the steam market prices o
 
 ### Setup
 
-1. Simply install the program via pip:
+1. Install the program via pip:
 
    ```bash
    pip install --user cs2tracker
@@ -26,10 +27,10 @@ CS2Tracker is a tool that can be used to keep track of the steam market prices o
 
 ### Options
 
--  `Edit Config` to change the amount of specific items you own and then save the config file.
+-  `Edit Config` to change the specific numbers of each item you own and then save the config file.
 -  `Run!` to gather the current market prices of your items and calculate the total amount in USD and EUR.
 -  `Show History` to see a price chart consisting of past calculations. A new data point for this chart is generated once a day upon running the program.
--  If you want to avoid temporary IP blocks, register for an API Key on [Crawlbase](crawlbase.com) and enter it into the `API_Key` field at the end of the `config.ini` file. This will route every request through a different proxy server and prevent IP blocks.
+-  If you want to avoid temporary IP blocks, register for an API Key on [Crawlbase](crawlbase.com) and enter it into the `API_Key` field at the end of the config file. This will route every request through a different proxy server.
 
 ---
 
