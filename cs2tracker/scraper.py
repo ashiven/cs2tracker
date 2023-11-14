@@ -231,7 +231,7 @@ class Scraper:
 
                         self.console.print(capsule_names_generic[href_index])
                         self.console.print(
-                            f"{price} --> ${price_total} ({capsule_quantities[href_index]})"
+                            f"${price} --> ${price_total} ({capsule_quantities[href_index]})"
                         )
 
                         self.total_price += price_total
@@ -272,7 +272,7 @@ class Scraper:
                         price_total = round(float(case_quantity * price), 2)
 
                         self.console.print(
-                            f"{price} --> ${price_total} ({case_quantity})"
+                            f"${price} --> ${price_total} ({case_quantity})"
                         )
 
                         self.total_price += price_total
