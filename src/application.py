@@ -57,7 +57,7 @@ class Application:
         subprocess.call(["notepad", CONFIG_FILE])
 
     def _draw_plot(self):
-        datesp, dollars, euros = self.parse_output()
+        datesp, dollars, euros = self._parse_output()
 
         fig, ax = plt.subplots()
         ax.plot(datesp, dollars, label="Dollars")
