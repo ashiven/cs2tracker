@@ -1,713 +1,258 @@
-import os
+import configparser
 import csv
 import datetime
-from bs4 import BeautifulSoup
-import configparser
+import os
 import time
-from colorama import init, Fore, Style
-from charset_normalizer import md__mypyc
+
 import requests
+from bs4 import BeautifulSoup
 from currency_converter import CurrencyConverter
+from rich.console import Console
+from tenacity import retry, stop_after_attempt
+
+from constants import (
+    CAPSULE_HREFS,
+    CAPSULE_NAMES,
+    CAPSULE_NAMES_GENERIC,
+    CAPSULE_PAGES,
+    CASE_HREFS,
+    CASE_NAMES,
+    CASE_PAGES,
+    CONFIG_FILE,
+    OUTPUT_FILE,
+)
 
 
-def main():
-    ####################################### READ CONFIG AND SET VARIABLES #################################################
+class Scraper:
+    def __init__(self):
+        self.api_key = None
+        self.use_proxy = False
 
-    config = configparser.ConfigParser()
-    config.read("./../data/config.ini")
+        self.case_quantities = []
+        self.rmr_quantities = []
+        self.stockholm_quantities = []
+        self.antwerp_quantities = []
+        self.rio_quantities = []
+        self.paris_quantities = []
 
-    total = 0
+        self.total_price = 0
+        self.total_price_euro = 0
 
-    ## sticker capsules
-
-    rmr_l = int(config.get("2020 RMR", "RMR_Legends"))
-    rmr_c = int(config.get("2020 RMR", "RMR_Challengers"))
-    rmr_co = int(config.get("2020 RMR", "RMR_Contenders"))
-    rmr = [rmr_l, rmr_c, rmr_co]
-
-    ant_l = int(config.get("Antwerp", "Antwerp_Legends"))
-    ant_c = int(config.get("Antwerp", "Antwerp_Challengers"))
-    ant_co = int(config.get("Antwerp", "Antwerp_Contenders"))
-    ant_au = int(config.get("Antwerp", "Antwerp_Champions_Autographs"))
-    ant_au_c = int(config.get("Antwerp", "Antwerp_Challengers_Autographs"))
-    ant_au_l = int(config.get("Antwerp", "Antwerp_Legends_Autographs"))
-    ant_au_co = int(config.get("Antwerp", "Antwerp_Contenders_Autographs"))
-    ant = [ant_l, ant_c, ant_co, ant_au, ant_au_c, ant_au_l, ant_au_co]
-
-    st_l = int(config.get("Stockholm", "Stockholm_Legends"))
-    st_c = int(config.get("Stockholm", "Stockholm_Challengers"))
-    st_co = int(config.get("Stockholm", "Stockholm_Contenders"))
-    st_au = int(config.get("Stockholm", "Stockholm_Champions_Autographs"))
-    st_au_f = int(config.get("Stockholm", "Stockholm_Finalists_Autographs"))
-    st = [st_l, st_c, st_co, st_au, st_au_f]
-
-    rio_l = int(config.get("Rio", "Rio_Legends"))
-    rio_c = int(config.get("Rio", "Rio_Challengers"))
-    rio_co = int(config.get("Rio", "Rio_Contenders"))
-    rio_au = int(config.get("Rio", "Rio_Champions_Autographs"))
-    rio_au_c = int(config.get("Rio", "Rio_Challengers_Autographs"))
-    rio_au_l = int(config.get("Rio", "Rio_Legends_Autographs"))
-    rio_au_co = int(config.get("Rio", "Rio_Contenders_Autographs"))
-    rio = [rio_l, rio_c, rio_co, rio_au, rio_au_c, rio_au_l, rio_au_co]
-
-    paris_l = int(config.get("Paris", "Paris_Legends"))
-    paris_c = int(config.get("Paris", "Paris_Challengers"))
-    paris_co = int(config.get("Paris", "Paris_Contenders"))
-    paris_au = int(config.get("Paris", "Paris_Champions_Autographs"))
-    paris_au_c = int(config.get("Paris", "Paris_Challengers_Autographs"))
-    paris_au_l = int(config.get("Paris", "Paris_Legends_Autographs"))
-    paris_au_co = int(config.get("Paris", "Paris_Contenders_Autographs"))
-    paris = [paris_l, paris_c, paris_co, paris_au, paris_au_c, paris_au_l, paris_au_co]
-
-    capsule_name = [
-        Fore.BLUE + "Legends" + Style.RESET_ALL,
-        Fore.BLUE + "Challengers" + Style.RESET_ALL,
-        Fore.BLUE + "Contenders" + Style.RESET_ALL,
-        Fore.BLUE + "Champions Autographs" + Style.RESET_ALL,
-        Fore.BLUE + "Challengers Autographs" + Style.RESET_ALL,
-        Fore.BLUE + "Legends Autographs" + Style.RESET_ALL,
-        Fore.BLUE + "Contenders Autographs" + Style.RESET_ALL,
-    ]
-
-    ## cases
-
-    rev1_case = int(config.get("Cases", "Revolution_Case"))
-    rec_case = int(config.get("Cases", "Recoil_Case"))
-    dnn_case = int(config.get("Cases", "Dreams_And_Nightmares_Case"))
-    rip_case = int(config.get("Cases", "Operation_Riptide_Case"))
-    snk_case = int(config.get("Cases", "Snakebite_Case"))
-    brk_case = int(config.get("Cases", "Operation_Broken_Fang_Case"))
-    frac_case = int(config.get("Cases", "Fracture_Case"))
-    chr_case = int(config.get("Cases", "Chroma_Case"))
-    chr2_case = int(config.get("Cases", "Chroma_2_Case"))
-    chr3_case = int(config.get("Cases", "Chroma_3_Case"))
-    clt_case = int(config.get("Cases", "Clutch_Case"))
-    csg_case = int(config.get("Cases", "CSGO_Weapon_Case"))
-    csg2_case = int(config.get("Cases", "CSGO_Weapon_Case_2"))
-    csg3_case = int(config.get("Cases", "CSGO_Weapon_Case_3"))
-    cs20_case = int(config.get("Cases", "CS20_Case"))
-    dgz_case = int(config.get("Cases", "Danger_Zone_Case"))
-    esp_case = int(config.get("Cases", "eSports_2013_Case"))
-    espw_case = int(config.get("Cases", "eSports_2013_Winter_Case"))
-    esps_case = int(config.get("Cases", "eSports_2014_Summer_Case"))
-    flch_case = int(config.get("Cases", "Falchion_Case"))
-    gam_case = int(config.get("Cases", "Gamma_Case"))
-    gam2_case = int(config.get("Cases", "Gamma_2_Case"))
-    glv_case = int(config.get("Cases", "Glove_Case"))
-    hrz_case = int(config.get("Cases", "Horizon_Case"))
-    hnts_case = int(config.get("Cases", "Huntsman_Weapon_Case"))
-    brav_case = int(config.get("Cases", "Operation_Bravo_Case"))
-    brkt_case = int(config.get("Cases", "Operation_Breakout_Weapon_Case"))
-    hydr_case = int(config.get("Cases", "Operation_Hydra_Case"))
-    phnx_case = int(config.get("Cases", "Operation_Phoenix_Weapon_Case"))
-    vngd_case = int(config.get("Cases", "Operation_Vanguard_Weapon_Case"))
-    wldf_case = int(config.get("Cases", "Operation_Wildfire_Case"))
-    prsm_case = int(config.get("Cases", "Prisma_Case"))
-    prsm2_case = int(config.get("Cases", "Prisma_2_Case"))
-    rev_case = int(config.get("Cases", "Revolver_Case"))
-    shdw_case = int(config.get("Cases", "Shadow_Case"))
-    shwb_case = int(config.get("Cases", "Shattered_Web_Case"))
-    spec_case = int(config.get("Cases", "Spectrum_Case"))
-    spec2_case = int(config.get("Cases", "Spectrum_2_Case"))
-    woff_case = int(config.get("Cases", "Winter_Offensive_Weapon_Case"))
-
-    ## proxy key
-    use_proxy = config.get("Proxy API Key", "Use_Proxy")
-    api_key = config.get("Proxy API Key", "API_Key")
-
-    ## create requests session
-    session = requests.Session()
-    session.headers.update(
-        {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"
-        }
-    )
-
-    ######################################## DISPLAY CAPSULE PRICES ######################################################
-    if rmr[0] > 0 or rmr[1] > 0 or rmr[2] > 0:
-        if use_proxy == "Yes":
-            page = requests.get(
-                url="https://steamcommunity.com/market/search?q=2020+rmr",
-                proxies={
-                    "http": f"http://{api_key}:@smartproxy.crawlbase.com:8012",
-                    "https": f"http://{api_key}:@smartproxy.crawlbase.com:8012",
-                },
-                verify=False,
-            )
-        else:
-            page = session.get("https://steamcommunity.com/market/search?q=2020+rmr")
-
-        soup = BeautifulSoup(page.content, "html.parser")
-        count = 0
-        capsule_namest = [
-            Fore.BLUE + "Legends" + Style.RESET_ALL,
-            Fore.BLUE + "Challengers" + Style.RESET_ALL,
-            Fore.BLUE + "Contenders" + Style.RESET_ALL,
-        ]
-        hrefs = [
-            "https://steamcommunity.com/market/listings/730/2020%20RMR%20Legends",
-            "https://steamcommunity.com/market/listings/730/2020%20RMR%20Challengers",
-            "https://steamcommunity.com/market/listings/730/2020%20RMR%20Contenders",
-        ]
-        print(
-            Fore.MAGENTA + "------------2020 RMR Capsule-------------" + Style.RESET_ALL
+        self.session = requests.Session()
+        self.session.headers.update(
+            {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"
+            }
         )
-        for href in hrefs:
-            if rmr[count] > 0:
-                listing = soup.find("a", attrs={"href": f"{href}"})
-                if listing is None:
-                    print(
-                        Fore.RED
-                        + "[!] Failed to load.(Too many requests)"
-                        + Style.RESET_ALL
-                    )
-                    break
-                try:
-                    price = listing.find("span", attrs={"class": "normal_price"})
-                    data = price.text.split()[2]
-                    data_raw = float(data.replace("$", ""))
-                    print(capsule_namest[count])
-                    print(
-                        *[
-                            data,
-                            "--> $"
-                            + str(round(float(rmr[count] * data_raw), 2))
-                            + f" ({rmr[count]})",
-                        ]
-                    )
-                    total = total + (rmr[count] * data_raw)
-                except ValueError:
-                    print(Fore.RED + "[!] Failed to load." + Style.RESET_ALL)
-                    break
-            count = count + 1
+        self.console = Console()
 
-    if st[0] > 0 or st[1] > 0 or st[2] > 0 or st[3] > 0 or st[4] > 0:
-        if use_proxy == "Yes":
-            page = requests.get(
-                url="https://steamcommunity.com/market/search?q=stockholm+capsule",
-                proxies={
-                    "http": f"http://{api_key}:@smartproxy.crawlbase.com:8012",
-                    "https": f"http://{api_key}:@smartproxy.crawlbase.com:8012",
-                },
-                verify=False,
-            )
-        else:
-            page = session.get(
-                "https://steamcommunity.com/market/search?q=stockholm+capsule"
-            )
+        config = self.parse_config()
+        self.set_config(config)
 
-        soup = BeautifulSoup(page.content, "html.parser")
-        count = 0
-        capsule_namest = [
-            Fore.BLUE + "Legends" + Style.RESET_ALL,
-            Fore.BLUE + "Challengers" + Style.RESET_ALL,
-            Fore.BLUE + "Contenders" + Style.RESET_ALL,
-            Fore.BLUE + "Champions Autographs" + Style.RESET_ALL,
-            Fore.BLUE + "Finalists Autographs" + Style.RESET_ALL,
-        ]
-        hrefs = [
-            "https://steamcommunity.com/market/listings/730/Stockholm%202021%20Legends%20Sticker%20Capsule",
-            "https://steamcommunity.com/market/listings/730/Stockholm%202021%20Challengers%20Sticker%20Capsule",
-            "https://steamcommunity.com/market/listings/730/Stockholm%202021%20Contenders%20Sticker%20Capsule",
-            "https://steamcommunity.com/market/listings/730/Stockholm%202021%20Champions%20Autograph%20Capsule",
-            "https://steamcommunity.com/market/listings/730/Stockholm%202021%20Finalists%20Autograph%20Capsule",
-        ]
-        print(
-            Fore.MAGENTA + "------------Stockholm Capsule------------" + Style.RESET_ALL
-        )
-        for href in hrefs:
-            if st[count] > 0:
-                listing = soup.find("a", attrs={"href": f"{href}"})
-                if listing is None:
-                    print(
-                        Fore.RED
-                        + "[!] Failed to load.(Too many requests)"
-                        + Style.RESET_ALL
-                    )
-                    break
-                try:
-                    price = listing.find("span", attrs={"class": "normal_price"})
-                    data = price.text.split()[2]
-                    data_raw = float(data.replace("$", ""))
-                    print(capsule_namest[count])
-                    print(
-                        *[
-                            data,
-                            "--> $"
-                            + str(round(float(st[count] * data_raw), 2))
-                            + f" ({st[count]})",
-                        ]
-                    )
-                    total = total + (st[count] * data_raw)
-                except ValueError:
-                    print(Fore.RED + "[!] Failed to load." + Style.RESET_ALL)
-                    break
-            count = count + 1
+    def parse_config(self):
+        config = configparser.ConfigParser()
+        config.read(CONFIG_FILE)
+        return config
 
-    if (
-        ant[0] > 0
-        or ant[1] > 0
-        or ant[2] > 0
-        or ant[3] > 0
-        or ant[4] > 0
-        or ant[5] > 0
-        or ant[6] > 0
-    ):
-        if use_proxy == "Yes":
-            page = requests.get(
-                url="https://steamcommunity.com/market/search?q=antwerp+capsule",
-                proxies={
-                    "http": f"http://{api_key}:@smartproxy.crawlbase.com:8012",
-                    "https": f"http://{api_key}:@smartproxy.crawlbase.com:8012",
-                },
-                verify=False,
-            )
-        else:
-            page = session.get(
-                "https://steamcommunity.com/market/search?q=antwerp+capsule"
-            )
+    def set_config(self, config):
+        self.use_proxy = bool(config.get("Proxy API Key", "Use_Proxy"))
+        self.api_key = config.get("Proxy API Key", "API_Key")
 
-        soup = BeautifulSoup(page.content, "html.parser")
-        count = 0
-        hrefs = [
-            "https://steamcommunity.com/market/listings/730/Antwerp%202022%20Legends%20Sticker%20Capsule",
-            "https://steamcommunity.com/market/listings/730/Antwerp%202022%20Challengers%20Sticker%20Capsule",
-            "https://steamcommunity.com/market/listings/730/Antwerp%202022%20Contenders%20Sticker%20Capsule",
-            "https://steamcommunity.com/market/listings/730/Antwerp%202022%20Champions%20Autograph%20Capsule",
-            "https://steamcommunity.com/market/listings/730/Antwerp%202022%20Challengers%20Autograph%20Capsule",
-            "https://steamcommunity.com/market/listings/730/Antwerp%202022%20Legends%20Autograph%20Capsule",
-            "https://steamcommunity.com/market/listings/730/Antwerp%202022%20Contenders%20Autograph%20Capsule",
-        ]
-        print(
-            Fore.MAGENTA + "------------Antwerp Capsule--------------" + Style.RESET_ALL
-        )
-        for href in hrefs:
-            if ant[count] > 0:
-                listing = soup.find("a", attrs={"href": f"{href}"})
-                if listing is None:
-                    print(
-                        Fore.RED
-                        + "[!] Failed to load.(Too many requests)"
-                        + Style.RESET_ALL
-                    )
-                    break
-                try:
-                    price = listing.find("span", attrs={"class": "normal_price"})
-                    data = price.text.split()[2]
-                    data_raw = float(data.replace("$", ""))
-                    print(capsule_name[count])
-                    print(
-                        *[
-                            data,
-                            "--> $"
-                            + str(round(float(ant[count] * data_raw), 2))
-                            + f" ({ant[count]})",
-                        ]
-                    )
-                    total = total + (ant[count] * data_raw)
-                except ValueError:
-                    print(Fore.RED + "[!] Failed to load." + Style.RESET_ALL)
-                    break
-            count = count + 1
-
-    if (
-        rio[0] > 0
-        or rio[1] > 0
-        or rio[2] > 0
-        or rio[3] > 0
-        or rio[4] > 0
-        or rio[5] > 0
-        or rio[6] > 0
-    ):
-        if use_proxy == "Yes":
-            page = requests.get(
-                url="https://steamcommunity.com/market/search?q=rio+capsule",
-                proxies={
-                    "http": f"http://{api_key}:@smartproxy.crawlbase.com:8012",
-                    "https": f"http://{api_key}:@smartproxy.crawlbase.com:8012",
-                },
-                verify=False,
-            )
-        else:
-            page = session.get("https://steamcommunity.com/market/search?q=rio+capsule")
-
-        soup = BeautifulSoup(page.content, "html.parser")
-        count = 0
-        hrefs = [
-            "https://steamcommunity.com/market/listings/730/Rio%202022%20Legends%20Sticker%20Capsule",
-            "https://steamcommunity.com/market/listings/730/Rio%202022%20Challengers%20Sticker%20Capsule",
-            "https://steamcommunity.com/market/listings/730/Rio%202022%20Contenders%20Sticker%20Capsule",
-            "https://steamcommunity.com/market/listings/730/Rio%202022%20Champions%20Autograph%20Capsule",
-            "https://steamcommunity.com/market/listings/730/Rio%202022%20Challengers%20Autograph%20Capsule",
-            "https://steamcommunity.com/market/listings/730/Rio%202022%20Legends%20Autograph%20Capsule",
-            "https://steamcommunity.com/market/listings/730/Rio%202022%20Contenders%20Autograph%20Capsule",
-        ]
-        print(
-            Fore.MAGENTA + "------------Rio Capsule------------------" + Style.RESET_ALL
-        )
-        for href in hrefs:
-            if rio[count] > 0:
-                listing = soup.find("a", attrs={"href": f"{href}"})
-                if listing is None:
-                    print(
-                        Fore.RED
-                        + "[!] Failed to load.(Too many requests)"
-                        + Style.RESET_ALL
-                    )
-                    break
-                try:
-                    price = listing.find("span", attrs={"class": "normal_price"})
-                    data = price.text.split()[2]
-                    data_raw = float(data.replace("$", ""))
-                    print(capsule_name[count])
-                    print(
-                        *[
-                            data,
-                            "--> $"
-                            + str(round(float(rio[count] * data_raw), 2))
-                            + f" ({rio[count]})",
-                        ]
-                    )
-                    total = total + (rio[count] * data_raw)
-                except ValueError:
-                    print(Fore.RED + "[!] Failed to load." + Style.RESET_ALL)
-                    break
-            count = count + 1
-
-    if (
-        paris[0] > 0
-        or paris[1] > 0
-        or paris[2] > 0
-        or paris[3] > 0
-        or paris[4] > 0
-        or paris[5] > 0
-        or paris[6] > 0
-    ):
-        if use_proxy == "Yes":
-            page = requests.get(
-                url="https://steamcommunity.com/market/search?q=paris+capsule",
-                proxies={
-                    "http": f"http://{api_key}:@smartproxy.crawlbase.com:8012",
-                    "https": f"http://{api_key}:@smartproxy.crawlbase.com:8012",
-                },
-                verify=False,
-            )
-        else:
-            page = session.get(
-                "https://steamcommunity.com/market/search?q=paris+capsule"
-            )
-
-        soup = BeautifulSoup(page.content, "html.parser")
-        count = 0
-        hrefs = [
-            "https://steamcommunity.com/market/listings/730/Paris%202023%20Legends%20Sticker%20Capsule",
-            "https://steamcommunity.com/market/listings/730/Paris%202023%20Challengers%20Sticker%20Capsule",
-            "https://steamcommunity.com/market/listings/730/Paris%202023%20Contenders%20Sticker%20Capsule",
-            "https://steamcommunity.com/market/listings/730/Paris%202023%20Champions%20Autograph%20Capsule",
-            "https://steamcommunity.com/market/listings/730/Paris%202023%20Challengers%20Autograph%20Capsule",
-            "https://steamcommunity.com/market/listings/730/Paris%202023%20Legends%20Autograph%20Capsule",
-            "https://steamcommunity.com/market/listings/730/Paris%202023%20Contenders%20Autograph%20Capsule",
-        ]
-        print(
-            Fore.MAGENTA + "------------Paris Capsule----------------" + Style.RESET_ALL
-        )
-        for href in hrefs:
-            if paris[count] > 0:
-                listing = soup.find("a", attrs={"href": f"{href}"})
-                if listing is None:
-                    print(
-                        Fore.RED
-                        + "[!] Failed to load.(Too many requests)"
-                        + Style.RESET_ALL
-                    )
-                    break
-                try:
-                    price = listing.find("span", attrs={"class": "normal_price"})
-                    data = price.text.split()[2]
-                    data_raw = float(data.replace("$", ""))
-                    print(capsule_name[count])
-                    print(
-                        *[
-                            data,
-                            "--> $"
-                            + str(round(float(paris[count] * data_raw), 2))
-                            + f" ({paris[count]})",
-                        ]
-                    )
-                    total = total + (paris[count] * data_raw)
-                except ValueError:
-                    print(Fore.RED + "[!] Failed to load." + Style.RESET_ALL)
-                    break
-            count = count + 1
-
-    ##################################### DISPLAY CASES ###############################################################
-
-    case_amounts = [
-        rev1_case,
-        rec_case,
-        dnn_case,
-        rip_case,
-        snk_case,
-        brk_case,
-        frac_case,
-        chr_case,
-        chr2_case,
-        chr3_case,
-        clt_case,
-        csg_case,
-        csg2_case,
-        csg3_case,
-        cs20_case,
-        dgz_case,
-        esp_case,
-        espw_case,
-        esps_case,
-        flch_case,
-        gam_case,
-        gam2_case,
-        glv_case,
-        hrz_case,
-        hnts_case,
-        brav_case,
-        brkt_case,
-        hydr_case,
-        phnx_case,
-        vngd_case,
-        wldf_case,
-        prsm_case,
-        prsm2_case,
-        rev_case,
-        shdw_case,
-        shwb_case,
-        spec_case,
-        spec2_case,
-        woff_case,
-    ]
-    case_names = [
-        "Revolution Case",
-        "Recoil Case",
-        "Dreams And Nightmares Case",
-        "Operation Riptide Case",
-        "Snakebite Case",
-        "Operation Broken Fang Case",
-        "Fracture Case",
-        "Chroma Case",
-        "Chroma 2 Case",
-        "Chroma 3 Case",
-        "Clutch Case",
-        "CSGO Weapon Case",
-        "CSGO Weapon Case 2",
-        "CSGO Weapon Case 3",
-        "CS20 Case",
-        "Danger Zone Case",
-        "eSports 2013 Case",
-        "eSports 2013 Winter Case",
-        "eSports 2014 Summer Case",
-        "Falchion Case",
-        "Gamma Case",
-        "Gamma 2 Case",
-        "Glove Case",
-        "Horizon Case",
-        "Huntsman Case",
-        "Operation Bravo Case",
-        "Operation Breakout Case",
-        "Operation Hydra Case",
-        "Operation Phoenix Case",
-        "Operation Vanguard Case",
-        "Operation Wildfire Case",
-        "Prisma Case",
-        "Prisma 2 Case",
-        "Revolver Case",
-        "Shadow Case",
-        "Shattered Web Case",
-        "Spectrum Case",
-        "Spectrum 2 Case",
-        "Winter Offensive Case",
-    ]
-    case_links = [
-        "https://steamcommunity.com/market/search?q=revolution+case",
-        "https://steamcommunity.com/market/search?q=recoil+case",
-        "https://steamcommunity.com/market/search?q=dreams+and+nightmares+case",
-        "https://steamcommunity.com/market/search?q=operation+riptide+case",
-        "https://steamcommunity.com/market/search?q=snakebite+case",
-        "https://steamcommunity.com/market/search?q=broken+fang+case",
-        "https://steamcommunity.com/market/search?q=fracture+case",
-        "https://steamcommunity.com/market/search?q=chroma+case",
-        "https://steamcommunity.com/market/search?q=chroma+case",
-        "https://steamcommunity.com/market/search?q=chroma+case",
-        "https://steamcommunity.com/market/search?q=clutch+case",
-        "https://steamcommunity.com/market/search?q=csgo+weapon+case",
-        "https://steamcommunity.com/market/search?q=csgo+weapon+case",
-        "https://steamcommunity.com/market/search?q=csgo+weapon+case",
-        "https://steamcommunity.com/market/search?q=cs20+case",
-        "https://steamcommunity.com/market/search?q=danger+zone+case",
-        "https://steamcommunity.com/market/search?q=esports+case",
-        "https://steamcommunity.com/market/search?q=esports+case",
-        "https://steamcommunity.com/market/search?q=esports+case",
-        "https://steamcommunity.com/market/search?q=falchion+case",
-        "https://steamcommunity.com/market/search?q=gamma+case",
-        "https://steamcommunity.com/market/search?q=gamma+case",
-        "https://steamcommunity.com/market/search?q=glove+case",
-        "https://steamcommunity.com/market/search?q=horizon+case",
-        "https://steamcommunity.com/market/search?q=huntsman+weapon+case",
-        "https://steamcommunity.com/market/search?q=operation+bravo+case",
-        "https://steamcommunity.com/market/search?q=operation+breakout+case",
-        "https://steamcommunity.com/market/search?q=operation+hydra+case",
-        "https://steamcommunity.com/market/search?q=operation+phoenix+case",
-        "https://steamcommunity.com/market/search?q=operation+vanguard+case",
-        "https://steamcommunity.com/market/search?q=operation+wildfire+case",
-        "https://steamcommunity.com/market/search?q=prisma+case",
-        "https://steamcommunity.com/market/search?q=prisma+case",
-        "https://steamcommunity.com/market/search?q=revolver+case",
-        "https://steamcommunity.com/market/search?q=shadow+case",
-        "https://steamcommunity.com/market/search?q=shattered+web+case",
-        "https://steamcommunity.com/market/search?q=spectrum+case",
-        "https://steamcommunity.com/market/search?q=spectrum+case",
-        "https://steamcommunity.com/market/search?q=winter+offensive+case",
-    ]
-    case_hrefs = [
-        "https://steamcommunity.com/market/listings/730/Revolution%20Case",
-        "https://steamcommunity.com/market/listings/730/Recoil%20Case",
-        "https://steamcommunity.com/market/listings/730/Dreams%20%26%20Nightmares%20Case",
-        "https://steamcommunity.com/market/listings/730/Operation%20Riptide%20Case",
-        "https://steamcommunity.com/market/listings/730/Snakebite%20Case",
-        "https://steamcommunity.com/market/listings/730/Operation%20Broken%20Fang%20Case",
-        "https://steamcommunity.com/market/listings/730/Fracture%20Case",
-        "https://steamcommunity.com/market/listings/730/Chroma%20Case",
-        "https://steamcommunity.com/market/listings/730/Chroma%202%20Case",
-        "https://steamcommunity.com/market/listings/730/Chroma%203%20Case",
-        "https://steamcommunity.com/market/listings/730/Clutch%20Case",
-        "https://steamcommunity.com/market/listings/730/CS%3AGO%20Weapon%20Case",
-        "https://steamcommunity.com/market/listings/730/CS%3AGO%20Weapon%20Case%202",
-        "https://steamcommunity.com/market/listings/730/CS%3AGO%20Weapon%20Case%203",
-        "https://steamcommunity.com/market/listings/730/CS20%20Case",
-        "https://steamcommunity.com/market/listings/730/Danger%20Zone%20Case",
-        "https://steamcommunity.com/market/listings/730/eSports%202013%20Case",
-        "https://steamcommunity.com/market/listings/730/eSports%202013%20Winter%20Case",
-        "https://steamcommunity.com/market/listings/730/eSports%202014%20Summer%20Case",
-        "https://steamcommunity.com/market/listings/730/Falchion%20Case",
-        "https://steamcommunity.com/market/listings/730/Gamma%20Case",
-        "https://steamcommunity.com/market/listings/730/Gamma%202%20Case",
-        "https://steamcommunity.com/market/listings/730/Glove%20Case",
-        "https://steamcommunity.com/market/listings/730/Horizon%20Case",
-        "https://steamcommunity.com/market/listings/730/Huntsman%20Weapon%20Case",
-        "https://steamcommunity.com/market/listings/730/Operation%20Bravo%20Case",
-        "https://steamcommunity.com/market/listings/730/Operation%20Breakout%20Weapon%20Case",
-        "https://steamcommunity.com/market/listings/730/Operation%20Hydra%20Case",
-        "https://steamcommunity.com/market/listings/730/Operation%20Phoenix%20Weapon%20Case",
-        "https://steamcommunity.com/market/listings/730/Operation%20Vanguard%20Weapon%20Case",
-        "https://steamcommunity.com/market/listings/730/Operation%20Wildfire%20Case",
-        "https://steamcommunity.com/market/listings/730/Prisma%20Case",
-        "https://steamcommunity.com/market/listings/730/Prisma%202%20Case",
-        "https://steamcommunity.com/market/listings/730/Revolver%20Case",
-        "https://steamcommunity.com/market/listings/730/Shadow%20Case",
-        "https://steamcommunity.com/market/listings/730/Shattered%20Web%20Case",
-        "https://steamcommunity.com/market/listings/730/Spectrum%20Case",
-        "https://steamcommunity.com/market/listings/730/Spectrum%202%20Case",
-        "https://steamcommunity.com/market/listings/730/Winter%20Offensive%20Weapon%20Case",
-    ]
-
-    for i in range(len(case_amounts)):
-        if case_amounts[i] > 0:
-            if use_proxy == "Yes":
-                page = requests.get(
-                    url=case_links[i],
-                    proxies={
-                        "http": f"http://{api_key}:@smartproxy.crawlbase.com:8012",
-                        "https": f"http://{api_key}:@smartproxy.crawlbase.com:8012",
-                    },
-                    verify=False,
+        for capsule_name in CAPSULE_NAMES:
+            config_capsule_name = capsule_name.replace(" ", "_")
+            if "RMR" in capsule_name:
+                self.rmr_quantities.append(
+                    int(config.get("2020 RMR", config_capsule_name))
                 )
-            else:
-                page = session.get(case_links[i])
+            elif "Stockholm" in capsule_name:
+                self.stockholm_quantities.append(
+                    int(config.get("Stockholm", config_capsule_name))
+                )
+            elif "Antwerp" in capsule_name:
+                self.antwerp_quantities.append(
+                    int(config.get("Antwerp", config_capsule_name))
+                )
+            elif "Rio" in capsule_name:
+                self.rio_quantities.append(int(config.get("Rio", config_capsule_name)))
+            elif "Paris" in capsule_name:
+                self.paris_quantities.append(
+                    int(config.get("Paris", config_capsule_name))
+                )
 
+        for case_name in CASE_NAMES:
+            config_case_name = case_name.replace(" ", "_")
+            self.case_quantities.append(int(config.get("Cases", config_case_name)))
+
+    @retry(stop=stop_after_attempt(3))
+    def get_page(self, url):
+        if self.use_proxy:
+            page = requests.get(
+                url=url,
+                proxies={
+                    "http": f"http://{self.api_key}:@smartproxy.crawlbase.com:8012",
+                    "https": f"http://{self.api_key}:@smartproxy.crawlbase.com:8012",
+                },
+                verify=False,
+            )
+        else:
+            page = self.session.get(url)
+
+        return page
+
+    def scrape_prices(self):
+        for capsule_page_url in CAPSULE_PAGES:
+            if "rmr" in capsule_page_url:
+                capsule_name = "2020 RMR"
+                capsule_quantities = self.rmr_quantities
+                capsule_hrefs = CAPSULE_HREFS[0:3]
+                capsule_names_generic = CAPSULE_NAMES_GENERIC[0:3]
+            elif "stockholm" in capsule_page_url:
+                capsule_name = "Stockholm"
+                capsule_quantities = self.stockholm_quantities
+                capsule_hrefs = CAPSULE_HREFS[3:8]
+                capsule_names_generic = (
+                    CAPSULE_NAMES_GENERIC[0:4] + CAPSULE_NAMES_GENERIC[-1]
+                )
+            elif "antwerp" in capsule_page_url:
+                capsule_name = "Antwerp"
+                capsule_quantities = self.antwerp_quantities
+                capsule_hrefs = CAPSULE_HREFS[8:15]
+                capsule_names_generic = CAPSULE_NAMES_GENERIC[0:7]
+            elif "rio" in capsule_page_url:
+                capsule_name = "Rio"
+                capsule_quantities = self.rio_quantities
+                capsule_hrefs = CAPSULE_HREFS[15:22]
+                capsule_names_generic = CAPSULE_NAMES_GENERIC[0:7]
+            elif "paris" in capsule_page_url:
+                capsule_name = "Paris"
+                capsule_quantities = self.paris_quantities
+                capsule_hrefs = CAPSULE_HREFS[22:29]
+                capsule_names_generic = CAPSULE_NAMES_GENERIC[0:7]
+
+                self.scrape_prices_capsule(
+                    capsule_page_url,
+                    capsule_hrefs,
+                    capsule_name,
+                    capsule_names_generic,
+                    capsule_quantities,
+                )
+
+        self.scrape_prices_case(
+            self.case_quantities, CASE_PAGES, CASE_HREFS, CASE_NAMES
+        )
+
+    def scrape_prices_capsule(
+        self,
+        capsule_page_url,
+        capsule_hrefs,
+        capsule_name,
+        capsule_names_generic,
+        capsule_quantities,
+    ):
+        if any([quantity > 0 for quantity in capsule_quantities]):
+            self.console.print(
+                +f"[bold magenta]------------{capsule_name}-------------"
+            )
+            page = self.get_page(capsule_page_url)
             soup = BeautifulSoup(page.content, "html.parser")
-            listing = soup.find("a", attrs={"href": case_hrefs[i]})
-            if listing is None:
-                print(
-                    Fore.MAGENTA
-                    + f"------------{case_names[i]}-----------------------------------"[
+
+            for href_index, href in enumerate(capsule_hrefs):
+                if capsule_quantities[href_index] > 0:
+                    try:
+                        listing = soup.find("a", attrs={"href": f"{href}"})
+                        if not listing:
+                            self.console.print("[bold red][!] Failed to load.")
+                            break
+
+                        price_span = listing.find(
+                            "span", attrs={"class": "normal_price"}
+                        )
+                        price_str = price_span.text.split()[2]
+                        price = float(price_str.replace("$", ""))
+                        price_total = round(
+                            float(capsule_quantities[href_index] * price), 2
+                        )
+
+                        self.console.print(capsule_names_generic[href_index])
+                        self.console.print(
+                            f"{price} --> ${price_total} ({capsule_quantities[href_index]})"
+                        )
+
+                        self.total_price += price_total
+
+                    except ValueError:
+                        self.console.print("[bold red][!] Failed to load.")
+                        break
+
+    def scrape_prices_case(
+        self, case_quantities, case_page_urls, case_hrefs, case_names
+    ):
+        for index, case_quantity in enumerate(case_quantities):
+            if case_quantity > 0:
+                self.console.print(
+                    f"[bold magenta]------------{case_names[index]}-----------------------------------"[
                         :41
                     ]
-                    + Style.RESET_ALL
                 )
-                print(
-                    Fore.RED
-                    + "[!] Failed to load.(Too many requests)"
-                    + Style.RESET_ALL
-                )
+                page = self.get_page(case_page_urls[index])
+                soup = BeautifulSoup(page.content, "html.parser")
+
+                listing = soup.find("a", attrs={"href": case_hrefs[index]})
+                if not listing:
+                    self.console.print("[bold red][!] Failed to load.")
+
+                else:
+                    try:
+                        price_class = listing.find(
+                            "span", attrs={"class": "normal_price"}
+                        )
+                        price_str = price_class.text.split()[2]
+                        price = float(price_str.replace("$", ""))
+                        price_total = round(float(case_quantity * price), 2)
+
+                        self.console.print(
+                            f"{price} --> ${price_total} ({case_quantity})"
+                        )
+
+                        self.total_price += price_total
+
+                    except ValueError:
+                        self.console.print("[bold red][!] Failed to load.")
+
+                    if not self.use_proxy:
+                        time.sleep(1)
+
+    def print_total(self):
+        self.console.print("[bold green]------------USD Total--------------------")
+        self.console.print(f"${self.total_price:.2f}")
+
+        self.total_price_euro = CurrencyConverter().convert(self.total, "USD", "EUR")
+        self.console.print("[bold green]------------EUR Total--------------------")
+        self.console.print(f"€{self.total_price_euro:.2f}")
+        self.console.print("[bold green]-----------------------------------------")
+
+    def save_to_file(self):
+        now = datetime.datetime.now()
+        date = now.strftime("%Y-%m-%d")
+
+        if not os.path.isfile(OUTPUT_FILE):
+            open(OUTPUT_FILE, "w").close()
+
+        with open(OUTPUT_FILE, "r", encoding="utf-8") as csvfile:
+            reader = csv.reader(csvfile)
+            last_row = None
+            for row in reader:
+                last_row = row
+            if last_row:
+                last_date_str = last_row[0][:10]
             else:
-                price = listing.find("span", attrs={"class": "normal_price"})
-                data = price.text.split()[2]
-                try:
-                    data_raw = float(data.replace("$", ""))
-                    print(
-                        Fore.MAGENTA
-                        + f"------------{case_names[i]}-----------------------------------"[
-                            :41
-                        ]
-                        + Style.RESET_ALL
-                    )
-                    print(
-                        data
-                        + " --> $"
-                        + str(round(float(case_amounts[i] * data_raw), 2))
-                        + " ("
-                        + str(case_amounts[i])
-                        + ")"
-                    )
-                    total += case_amounts[i] * data_raw
-                except ValueError:
-                    print(
-                        Fore.MAGENTA
-                        + f"------------{case_names[i]}-----------------------------------"[
-                            :41
-                        ]
-                        + Style.RESET_ALL
-                    )
-                    print(Fore.RED + "[!] Failed to load." + Style.RESET_ALL)
-                if use_proxy == "No":
-                    time.sleep(1)
+                last_date_str = ""
 
-    ##################################### PRINT TOTAL #######################################################################
-
-    print(Fore.GREEN + "------------USD Total--------------------" + Style.RESET_ALL)
-    print("$" + str(float(f"{total:.2f}")))
-
-    c = CurrencyConverter()
-    eur_total = c.convert(total, "USD", "EUR")
-    print(Fore.GREEN + "------------EUR Total--------------------" + Style.RESET_ALL)
-    print("€" + str(float(f"{eur_total:.2f}")))
-    print(Fore.GREEN + "-----------------------------------------" + Style.RESET_ALL)
-
-    ##################################### WRITE TOTAL TO OUTPUT FILE ########################################################
-
-    filename = "./../data/output.csv"
-    now = datetime.datetime.now()
-    date = now.strftime("%Y-%m-%d")
-
-    if not os.path.isfile(filename):
-        open(filename, "w").close()
-
-    with open(filename, "r", encoding="utf-8") as csvfile:
-        reader = csv.reader(csvfile)
-        last_row = None
-        for row in reader:
-            last_row = row
-        if last_row is not None:
-            last_date_str = last_row[0][:10]
-        else:
-            last_date_str = ""
-
-    if date != last_date_str:
-        today = now.strftime("%Y-%m-%d %H:%M:%S")
-        output1 = "{:.2f}$".format(total)
-        output2 = "{:.2f}€".format(eur_total)
-        with open(filename, "a", newline="", encoding="utf-8") as csvfile:
-            writer = csv.writer(csvfile)
-            writer.writerow([today, output1])
-            writer.writerow([today, output2])
-
-
-if __name__ == "__main__":
-    main()
+        if date != last_date_str:
+            today = now.strftime("%Y-%m-%d %H:%M:%S")
+            total = f"{self.total_price:.2f}$"
+            total_euro = f"{self.total_price_euro:.2f}€"
+            with open(OUTPUT_FILE, "a", newline="", encoding="utf-8") as csvfile:
+                writer = csv.writer(csvfile)
+                writer.writerow([today, total])
+                writer.writerow([today, total_euro])
