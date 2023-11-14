@@ -52,6 +52,8 @@ class Application:
 
     def _scrape_prices(self):
         self.scraper.scrape_prices()
+        self.scraper.print_total()
+        self.scraper.save_to_file()
 
     def _edit_config(self):
         subprocess.call(["notepad", CONFIG_FILE])
