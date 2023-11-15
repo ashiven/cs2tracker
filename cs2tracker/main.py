@@ -1,6 +1,7 @@
 import urllib3
 from rich.console import Console
 
+from ._version import version
 from .application import Application
 
 
@@ -22,7 +23,7 @@ def main():
 
 
 """
-        + "Version: v2.0.6 - 11/14/2023 - Jannik Novak @ashiven_\n"
+        + f"Version: v{version} - 11/14/2023 - Jannik Novak @ashiven_\n"
     )
 
     application = Application()

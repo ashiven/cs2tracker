@@ -7,7 +7,7 @@ import tkinter as tk
 import matplotlib.pyplot as plt
 from matplotlib.dates import DateFormatter
 
-from .constants import CONFIG_FILE, OUTPUT_FILE
+from .constants import CONFIG_FILE, OUTPUT_FILE, TEXT_EDITOR
 from .scraper import Scraper
 
 
@@ -56,7 +56,9 @@ class Application:
         self.scraper.save_to_file()
 
     def _edit_config(self):
-        subprocess.call(["notepad", CONFIG_FILE])
+        subprocess.call([TEXT_EDITOR, CONFIG_FILE])
+        config = self.scraper._parse_config()
+        self.scraper._set_config(config)
 
     def _draw_plot(self):
         datesp, dollars, euros = self._parse_output()
@@ -109,4 +111,4 @@ class Application:
     def _plot_file(self):
         if not os.path.isfile(OUTPUT_FILE):
             open(OUTPUT_FILE, "w").close()
-        subprocess.call(["notepad", OUTPUT_FILE])
+        subprocess.call([TEXT_EDITOR, OUTPUT_FILE])

@@ -1,5 +1,7 @@
 import os
+import sys
 
+TEXT_EDITOR = "notepad" if sys.platform == "win32" else "nano"
 BASE_DIR = os.path.dirname(os.path.abspath(__file__)).replace("\\", "/")
 OUTPUT_FILE = f"{BASE_DIR}/data/output.csv"
 CONFIG_FILE = f"{BASE_DIR}/data/config.ini"
