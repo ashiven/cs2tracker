@@ -19,7 +19,7 @@ class Application:
         window.title("CS2Tracker")
         window.geometry("400x400")
 
-        label = tk.Label(window, text="Welcome to CSGO Tracker!")
+        label = tk.Label(window, text="Welcome to CS2Tracker!")
         label.grid(column=0, row=0, pady=50, sticky="NSEW")
 
         run_button = tk.Button(window, text="Run!", command=self._scrape_prices)
