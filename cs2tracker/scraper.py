@@ -6,7 +6,12 @@ import time
 
 import requests
 from bs4 import BeautifulSoup
-from constants import (
+from currency_converter import CurrencyConverter
+from requests.adapters import HTTPAdapter, Retry
+from rich.console import Console
+from tenacity import retry, stop_after_attempt
+
+from .constants import (
     CAPSULE_HREFS,
     CAPSULE_NAMES,
     CAPSULE_NAMES_GENERIC,
@@ -17,10 +22,6 @@ from constants import (
     CONFIG_FILE,
     OUTPUT_FILE,
 )
-from currency_converter import CurrencyConverter
-from requests.adapters import HTTPAdapter, Retry
-from rich.console import Console
-from tenacity import retry, stop_after_attempt
 
 MAX_LINE_LEN = 50
 PADDING_LEN = MAX_LINE_LEN // 2 - 1

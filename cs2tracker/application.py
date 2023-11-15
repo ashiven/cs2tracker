@@ -5,9 +5,10 @@ import subprocess
 import tkinter as tk
 
 import matplotlib.pyplot as plt
-from constants import CONFIG_FILE, OUTPUT_FILE
 from matplotlib.dates import DateFormatter
-from scraper import Scraper
+
+from .constants import CONFIG_FILE, OUTPUT_FILE
+from .scraper import Scraper
 
 
 class Application:
