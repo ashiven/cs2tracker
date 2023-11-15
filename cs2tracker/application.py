@@ -16,7 +16,7 @@ class Application:
 
     def run(self):
         window = tk.Tk()
-        window.title("CSGOTracker")
+        window.title("CS2Tracker")
         window.geometry("400x400")
 
         label = tk.Label(window, text="Welcome to CSGO Tracker!")
