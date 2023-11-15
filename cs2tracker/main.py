@@ -22,7 +22,7 @@ def main():
 
 
 """
-        + "Version: v2.0.4 - 11/14/2023 - Jannik Novak @ashiven_"
+        + "Version: v2.0.5 - 11/14/2023 - Jannik Novak @ashiven_"
     )
 
     application = Application()
