@@ -1,8 +1,8 @@
 import os
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__)).replace("\\", "/")
-OUTPUT_FILE = f"{BASE_DIR}/../data/output.csv"
-CONFIG_FILE = f"{BASE_DIR}/../data/config.ini"
+OUTPUT_FILE = f"{BASE_DIR}/data/output.csv"
+CONFIG_FILE = f"{BASE_DIR}/data/config.ini"
 
 
 CAPSULE_NAMES = [
