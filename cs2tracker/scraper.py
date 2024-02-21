@@ -148,7 +148,9 @@ class Scraper:
         return config
 
     def _set_config(self, config):
-        self.use_proxy = bool(config.get("Proxy API Key", "Use_Proxy"))
+        self.use_proxy = (
+            False if config.get("Proxy API Key", "Use_Proxy") == "False" else True
+        )
         self.api_key = config.get("Proxy API Key", "API_Key")
 
         for capsule_name in CAPSULE_NAMES:
