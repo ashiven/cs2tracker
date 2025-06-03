@@ -37,6 +37,27 @@ CAPSULE_NAMES = [
     "Paris Challengers Autographs",
     "Paris Legends Autographs",
     "Paris Contenders Autographs",
+    "Copenhagen Legends",
+    "Copenhagen Challengers",
+    "Copenhagen Contenders",
+    "Copenhagen Champions Autographs",
+    "Copenhagen Challengers Autographs",
+    "Copenhagen Legends Autographs",
+    "Copenhagen Contenders Autographs",
+    "Shanghai Legends",
+    "Shanghai Challengers",
+    "Shanghai Contenders",
+    "Shanghai Champions Autographs",
+    "Shanghai Challengers Autographs",
+    "Shanghai Legends Autographs",
+    "Shanghai Contenders Autographs",
+    "Austin Legends",
+    "Austin Challengers",
+    "Austin Contenders",
+    "Austin Champions Autographs",
+    "Austin Challengers Autographs",
+    "Austin Legends Autographs",
+    "Austin Contenders Autographs",
 ]
 
 CAPSULE_NAMES_GENERIC = [
@@ -56,6 +77,9 @@ CAPSULE_PAGES = [
     "https://steamcommunity.com/market/search?q=antwerp+capsule",
     "https://steamcommunity.com/market/search?q=rio+capsule",
     "https://steamcommunity.com/market/search?q=paris+capsule",
+    "https://steamcommunity.com/market/search?q=copenhagen+capsule",
+    "https://steamcommunity.com/market/search?q=shanghai+capsule",
+    "https://steamcommunity.com/market/search?q=austin+capsule",
 ]
 
 CAPSULE_HREFS = [
@@ -88,6 +112,27 @@ CAPSULE_HREFS = [
     "https://steamcommunity.com/market/listings/730/Paris%202023%20Challengers%20Autograph%20Capsule",
     "https://steamcommunity.com/market/listings/730/Paris%202023%20Legends%20Autograph%20Capsule",
     "https://steamcommunity.com/market/listings/730/Paris%202023%20Contenders%20Autograph%20Capsule",
+    "https://steamcommunity.com/market/listings/730/Copenhagen%202024%20Legends%20Sticker%20Capsule",
+    "https://steamcommunity.com/market/listings/730/Copenhagen%202024%20Challengers%20Sticker%20Capsule",
+    "https://steamcommunity.com/market/listings/730/Copenhagen%202024%20Contenders%20Sticker%20Capsule",
+    "https://steamcommunity.com/market/listings/730/Copenhagen%202024%20Champions%20Autograph%20Capsule",
+    "https://steamcommunity.com/market/listings/730/Copenhagen%202024%20Challengers%20Autograph%20Capsule",
+    "https://steamcommunity.com/market/listings/730/Copenhagen%202024%20Legends%20Autograph%20Capsule",
+    "https://steamcommunity.com/market/listings/730/Copenhagen%202024%20Contenders%20Autograph%20Capsule",
+    "https://steamcommunity.com/market/listings/730/Shanghai%202024%20Legends%20Sticker%20Capsule",
+    "https://steamcommunity.com/market/listings/730/Shanghai%202024%20Challengers%20Sticker%20Capsule",
+    "https://steamcommunity.com/market/listings/730/Shanghai%202024%20Contenders%20Sticker%20Capsule",
+    "https://steamcommunity.com/market/listings/730/Shanghai%202024%20Champions%20Autograph%20Capsule",
+    "https://steamcommunity.com/market/listings/730/Shanghai%202024%20Challengers%20Autograph%20Capsule",
+    "https://steamcommunity.com/market/listings/730/Shanghai%202024%20Legends%20Autograph%20Capsule",
+    "https://steamcommunity.com/market/listings/730/Shanghai%202024%20Contenders%20Autograph%20Capsule",
+    "https://steamcommunity.com/market/listings/730/Austin%202025%20Legends%20Sticker%20Capsule",
+    "https://steamcommunity.com/market/listings/730/Austin%202025%20Challengers%20Sticker%20Capsule",
+    "https://steamcommunity.com/market/listings/730/Austin%202025%20Contenders%20Sticker%20Capsule",
+    "https://steamcommunity.com/market/listings/730/Austin%202025%20Champions%20Autograph%20Capsule",
+    "https://steamcommunity.com/market/listings/730/Austin%202025%20Challengers%20Autograph%20Capsule",
+    "https://steamcommunity.com/market/listings/730/Austin%202025%20Legends%20Autograph%20Capsule",
+    "https://steamcommunity.com/market/listings/730/Austin%202025%20Contenders%20Autograph%20Capsule",
 ]
 
 CASE_NAMES = [
@@ -130,6 +175,9 @@ CASE_NAMES = [
     "Spectrum Case",
     "Spectrum 2 Case",
     "Winter Offensive Case",
+    "Kilowatt Case",
+    "Gallery Case",
+    "Fever Case",
 ]
 
 
@@ -173,6 +221,9 @@ CASE_PAGES = [
     "https://steamcommunity.com/market/search?q=spectrum+case",
     "https://steamcommunity.com/market/search?q=spectrum+case",
     "https://steamcommunity.com/market/search?q=winter+offensive+case",
+    "https://steamcommunity.com/market/search?q=kilowatt+case",
+    "https://steamcommunity.com/market/search?q=gallery+case",
+    "https://steamcommunity.com/market/search?q=fever+case",
 ]
 
 CASE_HREFS = [
@@ -215,4 +266,7 @@ CASE_HREFS = [
     "https://steamcommunity.com/market/listings/730/Spectrum%20Case",
     "https://steamcommunity.com/market/listings/730/Spectrum%202%20Case",
     "https://steamcommunity.com/market/listings/730/Winter%20Offensive%20Weapon%20Case",
+    "https://steamcommunity.com/market/listings/730/Kilowatt%20Case",
+    "https://steamcommunity.com/market/listings/730/Gallery%20Case",
+    "https://steamcommunity.com/market/listings/730/Fever%20Case",
 ]
