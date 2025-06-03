@@ -174,6 +174,17 @@ class Scraper:
         )
         self.api_key = config.get("Proxy API Key", "API_Key")
 
+        # reset all quantities in case this is called at runtime (edit config)
+        self.case_quantities = []
+        self.rmr_quantities = []
+        self.stockholm_quantities = []
+        self.antwerp_quantities = []
+        self.rio_quantities = []
+        self.paris_quantities = []
+        self.copenhagen_quantities = []
+        self.shanghai_quantities = []
+        self.austin_quantities = []
+
         for capsule_name in CAPSULE_NAMES:
             config_capsule_name = capsule_name.replace(" ", "_")
             if "RMR" in capsule_name:
