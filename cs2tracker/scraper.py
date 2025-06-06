@@ -146,7 +146,7 @@ class Scraper:
         date = now.strftime("%Y-%m-%d")
 
         if not os.path.isfile(OUTPUT_FILE):
-            open(OUTPUT_FILE, "w").close()
+            open(OUTPUT_FILE, "w", encoding="utf-8").close()
 
         with open(OUTPUT_FILE, "r", encoding="utf-8") as csvfile:
             reader = csv.reader(csvfile)
@@ -295,7 +295,7 @@ class Scraper:
 
                         self.total_price += price_total
 
-                    except Exception:
+                    except (AttributeError, ValueError):
                         self.console.print("[bold red][!] Failed to find price listing")
                         break
 
@@ -339,7 +339,7 @@ class Scraper:
 
                     self.total_price += price_total
 
-                except Exception:
+                except (AttributeError, ValueError):
                     self.console.print("[bold red][!] Failed to find price listing")
 
                 self.console.print("\n")

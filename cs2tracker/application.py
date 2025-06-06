@@ -88,7 +88,7 @@ class Application:
         row_num = 0
 
         if not os.path.isfile(OUTPUT_FILE):
-            open(OUTPUT_FILE, "w").close()
+            open(OUTPUT_FILE, "w", encoding="utf-8").close()
 
         with open(OUTPUT_FILE, "r", newline="", encoding="utf-8") as csvfile:
             reader = csv.reader(csvfile)
@@ -110,5 +110,5 @@ class Application:
 
     def _plot_file(self):
         if not os.path.isfile(OUTPUT_FILE):
-            open(OUTPUT_FILE, "w").close()
+            open(OUTPUT_FILE, "w", encoding="utf-8").close()
         subprocess.call([TEXT_EDITOR, OUTPUT_FILE])
