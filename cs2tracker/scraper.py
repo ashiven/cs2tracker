@@ -23,7 +23,7 @@ from .constants import (
     OUTPUT_FILE,
 )
 
-MAX_LINE_LEN = 50
+MAX_LINE_LEN = 72
 PADDING_LEN = MAX_LINE_LEN // 2 - 1
 PADDING = "-" * PADDING_LEN
 
@@ -60,8 +60,8 @@ class Scraper:
 
         self.console = Console()
 
-        config = self._parse_config()
-        self._set_config(config)
+        config = self.parse_config()
+        self.set_config(config)
 
     def scrape_prices(self):
         for capsule_page_url in CAPSULE_PAGES:
@@ -124,18 +124,22 @@ class Scraper:
         )
 
     def print_total(self):
-        usd_string = f"{PADDING}USD Total{PADDING}"[:MAX_LINE_LEN]
+        usd_string = "USD Total".center(
+            MAX_LINE_LEN, "-"
+        )  # f"{PADDING}USD Total{PADDING}"[:MAX_LINE_LEN]
         self.console.print(f"[bold green]{usd_string}")
         self.console.print(f"${self.total_price:.2f}")
 
         self.total_price_euro = CurrencyConverter().convert(
             self.total_price, "USD", "EUR"
         )
-        eur_string = f"{PADDING}EUR Total{PADDING}"[:MAX_LINE_LEN]
+        eur_string = "EUR Total".center(
+            MAX_LINE_LEN, "-"
+        )  # f"{PADDING}EUR Total{PADDING}"[:MAX_LINE_LEN]
         self.console.print(f"[bold green]{eur_string}")
         self.console.print(f"€{self.total_price_euro:.2f}")
         end_string = f"{PADDING}{PADDING}{PADDING}"[:MAX_LINE_LEN]
-        self.console.print(f"[bold green]{end_string}")
+        self.console.print(f"[bold green]{end_string}\n")
 
     def save_to_file(self):
         now = datetime.datetime.now()
@@ -163,12 +167,16 @@ class Scraper:
                 writer.writerow([today, total])
                 writer.writerow([today, total_euro])
 
-    def _parse_config(self):
+        # reset total prices for next run
+        self.total_price = 0
+        self.total_price_euro = 0
+
+    def parse_config(self):
         config = configparser.ConfigParser()
         config.read(CONFIG_FILE)
         return config
 
-    def _set_config(self, config):
+    def set_config(self, config):
         self.use_proxy = (
             False if config.get("Proxy API Key", "Use_Proxy") == "False" else True
         )
@@ -247,7 +255,9 @@ class Scraper:
         capsule_quantities,
     ):
         if any([quantity > 0 for quantity in capsule_quantities]):
-            title_string = f"{PADDING}{capsule_name}{PADDING}"[:MAX_LINE_LEN]
+            title_string = capsule_name.center(
+                MAX_LINE_LEN, "-"
+            )  # f"{PADDING}{capsule_name}{PADDING}"[:MAX_LINE_LEN]
             self.console.print(f"[bold magenta]{title_string}")
 
             page = self._get_page(capsule_page_url)
@@ -276,23 +286,29 @@ class Scraper:
                             float(capsule_quantities[href_index] * price), 2
                         )
 
-                        self.console.print(capsule_names_generic[href_index])
                         self.console.print(
-                            f"${price} --> ${price_total} ({capsule_quantities[href_index]})"
+                            f"[bold red]{capsule_names_generic[href_index]}"
+                        )
+                        self.console.print(
+                            f"Owned: {capsule_quantities[href_index]}      Steam market price: ${price}      Total: ${price_total}"
                         )
 
                         self.total_price += price_total
 
-                    except ValueError:
+                    except Exception:
                         self.console.print("[bold red][!] Failed to find price listing")
                         break
+
+            self.console.print("\n")
 
     def _scrape_prices_case(
         self, case_quantities, case_page_urls, case_hrefs, case_names
     ):
         for index, case_quantity in enumerate(case_quantities):
             if case_quantity > 0:
-                title_string = f"{PADDING}{case_names[index]}{PADDING}"[:MAX_LINE_LEN]
+                title_string = case_names[index].center(
+                    MAX_LINE_LEN, "-"
+                )  # f"{PADDING}{case_names[index]}{PADDING}"[:MAX_LINE_LEN]
                 self.console.print(f"[bold magenta]{title_string}")
 
                 page = self._get_page(case_page_urls[index])
@@ -317,12 +333,16 @@ class Scraper:
                     price = float(price_str.replace("$", ""))
                     price_total = round(float(case_quantity * price), 2)
 
-                    self.console.print(f"${price} --> ${price_total} ({case_quantity})")
+                    self.console.print(
+                        f"Owned: {case_quantity}      Steam market price: ${price}      Total: ${price_total}"
+                    )
 
                     self.total_price += price_total
 
-                except ValueError:
+                except Exception:
                     self.console.print("[bold red][!] Failed to find price listing")
+
+                self.console.print("\n")
 
                 if not self.use_proxy:
                     time.sleep(1)

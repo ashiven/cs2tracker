@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import urllib3
 from rich.console import Console
 
@@ -23,7 +25,7 @@ def main():
 
 
 """
-        + f"Version: v{version} - 11/14/2023 - Jannik Novak @ashiven_\n"
+        + f"Version: v{version} - {datetime.today().strftime('%Y/%m/%d')} - Jannik Novak @ashiven_\n"
     )
 
     application = Application()

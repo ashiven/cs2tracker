@@ -57,8 +57,8 @@ class Application:
 
     def _edit_config(self):
         subprocess.call([TEXT_EDITOR, CONFIG_FILE])
-        config = self.scraper._parse_config()
-        self.scraper._set_config(config)
+        config = self.scraper.parse_config()
+        self.scraper.set_config(config)
 
     def _draw_plot(self):
         datesp, dollars, euros = self._parse_output()
