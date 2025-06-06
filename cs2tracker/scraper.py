@@ -24,8 +24,6 @@ from .constants import (
 )
 
 MAX_LINE_LEN = 72
-PADDING_LEN = MAX_LINE_LEN // 2 - 1
-PADDING = "-" * PADDING_LEN
 
 
 class Scraper:
@@ -124,21 +122,17 @@ class Scraper:
         )
 
     def print_total(self):
-        usd_string = "USD Total".center(
-            MAX_LINE_LEN, "-"
-        )  # f"{PADDING}USD Total{PADDING}"[:MAX_LINE_LEN]
+        usd_string = "USD Total".center(MAX_LINE_LEN, "-")
         self.console.print(f"[bold green]{usd_string}")
         self.console.print(f"${self.total_price:.2f}")
 
         self.total_price_euro = CurrencyConverter().convert(
             self.total_price, "USD", "EUR"
         )
-        eur_string = "EUR Total".center(
-            MAX_LINE_LEN, "-"
-        )  # f"{PADDING}EUR Total{PADDING}"[:MAX_LINE_LEN]
+        eur_string = "EUR Total".center(MAX_LINE_LEN, "-")
         self.console.print(f"[bold green]{eur_string}")
         self.console.print(f"€{self.total_price_euro:.2f}")
-        end_string = f"{PADDING}{PADDING}{PADDING}"[:MAX_LINE_LEN]
+        end_string = "-" * MAX_LINE_LEN
         self.console.print(f"[bold green]{end_string}\n")
 
     def save_to_file(self):
@@ -255,9 +249,7 @@ class Scraper:
         capsule_quantities,
     ):
         if any([quantity > 0 for quantity in capsule_quantities]):
-            title_string = capsule_name.center(
-                MAX_LINE_LEN, "-"
-            )  # f"{PADDING}{capsule_name}{PADDING}"[:MAX_LINE_LEN]
+            title_string = capsule_name.center(MAX_LINE_LEN, "-")
             self.console.print(f"[bold magenta]{title_string}")
 
             page = self._get_page(capsule_page_url)
@@ -306,9 +298,7 @@ class Scraper:
     ):
         for index, case_quantity in enumerate(case_quantities):
             if case_quantity > 0:
-                title_string = case_names[index].center(
-                    MAX_LINE_LEN, "-"
-                )  # f"{PADDING}{case_names[index]}{PADDING}"[:MAX_LINE_LEN]
+                title_string = case_names[index].center(MAX_LINE_LEN, "-")
                 self.console.print(f"[bold magenta]{title_string}")
 
                 page = self._get_page(case_page_urls[index])
