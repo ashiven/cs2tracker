@@ -6,7 +6,7 @@
 **CS2Tracker** is a tool that can be used to keep track of the steam market prices of your CS2 investment.
 
 <p align="center">
-   <img src="https://github.com/user-attachments/assets/6bd13c96-55ea-4857-8910-f97f5ce78704" />
+   <img src="https://github.com/user-attachments/assets/72376252-c076-4d5d-9224-578419795430" />
 </p>
 
 ## Getting Started
