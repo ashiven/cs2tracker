@@ -3,4 +3,9 @@ disable=
     too-many-arguments,
     too-many-positional-arguments,
     too-many-locals,
-    consider-using-with,
+    line-too-long,
+    missing-module-docstring,
+    missing-class-docstring,
+    missing-function-docstring,
+    too-few-public-methods,
+    import-error
