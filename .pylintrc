@@ -1,5 +1,6 @@
 [MESSAGES CONTROL]
 disable=
+    too-many-instance-attributes,
     too-many-arguments,
     too-many-positional-arguments,
     too-many-locals,
@@ -9,4 +10,5 @@ disable=
     missing-function-docstring,
     too-few-public-methods,
     import-error,
-    simplifiable-if-expression
+    simplifiable-if-expression,
+    consider-using-with
