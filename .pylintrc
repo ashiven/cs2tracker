@@ -8,4 +8,5 @@ disable=
     missing-class-docstring,
     missing-function-docstring,
     too-few-public-methods,
-    import-error
+    import-error,
+    simplifiable-if-expression
