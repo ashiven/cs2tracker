@@ -248,7 +248,7 @@ class Scraper:
         capsule_names_generic,
         capsule_quantities,
     ):
-        if any([quantity > 0 for quantity in capsule_quantities]):
+        if any(quantity > 0 for quantity in capsule_quantities):
             title_string = capsule_name.center(MAX_LINE_LEN, "-")
             self.console.print(f"[bold magenta]{title_string}")
 
