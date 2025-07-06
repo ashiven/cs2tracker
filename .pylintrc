@@ -1,0 +1,14 @@
+[MESSAGES CONTROL]
+disable=
+    too-many-instance-attributes,
+    too-many-arguments,
+    too-many-positional-arguments,
+    too-many-locals,
+    line-too-long,
+    missing-module-docstring,
+    missing-class-docstring,
+    missing-function-docstring,
+    too-few-public-methods,
+    import-error,
+    simplifiable-if-expression,
+    consider-using-with
