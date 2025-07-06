@@ -16,6 +16,16 @@ class Application:
         self.scraper = Scraper()
 
     def run(self):
+        """Run the main application window with buttons for scraping prices, editing the
+        configuration, showing history in a chart, and editing the log file.
+        """
+        application_window = self._configure_window()
+        application_window.mainloop()
+
+    def _configure_window(self):
+        """Configure the main application window layout with buttons for the various
+        actions.
+        """
         window = tk.Tk()
         window.title("CS2Tracker")
         window.geometry("400x400")
@@ -29,7 +39,7 @@ class Application:
             window, text="Show History (Chart)", command=self._draw_plot
         )
         plotfile_button = tk.Button(
-            window, text="Show History (File)", command=self._plot_file
+            window, text="Show History (File)", command=self._edit_log_file
         )
 
         run_button.grid(row=1, column=0, pady=10, sticky="NSEW")
@@ -48,24 +58,53 @@ class Application:
         plot_button.grid_configure(sticky="NSEW")
         plotfile_button.grid_configure(sticky="NSEW")
 
-        window.mainloop()
+        return window
 
     def _scrape_prices(self):
+        """Scrape prices from the configured sources, print the total, and save the
+        results to a file.
+        """
         self.scraper.scrape_prices()
         self.scraper.print_total()
         self.scraper.save_to_file()
 
     def _edit_config(self):
+        """Edit the configuration file using the specified text editor."""
         subprocess.call([TEXT_EDITOR, CONFIG_FILE])
         config = self.scraper.parse_config()
         self.scraper.set_config(config)
 
+    def _parse_logs(self):
+        """
+        Parse the output file to extract dates, dollar prices, and euro prices.
+
+        This data is used for drawing the plot of past prices.
+        """
+        if not os.path.isfile(OUTPUT_FILE):
+            open(OUTPUT_FILE, "w", encoding="utf-8").close()
+
+        dates, dollars, euros = [], [], []
+        with open(OUTPUT_FILE, "r", newline="", encoding="utf-8") as price_logs:
+            price_logs_reader = csv.reader(price_logs)
+            for row in price_logs_reader:
+                date, price_with_currency = row
+                date = datetime.datetime.strptime(date[:-9], "%Y-%m-%d %H:%M:%S")
+                price = float(price_with_currency.rstrip("$€"))
+                dates.append(date)
+                if price_with_currency.endswith("€"):
+                    euros.append(price)
+                else:
+                    dollars.append(price)
+
+        return dates, dollars, euros
+
     def _draw_plot(self):
-        datesp, dollars, euros = self._parse_output()
+        """Draw a plot of the scraped prices over time."""
+        dates, dollars, euros = self._parse_logs()
 
         fig, ax = plt.subplots()
-        ax.plot(datesp, dollars, label="Dollars")
-        ax.plot(datesp, euros, label="Euros")
+        ax.plot(dates, dollars, label="Dollars")
+        ax.plot(dates, euros, label="Euros")
         ax.set_xlabel("Date")
         ax.set_ylabel("Price")
         ax.legend()
@@ -76,39 +115,8 @@ class Application:
 
         plt.show()
 
-    def _parse_output(self):
-        def parse_row(row):
-            date_str, price_str = row
-            price = float(price_str[:-1])
-            return date_str, price
-
-        dates = []
-        dollars = []
-        euros = []
-        row_num = 0
-
-        if not os.path.isfile(OUTPUT_FILE):
-            open(OUTPUT_FILE, "w", encoding="utf-8").close()
-
-        with open(OUTPUT_FILE, "r", newline="", encoding="utf-8") as csvfile:
-            reader = csv.reader(csvfile)
-            for row in reader:
-                row_num += 1
-                date, price = parse_row(row)
-                if row_num % 2 == 0:
-                    euros.append(price)
-                else:
-                    dollars.append(price)
-                    dates.append(date)
-
-        datesp = []
-        for date_str in dates:
-            date = datetime.datetime.strptime(date_str[:-9], "%Y-%m-%d")
-            datesp.append(date)
-
-        return datesp, dollars, euros
-
-    def _plot_file(self):
+    def _edit_log_file(self):
+        """Opens the file containing past price calculations."""
         if not os.path.isfile(OUTPUT_FILE):
             open(OUTPUT_FILE, "w", encoding="utf-8").close()
         subprocess.call([TEXT_EDITOR, OUTPUT_FILE])
