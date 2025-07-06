@@ -101,7 +101,7 @@ PARIS_CAPSULES = {
     ],
 }
 
-COPENHAFEN_CASULES = {
+COPENHAGEN_CASULES = {
     "page": "https://steamcommunity.com/market/search?q=copenhagen+capsule",
     "items": [
         "https://steamcommunity.com/market/listings/730/Copenhagen%202024%20Legends%20Sticker%20Capsule",
@@ -167,6 +167,17 @@ AUSTIN_CAPSULES = {
         "Austin Contenders Autographs",
     ],
 }
+
+CAPSULE_INFO = [
+    RMR_CAPSULES,
+    STOCKHOLM_CAPSULES,
+    ANTWERP_CAPSULES,
+    RIO_CAPSULES,
+    PARIS_CAPSULES,
+    COPENHAGEN_CASULES,
+    SHANGHAI_CAPSULES,
+    AUSTIN_CAPSULES,
+]
 
 CASE_NAMES = [
     "Revolution Case",
