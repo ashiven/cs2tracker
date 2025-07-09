@@ -174,10 +174,7 @@ class Scraper:
         capsule_usd_total = 0
         for capsule_section, capsule_info in CAPSULE_INFO.items():
             # only scrape capsule sections where the user owns at least one item
-            if any(
-                int(owned) > 0
-                for capsule_name, owned in self.config.items(capsule_section)
-            ):
+            if any(int(owned) > 0 for _, owned in self.config.items(capsule_section)):
                 capsule_usd_total += self._scrape_prices_capsule(
                     capsule_section, capsule_info
                 )
