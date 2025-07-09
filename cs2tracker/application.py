@@ -3,8 +3,10 @@ import datetime
 import os
 import subprocess
 import tkinter as tk
+from typing import cast
 
 import matplotlib.pyplot as plt
+from matplotlib.axes import Axes
 from matplotlib.dates import DateFormatter
 
 from .constants import CONFIG_FILE, OUTPUT_FILE, TEXT_EDITOR
@@ -65,14 +67,11 @@ class Application:
         results to a file.
         """
         self.scraper.scrape_prices()
-        self.scraper.print_total()
-        self.scraper.save_to_file()
 
     def _edit_config(self):
         """Edit the configuration file using the specified text editor."""
         subprocess.call([TEXT_EDITOR, CONFIG_FILE])
-        config = self.scraper.parse_config()
-        self.scraper.set_config(config)
+        self.scraper.parse_config()
 
     def _parse_logs(self):
         """
@@ -102,7 +101,9 @@ class Application:
         """Draw a plot of the scraped prices over time."""
         dates, dollars, euros = self._parse_logs()
 
-        fig, ax = plt.subplots()
+        fig, ax_raw = plt.subplots()
+        ax = cast(Axes, ax_raw)
+
         ax.plot(dates, dollars, label="Dollars")
         ax.plot(dates, euros, label="Euros")
         ax.set_xlabel("Date")
