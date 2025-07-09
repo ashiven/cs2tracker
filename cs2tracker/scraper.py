@@ -4,10 +4,10 @@ import time
 from configparser import ConfigParser
 from datetime import datetime
 
-import requests
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 from currency_converter import CurrencyConverter
+from requests import RequestException, Session
 from requests.adapters import HTTPAdapter, Retry
 from rich.console import Console
 from tenacity import retry, stop_after_attempt
@@ -16,6 +16,7 @@ from .constants import CAPSULE_INFO, CASE_HREFS, CASE_PAGES, CONFIG_FILE, OUTPUT
 
 MAX_LINE_LEN = 72
 SEPARATOR = "-"
+PRICE_INFO = "Owned: {}      Steam market price: ${}      Total: ${}\n"
 
 
 class Scraper:
@@ -32,7 +33,7 @@ class Scraper:
         self.config.read(CONFIG_FILE)
 
     def _start_session(self):
-        self.session = requests.Session()
+        self.session = Session()
         self.session.headers.update(
             {
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"
@@ -46,22 +47,28 @@ class Scraper:
 
     def scrape_prices(self):
         capsule_usd_total = 0
-        for capsule_name, capsule_info in CAPSULE_INFO.items():
-            capsule_usd_total += self._scrape_prices_capsule(capsule_name, capsule_info)
+        try:
+            capsule_usd_total = self._scrape_prices_capsules()
+        except (RequestException, AttributeError):
+            self.console.print("[bold red]Failed to scrape capsule prices.\n")
 
-        case_usd_total = self._scrape_prices_case()
+        case_usd_total = 0
+        try:
+            case_usd_total = self._scrape_prices_case()
+        except (RequestException, AttributeError):
+            self.console.print("[bold red]Failed to scrape case prices.\n")
 
         self.usd_total += capsule_usd_total
         self.usd_total += case_usd_total
         self.eur_total = CurrencyConverter().convert(self.usd_total, "USD", "EUR")
 
-        self.print_total()
-        self.save_to_file()
+        self._print_total()
+        self._save_to_file()
 
         # reset totals for next run
         self.usd_total, self.eur_total = 0, 0
 
-    def print_total(self):
+    def _print_total(self):
         usd_title = "USD Total".center(MAX_LINE_LEN, SEPARATOR)
         self.console.print(f"[bold green]{usd_title}")
         self.console.print(f"${self.usd_total:.2f}")
@@ -73,7 +80,7 @@ class Scraper:
         end_string = SEPARATOR * MAX_LINE_LEN
         self.console.print(f"[bold green]{end_string}\n")
 
-    def save_to_file(self):
+    def _save_to_file(self):
         if not os.path.isfile(OUTPUT_FILE):
             open(OUTPUT_FILE, "w", encoding="utf-8").close()
 
@@ -116,7 +123,7 @@ class Scraper:
             self.console.print(
                 f"[bold red][!] Failed to load page ({status}). Retrying...\n"
             )
-            raise requests.RequestException(f"Failed to load page: {url}")
+            raise RequestException(f"Failed to load page: {url}")
 
         return page
 
@@ -145,11 +152,10 @@ class Scraper:
         capsule_title = capsule_section.center(MAX_LINE_LEN, SEPARATOR)
         self.console.print(f"[bold magenta]{capsule_title}")
 
+        capsule_price_total = 0
         capsule_page = capsule_info["page"]
         capsule_names = capsule_info["names"]
         capsule_hrefs = capsule_info["items"]
-        capsule_price_total = 0
-        # TODO: only get page if owned > 0 for any item
         capsule_page = self._get_page(capsule_page)
         for capsule_name, capsule_href in zip(capsule_names, capsule_hrefs):
             config_capsule_name = capsule_name.replace(" ", "_")
@@ -159,12 +165,24 @@ class Scraper:
             price_usd_owned = round(float(owned * price_usd), 2)
 
             self.console.print(f"[bold red]{capsule_name}")
-            self.console.print(
-                f"Owned: {owned}      Steam market price: ${price_usd}      Total: ${price_usd_owned}"
-            )
+            self.console.print(PRICE_INFO.format(owned, price_usd, price_usd_owned))
             capsule_price_total += price_usd_owned
 
         return capsule_price_total
+
+    def _scrape_prices_capsules(self):
+        capsule_usd_total = 0
+        for capsule_section, capsule_info in CAPSULE_INFO.items():
+            # only scrape capsule sections where the user owns at least one item
+            if any(
+                int(owned) > 0
+                for capsule_name, owned in self.config.items(capsule_section)
+            ):
+                capsule_usd_total += self._scrape_prices_capsule(
+                    capsule_section, capsule_info
+                )
+
+        return capsule_usd_total
 
     def _parse_case_price(self, case_page, case_href):
         case_soup = BeautifulSoup(case_page.content, "html.parser")
@@ -197,9 +215,7 @@ class Scraper:
             price_usd = self._parse_case_price(case_page, CASE_HREFS[case_index])
             price_usd_owned = round(float(int(owned) * price_usd), 2)
 
-            self.console.print(
-                f"Owned: {owned}      Steam market price: ${price_usd}      Total: ${price_usd_owned}\n"
-            )
+            self.console.print(PRICE_INFO.format(owned, price_usd, price_usd_owned))
             case_price_total += price_usd_owned
 
             if not self.config.getboolean("settings", "Use_Proxy", fallback=False):
