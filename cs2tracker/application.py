@@ -52,7 +52,7 @@ class Application:
         run_button.grid_configure(sticky="NSEW")
         edit_button.grid_configure(sticky="NSEW")
         plot_button.grid_configure(sticky="NSEW")
-        plotfile_button.grid_configure(sticky="NSEW")
+        plot_file_button.grid_configure(sticky="NSEW")
 
         return window
 
