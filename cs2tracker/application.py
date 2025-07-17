@@ -31,23 +31,23 @@ class Application:
         window.geometry("400x400")
 
         label = tk.Label(window, text="Welcome to CS2Tracker!")
-        label.grid(column=0, row=0, pady=50, sticky="NSEW")
-
         run_button = tk.Button(window, text="Run!", command=self._scrape_prices)
         edit_button = tk.Button(window, text="Edit Config", command=self._edit_config)
         plot_button = tk.Button(window, text="Show History (Chart)", command=self._draw_plot)
-        plotfile_button = tk.Button(window, text="Show History (File)", command=self._edit_log_file)
+        plot_file_button = tk.Button(window, text="Show History (File)", command=self._edit_log_file)
 
+        label.grid(row=0, column=0, pady=50, sticky="NSEW")
         run_button.grid(row=1, column=0, pady=10, sticky="NSEW")
         edit_button.grid(row=2, column=0, pady=10, sticky="NSEW")
         plot_button.grid(row=3, column=0, pady=10, sticky="NSEW")
-        plotfile_button.grid(row=4, column=0, pady=10, sticky="NSEW")
+        plot_file_button.grid(row=4, column=0, pady=10, sticky="NSEW")
 
         window.grid_columnconfigure(0, weight=1)
         window.grid_rowconfigure(1, weight=1)
         window.grid_rowconfigure(2, weight=1)
         window.grid_rowconfigure(3, weight=1)
         window.grid_rowconfigure(4, weight=1)
+
         label.grid_configure(sticky="NSEW")
         run_button.grid_configure(sticky="NSEW")
         edit_button.grid_configure(sticky="NSEW")
@@ -80,8 +80,8 @@ class Application:
         ax.set_ylabel("Price")
         ax.legend()
 
-        date_form = DateFormatter("%d-%m-%Y")
-        ax.xaxis.set_major_formatter(date_form)
+        date_formatter = DateFormatter("%d-%m-%Y")
+        ax.xaxis.set_major_formatter(date_formatter)
         fig.autofmt_xdate()
 
         plt.show()
