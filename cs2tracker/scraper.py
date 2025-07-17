@@ -219,7 +219,7 @@ class Scraper:
         self.console.print(f"[bold magenta]{capsule_title}")
 
         capsule_usd_total = 0
-        capsule_page = self._get_page(capsule_info["page")
+        capsule_page = self._get_page(capsule_info["page"])
         for capsule_name, capsule_href in zip(capsule_info["names"], capsule_info["items"]):
             config_capsule_name = capsule_name.replace(" ", "_")
             owned = self.config.getint(capsule_section, config_capsule_name, fallback=0)
