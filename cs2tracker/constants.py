@@ -145,7 +145,6 @@ SHANGHAI_CAPSULES = {
     ],
 }
 
-
 AUSTIN_CAPSULES = {
     "page": "https://steamcommunity.com/market/search?q=austin+capsule",
     "items": [
