@@ -130,7 +130,7 @@ class Scraper:
             open(OUTPUT_FILE, "w", encoding="utf-8").close()
 
         dates, dollars, euros = [], [], []
-        with open(OUTPUT_FILE, "r", newline="", encoding="utf-8") as price_logs:
+        with open(OUTPUT_FILE, "r", encoding="utf-8") as price_logs:
             price_logs_reader = csv.reader(price_logs)
             for row in price_logs_reader:
                 date, price_with_currency = row
