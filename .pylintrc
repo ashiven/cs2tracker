@@ -5,4 +5,4 @@ disable=
     missing-class-docstring,
     too-few-public-methods,
     consider-using-with,
-		import-error
+    import-error
