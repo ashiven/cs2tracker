@@ -217,7 +217,7 @@ class Scraper:
 
         :param capsule_section: The section name in the config for the capsule.
         :param capsule_info: A dictionary containing information about the capsule
-            section, page, hrefs, and names.
+            page, hrefs, and names.
         """
         capsule_title = capsule_section.center(MAX_LINE_LEN, SEPARATOR)
         self.console.print(f"[bold magenta]{capsule_title}")
