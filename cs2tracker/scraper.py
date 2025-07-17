@@ -108,13 +108,9 @@ class Scraper:
 
         with open(OUTPUT_FILE, "r", encoding="utf-8") as price_logs:
             price_logs_reader = csv.reader(price_logs)
-            last_row = None
+            last_log_date = ""
             for row in price_logs_reader:
-                last_row = row
-            if last_row:
-                last_log_date = last_row[0][:10]
-            else:
-                last_log_date = ""
+                last_log_date, _ = row
 
         today = datetime.now().strftime("%Y-%m-%d")
         if last_log_date != today:
