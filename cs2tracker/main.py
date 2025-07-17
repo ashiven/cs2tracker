@@ -15,7 +15,7 @@ def main():
     application.
     """
 
-    ## disable warnings for proxy requests
+    # Disable warnings for proxy requests
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     console = Console()
