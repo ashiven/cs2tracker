@@ -3,7 +3,7 @@ from datetime import datetime
 import urllib3
 from rich.console import Console
 
-from cs2tracker._version import version
+from cs2tracker._version import version  # pylint: disable=E0611
 from cs2tracker.application import Application
 
 
