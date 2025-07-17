@@ -10,9 +10,15 @@ from currency_converter import CurrencyConverter
 from requests import RequestException, Session
 from requests.adapters import HTTPAdapter, Retry
 from rich.console import Console
-from tenacity import retry, stop_after_attempt
+from tenacity import RetryError, retry, stop_after_attempt
 
-from .constants import CAPSULE_INFO, CASE_HREFS, CASE_PAGES, CONFIG_FILE, OUTPUT_FILE
+from cs2tracker.constants import (
+    CAPSULE_INFO,
+    CASE_HREFS,
+    CASE_PAGES,
+    CONFIG_FILE,
+    OUTPUT_FILE,
+)
 
 MAX_LINE_LEN = 72
 SEPARATOR = "-"
@@ -39,9 +45,7 @@ class Scraper:
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"
             }
         )
-        retries = Retry(
-            total=5, backoff_factor=0.1, status_forcelist=[500, 502, 503, 504, 520]
-        )
+        retries = Retry(total=5, backoff_factor=0.1, status_forcelist=[500, 502, 503, 504, 520])
         self.session.mount("http://", HTTPAdapter(max_retries=retries))
         self.session.mount("https://", HTTPAdapter(max_retries=retries))
 
@@ -49,14 +53,18 @@ class Scraper:
         capsule_usd_total = 0
         try:
             capsule_usd_total = self._scrape_prices_capsules()
-        except (RequestException, AttributeError):
-            self.console.print("[bold red]Failed to scrape capsule prices.\n")
+        except (RequestException, AttributeError, RetryError, ValueError):
+            self.console.print(
+                "[bold red]Failed to scrape capsule prices. (Consider using proxies to prevent rate limiting)\n"
+            )
 
         case_usd_total = 0
         try:
             case_usd_total = self._scrape_prices_case()
-        except (RequestException, AttributeError):
-            self.console.print("[bold red]Failed to scrape case prices.\n")
+        except (RequestException, AttributeError, RetryError, ValueError):
+            self.console.print(
+                "[bold red]Failed to scrape case prices. (Consider using proxies to prevent rate limiting)\n"
+            )
 
         self.usd_total += capsule_usd_total
         self.usd_total += case_usd_total
@@ -98,9 +106,8 @@ class Scraper:
         if last_log_date != today:
             with open(OUTPUT_FILE, "a", newline="", encoding="utf-8") as price_logs:
                 price_logs_writer = csv.writer(price_logs)
-                now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                price_logs_writer.writerow([now, f"{self.usd_total:.2f}$"])
-                price_logs_writer.writerow([now, f"{self.eur_total:.2f}€"])
+                price_logs_writer.writerow([today, f"{self.usd_total:.2f}$"])
+                price_logs_writer.writerow([today, f"{self.eur_total:.2f}€"])
 
     @retry(stop=stop_after_attempt(10))
     def _get_page(self, url):
@@ -120,9 +127,7 @@ class Scraper:
 
         if not page.ok or not page.content:
             status = page.status_code
-            self.console.print(
-                f"[bold red][!] Failed to load page ({status}). Retrying...\n"
-            )
+            self.console.print(f"[bold red][!] Failed to load page ({status}). Retrying...\n")
             raise RequestException(f"Failed to load page: {url}")
 
         return page
@@ -135,9 +140,7 @@ class Scraper:
 
         price_span = capsule_listing.find("span", attrs={"class": "normal_price"})
         if not isinstance(price_span, Tag):
-            raise ValueError(
-                f"Failed to find price span in capsule listing: {capsule_href}"
-            )
+            raise ValueError(f"Failed to find price span in capsule listing: {capsule_href}")
 
         price_str = price_span.text.split()[2]
         price = float(price_str.replace("$", ""))
@@ -160,11 +163,13 @@ class Scraper:
         for capsule_name, capsule_href in zip(capsule_names, capsule_hrefs):
             config_capsule_name = capsule_name.replace(" ", "_")
             owned = self.config.getint(capsule_section, config_capsule_name, fallback=0)
+            if owned == 0:
+                continue
 
             price_usd = self._parse_capsule_price(capsule_page, capsule_href)
             price_usd_owned = round(float(owned * price_usd), 2)
 
-            self.console.print(f"[bold red]{capsule_name}")
+            self.console.print(f"[bold deep_sky_blue4]{capsule_name}")
             self.console.print(PRICE_INFO.format(owned, price_usd, price_usd_owned))
             capsule_price_total += price_usd_owned
 
@@ -175,9 +180,7 @@ class Scraper:
         for capsule_section, capsule_info in CAPSULE_INFO.items():
             # only scrape capsule sections where the user owns at least one item
             if any(int(owned) > 0 for _, owned in self.config.items(capsule_section)):
-                capsule_usd_total += self._scrape_prices_capsule(
-                    capsule_section, capsule_info
-                )
+                capsule_usd_total += self._scrape_prices_capsule(capsule_section, capsule_info)
 
         return capsule_usd_total
 
@@ -198,13 +201,11 @@ class Scraper:
 
     def _scrape_prices_case(self):
         case_price_total = 0
-        for case_index, (config_case_name, owned) in enumerate(
-            self.config.items("Cases")
-        ):
+        for case_index, (config_case_name, owned) in enumerate(self.config.items("Cases")):
             if int(owned) == 0:
                 continue
 
-            case_name = config_case_name.replace("_", " ")
+            case_name = config_case_name.replace("_", " ").title()
             case_title = case_name.center(MAX_LINE_LEN, SEPARATOR)
             self.console.print(f"[bold magenta]{case_title}")
 

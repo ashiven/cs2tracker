@@ -1,16 +1,16 @@
 import csv
-import datetime
 import os
 import subprocess
 import tkinter as tk
+from datetime import datetime
 from typing import cast
 
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 from matplotlib.dates import DateFormatter
 
-from .constants import CONFIG_FILE, OUTPUT_FILE, TEXT_EDITOR
-from .scraper import Scraper
+from cs2tracker.constants import CONFIG_FILE, OUTPUT_FILE, TEXT_EDITOR
+from cs2tracker.scraper import Scraper
 
 
 class Application:
@@ -37,12 +37,8 @@ class Application:
 
         run_button = tk.Button(window, text="Run!", command=self._scrape_prices)
         edit_button = tk.Button(window, text="Edit Config", command=self._edit_config)
-        plot_button = tk.Button(
-            window, text="Show History (Chart)", command=self._draw_plot
-        )
-        plotfile_button = tk.Button(
-            window, text="Show History (File)", command=self._edit_log_file
-        )
+        plot_button = tk.Button(window, text="Show History (Chart)", command=self._draw_plot)
+        plotfile_button = tk.Button(window, text="Show History (File)", command=self._edit_log_file)
 
         run_button.grid(row=1, column=0, pady=10, sticky="NSEW")
         edit_button.grid(row=2, column=0, pady=10, sticky="NSEW")
@@ -87,13 +83,15 @@ class Application:
             price_logs_reader = csv.reader(price_logs)
             for row in price_logs_reader:
                 date, price_with_currency = row
-                date = datetime.datetime.strptime(date[:-9], "%Y-%m-%d %H:%M:%S")
+                date = datetime.strptime(date, "%Y-%m-%d")
                 price = float(price_with_currency.rstrip("$€"))
-                dates.append(date)
                 if price_with_currency.endswith("€"):
                     euros.append(price)
                 else:
                     dollars.append(price)
+                    # Only append every second date since the dates are the same for euros and dollars
+                    # and we want the length of dates to match the lengths of dollars and euros
+                    dates.append(date)
 
         return dates, dollars, euros
 

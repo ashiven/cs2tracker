@@ -169,14 +169,14 @@ AUSTIN_CAPSULES = {
 }
 
 CAPSULE_INFO = {
-    "2020 RMR": RMR_CAPSULES,
-    "Stockholm": STOCKHOLM_CAPSULES,
-    "Antwerp": ANTWERP_CAPSULES,
-    "Rio": RIO_CAPSULES,
-    "Paris": PARIS_CAPSULES,
-    "Copenhagen": COPENHAGEN_CASULES,
-    "Shanghai": SHANGHAI_CAPSULES,
-    "Austin": AUSTIN_CAPSULES,
+    "2020 RMR Sticker Capsule": RMR_CAPSULES,
+    "Stockholm Sticker Capsule": STOCKHOLM_CAPSULES,
+    "Antwerp Sticker Capsule": ANTWERP_CAPSULES,
+    "Rio Sticker Capsule": RIO_CAPSULES,
+    "Paris Sticker Capsule": PARIS_CAPSULES,
+    "Copenhagen Sticker Capsule": COPENHAGEN_CASULES,
+    "Shanghai Sticker Capsule": SHANGHAI_CAPSULES,
+    "Austin Sticker Capsule": AUSTIN_CAPSULES,
 }
 
 

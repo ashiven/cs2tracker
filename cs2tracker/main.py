@@ -3,8 +3,8 @@ from datetime import datetime
 import urllib3
 from rich.console import Console
 
-from ._version import version
-from .application import Application
+from cs2tracker._version import version
+from cs2tracker.application import Application
 
 
 def main():
@@ -25,7 +25,7 @@ def main():
 
 
 """
-        + f"Version: v{version} - {datetime.today().strftime('%Y/%m/%d')} - Jannik Novak @ashiven_\n"
+        + f"Version: v{version} - {datetime.today().strftime('%Y/%m/%d')} - Jannik Novak @ashiven\n"
     )
 
     application = Application()
