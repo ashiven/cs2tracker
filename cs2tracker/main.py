@@ -8,6 +8,13 @@ from cs2tracker.application import Application
 
 
 def main():
+    """
+    The main entry point for the CS2Tracker application.
+
+    Provides a console output with the application version and date, and initializes the
+    application.
+    """
+
     ## disable warnings for proxy requests
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 

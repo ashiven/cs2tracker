@@ -1,8 +1,6 @@
-import csv
 import os
 import subprocess
 import tkinter as tk
-from datetime import datetime
 from typing import cast
 
 import matplotlib.pyplot as plt
@@ -69,35 +67,9 @@ class Application:
         subprocess.call([TEXT_EDITOR, CONFIG_FILE])
         self.scraper.parse_config()
 
-    def _parse_logs(self):
-        """
-        Parse the output file to extract dates, dollar prices, and euro prices.
-
-        This data is used for drawing the plot of past prices.
-        """
-        if not os.path.isfile(OUTPUT_FILE):
-            open(OUTPUT_FILE, "w", encoding="utf-8").close()
-
-        dates, dollars, euros = [], [], []
-        with open(OUTPUT_FILE, "r", newline="", encoding="utf-8") as price_logs:
-            price_logs_reader = csv.reader(price_logs)
-            for row in price_logs_reader:
-                date, price_with_currency = row
-                date = datetime.strptime(date, "%Y-%m-%d")
-                price = float(price_with_currency.rstrip("$€"))
-                if price_with_currency.endswith("€"):
-                    euros.append(price)
-                else:
-                    dollars.append(price)
-                    # Only append every second date since the dates are the same for euros and dollars
-                    # and we want the length of dates to match the lengths of dollars and euros
-                    dates.append(date)
-
-        return dates, dollars, euros
-
     def _draw_plot(self):
         """Draw a plot of the scraped prices over time."""
-        dates, dollars, euros = self._parse_logs()
+        dates, dollars, euros = self.scraper.read_price_log()
 
         fig, ax_raw = plt.subplots()
         ax = cast(Axes, ax_raw)

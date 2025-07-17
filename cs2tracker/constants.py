@@ -101,7 +101,7 @@ PARIS_CAPSULES = {
     ],
 }
 
-COPENHAGEN_CASULES = {
+COPENHAGEN_CAPSULES = {
     "page": "https://steamcommunity.com/market/search?q=copenhagen+capsule",
     "items": [
         "https://steamcommunity.com/market/listings/730/Copenhagen%202024%20Legends%20Sticker%20Capsule",
@@ -174,7 +174,7 @@ CAPSULE_INFO = {
     "Antwerp Sticker Capsule": ANTWERP_CAPSULES,
     "Rio Sticker Capsule": RIO_CAPSULES,
     "Paris Sticker Capsule": PARIS_CAPSULES,
-    "Copenhagen Sticker Capsule": COPENHAGEN_CASULES,
+    "Copenhagen Sticker Capsule": COPENHAGEN_CAPSULES,
     "Shanghai Sticker Capsule": SHANGHAI_CAPSULES,
     "Austin Sticker Capsule": AUSTIN_CAPSULES,
 }
