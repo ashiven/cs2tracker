@@ -218,12 +218,9 @@ class Scraper:
         capsule_title = capsule_section.center(MAX_LINE_LEN, SEPARATOR)
         self.console.print(f"[bold magenta]{capsule_title}")
 
-        capsule_price_total = 0
-        capsule_page = capsule_info["page"]
-        capsule_names = capsule_info["names"]
-        capsule_hrefs = capsule_info["items"]
-        capsule_page = self._get_page(capsule_page)
-        for capsule_name, capsule_href in zip(capsule_names, capsule_hrefs):
+        capsule_usd_total = 0
+        capsule_page = self._get_page(capsule_info["page")
+        for capsule_name, capsule_href in zip(capsule_info["names"], capsule_info["items"]):
             config_capsule_name = capsule_name.replace(" ", "_")
             owned = self.config.getint(capsule_section, config_capsule_name, fallback=0)
             if owned == 0:
@@ -234,9 +231,9 @@ class Scraper:
 
             self.console.print(f"[bold deep_sky_blue4]{capsule_name}")
             self.console.print(PRICE_INFO.format(owned, price_usd, price_usd_owned))
-            capsule_price_total += price_usd_owned
+            capsule_usd_total += price_usd_owned
 
-        return capsule_price_total
+        return capsule_usd_total
 
     def scrape_capsule_section_prices(self):
         """Scrape prices for all capsule sections defined in the configuration."""
