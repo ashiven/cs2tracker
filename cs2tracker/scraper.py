@@ -126,9 +126,10 @@ class Scraper:
 
     def read_price_log(self):
         """
-        Parse the output file to extract dates, dollar prices, and euro prices.
+        Parse the output file to extract dates, dollar prices, and euro prices. This
+        data is used for drawing the plot of past prices.
 
-        This data is used for drawing the plot of past prices.
+        :return: A tuple containing three lists: dates, dollar prices, and euro prices.
         """
         if not os.path.isfile(OUTPUT_FILE):
             open(OUTPUT_FILE, "w", encoding="utf-8").close()
@@ -157,10 +158,13 @@ class Scraper:
         request fails, it will retry up to 10 times.
 
         :param url: The URL to fetch the page from.
+        :return: The HTTP response object containing the page content.
+        :raises RequestException: If the request fails.
+        :raises RetryError: If the retry limit is reached.
         """
-        use_proxy = self.config.getboolean("settings", "Use_Proxy", fallback=False)
-        api_key = self.config.get("settings", "API_Key", fallback="")
-        if use_proxy:
+        use_proxy = self.config.getboolean("Settings", "Use_Proxy", fallback=False)
+        api_key = self.config.get("Settings", "API_Key", fallback=None)
+        if use_proxy and api_key:
             page = self.session.get(
                 url=url,
                 proxies={
@@ -295,7 +299,7 @@ class Scraper:
             self.console.print(PRICE_INFO.format(owned, price_usd, price_usd_owned))
             case_price_total += price_usd_owned
 
-            if not self.config.getboolean("settings", "Use_Proxy", fallback=False):
+            if not self.config.getboolean("Settings", "Use_Proxy", fallback=False):
                 time.sleep(1)
 
         return case_price_total
