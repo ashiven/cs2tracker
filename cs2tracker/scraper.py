@@ -101,7 +101,7 @@ class Scraper:
         """
         Save the current date and total prices in USD and EUR to a CSV file.
 
-        This will append a new entry to the output file if if no entry has been made for
+        This will append a new entry to the output file if no entry has been made for
         today.
         """
         if not os.path.isfile(OUTPUT_FILE):
