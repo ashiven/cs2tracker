@@ -100,7 +100,6 @@ class Scraper:
     def _save_price_log(self):
         """
         Save the current date and total prices in USD and EUR to a CSV file.
-
         This will append a new entry to the output file if no entry has been made for
         today.
         """
@@ -218,7 +217,7 @@ class Scraper:
 
         :param capsule_section: The section name in the config for the capsule.
         :param capsule_info: A dictionary containing information about the capsule
-            section,
+            section, page, hrefs, and names.
         """
         capsule_title = capsule_section.center(MAX_LINE_LEN, SEPARATOR)
         self.console.print(f"[bold magenta]{capsule_title}")
@@ -279,7 +278,6 @@ class Scraper:
     def _scrape_case_prices(self):
         """
         Scrape prices for all cases defined in the configuration.
-
         For each case, it prints the case name, owned count, price per item, and total
         price for owned items.
         """
