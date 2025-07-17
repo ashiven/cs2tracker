@@ -34,7 +34,9 @@ class Application:
         run_button = tk.Button(window, text="Run!", command=self._scrape_prices)
         edit_button = tk.Button(window, text="Edit Config", command=self._edit_config)
         plot_button = tk.Button(window, text="Show History (Chart)", command=self._draw_plot)
-        plot_file_button = tk.Button(window, text="Show History (File)", command=self._edit_log_file)
+        plot_file_button = tk.Button(
+            window, text="Show History (File)", command=self._edit_log_file
+        )
 
         label.grid(row=0, column=0, pady=50, sticky="NSEW")
         run_button.grid(row=1, column=0, pady=10, sticky="NSEW")
