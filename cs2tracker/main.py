@@ -3,11 +3,18 @@ from datetime import datetime
 import urllib3
 from rich.console import Console
 
-from ._version import version
-from .application import Application
+from cs2tracker._version import version  # pylint: disable=E0611
+from cs2tracker.application import Application
 
 
 def main():
+    """
+    The main entry point for the CS2Tracker application.
+
+    Provides a console output with the application version and date, and initializes the
+    application.
+    """
+
     ## disable warnings for proxy requests
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -25,7 +32,7 @@ def main():
 
 
 """
-        + f"Version: v{version} - {datetime.today().strftime('%Y/%m/%d')} - Jannik Novak @ashiven_\n"
+        + f"Version: v{version} - {datetime.today().strftime('%Y/%m/%d')} - Jannik Novak @ashiven\n"
     )
 
     application = Application()

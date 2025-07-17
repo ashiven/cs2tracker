@@ -1,338 +1,305 @@
-import configparser
 import csv
-import datetime
 import os
 import time
+from configparser import ConfigParser
+from datetime import datetime
 
-import requests
 from bs4 import BeautifulSoup
+from bs4.element import Tag
 from currency_converter import CurrencyConverter
+from requests import RequestException, Session
 from requests.adapters import HTTPAdapter, Retry
 from rich.console import Console
-from tenacity import retry, stop_after_attempt
+from tenacity import RetryError, retry, stop_after_attempt
 
-from .constants import (
-    CAPSULE_HREFS,
-    CAPSULE_NAMES,
-    CAPSULE_NAMES_GENERIC,
-    CAPSULE_PAGES,
+from cs2tracker.constants import (
+    CAPSULE_INFO,
     CASE_HREFS,
-    CASE_NAMES,
     CASE_PAGES,
     CONFIG_FILE,
     OUTPUT_FILE,
 )
 
 MAX_LINE_LEN = 72
+SEPARATOR = "-"
+PRICE_INFO = "Owned: {}      Steam market price: ${}      Total: ${}\n"
 
 
 class Scraper:
     def __init__(self):
-        self.api_key = None
-        self.use_proxy = False
+        """Initialize the Scraper class."""
+        self.console = Console()
+        self.parse_config()
+        self._start_session()
 
-        self.case_quantities = []
-        self.rmr_quantities = []
-        self.stockholm_quantities = []
-        self.antwerp_quantities = []
-        self.rio_quantities = []
-        self.paris_quantities = []
-        self.copenhagen_quantities = []
-        self.shanghai_quantities = []
-        self.austin_quantities = []
+        self.usd_total = 0
+        self.eur_total = 0
 
-        self.total_price = 0
-        self.total_price_euro = 0
+    def parse_config(self):
+        """Parse the configuration file to read settings and user-owned items."""
+        self.config = ConfigParser()
+        self.config.read(CONFIG_FILE)
 
-        self.session = requests.Session()
+    def _start_session(self):
+        """Start a requests session with custom headers and retry logic."""
+        self.session = Session()
         self.session.headers.update(
             {
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"
             }
         )
-        retries = Retry(
-            total=5, backoff_factor=0.1, status_forcelist=[500, 502, 503, 504, 520]
-        )
+        retries = Retry(total=5, backoff_factor=0.1, status_forcelist=[500, 502, 503, 504, 520])
         self.session.mount("http://", HTTPAdapter(max_retries=retries))
         self.session.mount("https://", HTTPAdapter(max_retries=retries))
 
-        self.console = Console()
-
-        config = self.parse_config()
-        self.set_config(config)
-
     def scrape_prices(self):
-        for capsule_page_url in CAPSULE_PAGES:
-            capsule_hrefs = (
-                capsule_name
-            ) = capsule_names_generic = capsule_quantities = None
-            if "rmr" in capsule_page_url:
-                capsule_name = "2020 RMR"
-                capsule_quantities = self.rmr_quantities
-                capsule_hrefs = CAPSULE_HREFS[0:3]
-                capsule_names_generic = CAPSULE_NAMES_GENERIC[0:3]
-            elif "stockholm" in capsule_page_url:
-                capsule_name = "Stockholm"
-                capsule_quantities = self.stockholm_quantities
-                capsule_hrefs = CAPSULE_HREFS[3:8]
-                capsule_names_generic = CAPSULE_NAMES_GENERIC[0:4] + [
-                    CAPSULE_NAMES_GENERIC[-1]
-                ]
-            elif "antwerp" in capsule_page_url:
-                capsule_name = "Antwerp"
-                capsule_quantities = self.antwerp_quantities
-                capsule_hrefs = CAPSULE_HREFS[8:15]
-                capsule_names_generic = CAPSULE_NAMES_GENERIC[0:7]
-            elif "rio" in capsule_page_url:
-                capsule_name = "Rio"
-                capsule_quantities = self.rio_quantities
-                capsule_hrefs = CAPSULE_HREFS[15:22]
-                capsule_names_generic = CAPSULE_NAMES_GENERIC[0:7]
-            elif "paris" in capsule_page_url:
-                capsule_name = "Paris"
-                capsule_quantities = self.paris_quantities
-                capsule_hrefs = CAPSULE_HREFS[22:29]
-                capsule_names_generic = CAPSULE_NAMES_GENERIC[0:7]
-            elif "copenhagen" in capsule_page_url:
-                capsule_name = "Copenhagen"
-                capsule_quantities = self.copenhagen_quantities
-                capsule_hrefs = CAPSULE_HREFS[29:36]
-                capsule_names_generic = CAPSULE_NAMES_GENERIC[0:7]
-            elif "shanghai" in capsule_page_url:
-                capsule_name = "Shanghai"
-                capsule_quantities = self.shanghai_quantities
-                capsule_hrefs = CAPSULE_HREFS[36:43]
-                capsule_names_generic = CAPSULE_NAMES_GENERIC[0:7]
-            elif "austin" in capsule_page_url:
-                capsule_name = "Austin"
-                capsule_quantities = self.austin_quantities
-                capsule_hrefs = CAPSULE_HREFS[43:50]
-                capsule_names_generic = CAPSULE_NAMES_GENERIC[0:7]
-
-            self._scrape_prices_capsule(
-                capsule_page_url,
-                capsule_hrefs,
-                capsule_name,
-                capsule_names_generic,
-                capsule_quantities,
+        """Scrape prices for capsules and cases, calculate totals in USD and EUR, and
+        print/save the results.
+        """
+        capsule_usd_total = 0
+        try:
+            capsule_usd_total = self.scrape_capsule_section_prices()
+        except (RequestException, AttributeError, RetryError, ValueError):
+            self.console.print(
+                "[bold red]Failed to scrape capsule prices. (Consider using proxies to prevent rate limiting)\n"
             )
 
-        self._scrape_prices_case(
-            self.case_quantities, CASE_PAGES, CASE_HREFS, CASE_NAMES
-        )
+        case_usd_total = 0
+        try:
+            case_usd_total = self._scrape_case_prices()
+        except (RequestException, AttributeError, RetryError, ValueError):
+            self.console.print(
+                "[bold red]Failed to scrape case prices. (Consider using proxies to prevent rate limiting)\n"
+            )
 
-    def print_total(self):
-        usd_string = "USD Total".center(MAX_LINE_LEN, "-")
-        self.console.print(f"[bold green]{usd_string}")
-        self.console.print(f"${self.total_price:.2f}")
+        self.usd_total += capsule_usd_total
+        self.usd_total += case_usd_total
+        self.eur_total = CurrencyConverter().convert(self.usd_total, "USD", "EUR")
 
-        self.total_price_euro = CurrencyConverter().convert(
-            self.total_price, "USD", "EUR"
-        )
-        eur_string = "EUR Total".center(MAX_LINE_LEN, "-")
-        self.console.print(f"[bold green]{eur_string}")
-        self.console.print(f"€{self.total_price_euro:.2f}")
-        end_string = "-" * MAX_LINE_LEN
+        self._print_total()
+        self._save_price_log()
+
+        # reset totals for next run
+        self.usd_total, self.eur_total = 0, 0
+
+    def _print_total(self):
+        """Print the total prices in USD and EUR, formatted with titles and
+        separators.
+        """
+        usd_title = "USD Total".center(MAX_LINE_LEN, SEPARATOR)
+        self.console.print(f"[bold green]{usd_title}")
+        self.console.print(f"${self.usd_total:.2f}")
+
+        eur_title = "EUR Total".center(MAX_LINE_LEN, SEPARATOR)
+        self.console.print(f"[bold green]{eur_title}")
+        self.console.print(f"€{self.eur_total:.2f}")
+
+        end_string = SEPARATOR * MAX_LINE_LEN
         self.console.print(f"[bold green]{end_string}\n")
 
-    def save_to_file(self):
-        now = datetime.datetime.now()
-        date = now.strftime("%Y-%m-%d")
+    def _save_price_log(self):
+        """
+        Save the current date and total prices in USD and EUR to a CSV file.
 
+        This will append a new entry to the output file if no entry has been made for
+        today.
+        """
         if not os.path.isfile(OUTPUT_FILE):
             open(OUTPUT_FILE, "w", encoding="utf-8").close()
 
-        with open(OUTPUT_FILE, "r", encoding="utf-8") as csvfile:
-            reader = csv.reader(csvfile)
+        with open(OUTPUT_FILE, "r", encoding="utf-8") as price_logs:
+            price_logs_reader = csv.reader(price_logs)
             last_row = None
-            for row in reader:
+            for row in price_logs_reader:
                 last_row = row
             if last_row:
-                last_date_str = last_row[0][:10]
+                last_log_date = last_row[0][:10]
             else:
-                last_date_str = ""
+                last_log_date = ""
 
-        if date != last_date_str:
-            today = now.strftime("%Y-%m-%d %H:%M:%S")
-            total = f"{self.total_price:.2f}$"
-            total_euro = f"{self.total_price_euro:.2f}€"
-            with open(OUTPUT_FILE, "a", newline="", encoding="utf-8") as csvfile:
-                writer = csv.writer(csvfile)
-                writer.writerow([today, total])
-                writer.writerow([today, total_euro])
+        today = datetime.now().strftime("%Y-%m-%d")
+        if last_log_date != today:
+            with open(OUTPUT_FILE, "a", newline="", encoding="utf-8") as price_logs:
+                price_logs_writer = csv.writer(price_logs)
+                price_logs_writer.writerow([today, f"{self.usd_total:.2f}$"])
+                price_logs_writer.writerow([today, f"{self.eur_total:.2f}€"])
 
-        # reset total prices for next run
-        self.total_price = 0
-        self.total_price_euro = 0
+    def read_price_log(self):
+        """
+        Parse the output file to extract dates, dollar prices, and euro prices. This
+        data is used for drawing the plot of past prices.
 
-    def parse_config(self):
-        config = configparser.ConfigParser()
-        config.read(CONFIG_FILE)
-        return config
+        :return: A tuple containing three lists: dates, dollar prices, and euro prices.
+        """
+        if not os.path.isfile(OUTPUT_FILE):
+            open(OUTPUT_FILE, "w", encoding="utf-8").close()
 
-    def set_config(self, config):
-        self.use_proxy = (
-            False if config.get("Proxy API Key", "Use_Proxy") == "False" else True
-        )
-        self.api_key = config.get("Proxy API Key", "API_Key")
+        dates, dollars, euros = [], [], []
+        with open(OUTPUT_FILE, "r", newline="", encoding="utf-8") as price_logs:
+            price_logs_reader = csv.reader(price_logs)
+            for row in price_logs_reader:
+                date, price_with_currency = row
+                date = datetime.strptime(date, "%Y-%m-%d")
+                price = float(price_with_currency.rstrip("$€"))
+                if price_with_currency.endswith("€"):
+                    euros.append(price)
+                else:
+                    dollars.append(price)
+                    # Only append every second date since the dates are the same for euros and dollars
+                    # and we want the length of dates to match the lengths of dollars and euros
+                    dates.append(date)
 
-        # reset all quantities in case this is called at runtime (edit config)
-        self.case_quantities = []
-        self.rmr_quantities = []
-        self.stockholm_quantities = []
-        self.antwerp_quantities = []
-        self.rio_quantities = []
-        self.paris_quantities = []
-        self.copenhagen_quantities = []
-        self.shanghai_quantities = []
-        self.austin_quantities = []
-
-        for capsule_name in CAPSULE_NAMES:
-            config_capsule_name = capsule_name.replace(" ", "_")
-            if "RMR" in capsule_name:
-                self.rmr_quantities.append(
-                    int(config.get("2020 RMR", config_capsule_name))
-                )
-            elif "Stockholm" in capsule_name:
-                self.stockholm_quantities.append(
-                    int(config.get("Stockholm", config_capsule_name))
-                )
-            elif "Antwerp" in capsule_name:
-                self.antwerp_quantities.append(
-                    int(config.get("Antwerp", config_capsule_name))
-                )
-            elif "Rio" in capsule_name:
-                self.rio_quantities.append(int(config.get("Rio", config_capsule_name)))
-            elif "Paris" in capsule_name:
-                self.paris_quantities.append(
-                    int(config.get("Paris", config_capsule_name))
-                )
-            elif "Copenhagen" in capsule_name:
-                self.copenhagen_quantities.append(
-                    int(config.get("Copenhagen", config_capsule_name))
-                )
-            elif "Shanghai" in capsule_name:
-                self.shanghai_quantities.append(
-                    int(config.get("Shanghai", config_capsule_name))
-                )
-            elif "Austin" in capsule_name:
-                self.austin_quantities.append(
-                    int(config.get("Austin", config_capsule_name))
-                )
-
-        for case_name in CASE_NAMES:
-            config_case_name = case_name.replace(" ", "_")
-            self.case_quantities.append(int(config.get("Cases", config_case_name)))
+        return dates, dollars, euros
 
     @retry(stop=stop_after_attempt(10))
     def _get_page(self, url):
-        if self.use_proxy:
+        """
+        Get the page content from the given URL, using a proxy if configured. If the
+        request fails, it will retry up to 10 times.
+
+        :param url: The URL to fetch the page from.
+        :return: The HTTP response object containing the page content.
+        :raises RequestException: If the request fails.
+        :raises RetryError: If the retry limit is reached.
+        """
+        use_proxy = self.config.getboolean("Settings", "Use_Proxy", fallback=False)
+        api_key = self.config.get("Settings", "API_Key", fallback=None)
+        if use_proxy and api_key:
             page = self.session.get(
                 url=url,
                 proxies={
-                    "http": f"http://{self.api_key}:@smartproxy.crawlbase.com:8012",
-                    "https": f"http://{self.api_key}:@smartproxy.crawlbase.com:8012",
+                    "http": f"http://{api_key}:@smartproxy.crawlbase.com:8012",
+                    "https": f"http://{api_key}:@smartproxy.crawlbase.com:8012",
                 },
                 verify=False,
             )
         else:
             page = self.session.get(url)
 
+        if not page.ok or not page.content:
+            status = page.status_code
+            self.console.print(f"[bold red][!] Failed to load page ({status}). Retrying...\n")
+            raise RequestException(f"Failed to load page: {url}")
+
         return page
 
-    def _scrape_prices_capsule(
+    def _parse_capsule_price(self, capsule_page, capsule_href):
+        """
+        Parse the price of a capsule from the given page and href.
+
+        :param capsule_page: The HTTP response object containing the capsule page
+            content.
+        :param capsule_href: The href of the capsule listing to find the price for.
+        :return: The price of the capsule as a float.
+        :raises ValueError: If the capsule listing or price span cannot be found.
+        """
+        capsule_soup = BeautifulSoup(capsule_page.content, "html.parser")
+        capsule_listing = capsule_soup.find("a", attrs={"href": f"{capsule_href}"})
+        if not isinstance(capsule_listing, Tag):
+            raise ValueError(f"Failed to find capsule listing: {capsule_href}")
+
+        price_span = capsule_listing.find("span", attrs={"class": "normal_price"})
+        if not isinstance(price_span, Tag):
+            raise ValueError(f"Failed to find price span in capsule listing: {capsule_href}")
+
+        price_str = price_span.text.split()[2]
+        price = float(price_str.replace("$", ""))
+
+        return price
+
+    def _scrape_capsule_prices(
         self,
-        capsule_page_url,
-        capsule_hrefs,
-        capsule_name,
-        capsule_names_generic,
-        capsule_quantities,
+        capsule_section,
+        capsule_info,
     ):
-        if any(quantity > 0 for quantity in capsule_quantities):
-            title_string = capsule_name.center(MAX_LINE_LEN, "-")
-            self.console.print(f"[bold magenta]{title_string}")
+        """
+        Scrape prices for a specific capsule section, printing the details to the
+        console.
 
-            page = self._get_page(capsule_page_url)
-            soup = BeautifulSoup(page.content, "html.parser")
+        :param capsule_section: The section name in the config for the capsule.
+        :param capsule_info: A dictionary containing information about the capsule
+            section,
+        """
+        capsule_title = capsule_section.center(MAX_LINE_LEN, SEPARATOR)
+        self.console.print(f"[bold magenta]{capsule_title}")
 
-            for href_index, href in enumerate(capsule_hrefs):
-                if capsule_quantities[href_index] > 0:
-                    try:
-                        listing = soup.find("a", attrs={"href": f"{href}"})
-                        retries = 0
-                        while not listing and retries < 5:
-                            self.console.print(
-                                f"[bold red][!] Failed to load page ({page.status_code}). Retrying...\n"
-                            )
-                            page = self._get_page(capsule_page_url)
-                            soup = BeautifulSoup(page.content, "html.parser")
-                            listing = soup.find("a", attrs={"href": f"{href}"})
-                            retries += 1
+        capsule_price_total = 0
+        capsule_page = capsule_info["page"]
+        capsule_names = capsule_info["names"]
+        capsule_hrefs = capsule_info["items"]
+        capsule_page = self._get_page(capsule_page)
+        for capsule_name, capsule_href in zip(capsule_names, capsule_hrefs):
+            config_capsule_name = capsule_name.replace(" ", "_")
+            owned = self.config.getint(capsule_section, config_capsule_name, fallback=0)
+            if owned == 0:
+                continue
 
-                        price_span = listing.find(
-                            "span", attrs={"class": "normal_price"}
-                        )
-                        price_str = price_span.text.split()[2]
-                        price = float(price_str.replace("$", ""))
-                        price_total = round(
-                            float(capsule_quantities[href_index] * price), 2
-                        )
+            price_usd = self._parse_capsule_price(capsule_page, capsule_href)
+            price_usd_owned = round(float(owned * price_usd), 2)
 
-                        self.console.print(
-                            f"[bold red]{capsule_names_generic[href_index]}"
-                        )
-                        self.console.print(
-                            f"Owned: {capsule_quantities[href_index]}      Steam market price: ${price}      Total: ${price_total}"
-                        )
+            self.console.print(f"[bold deep_sky_blue4]{capsule_name}")
+            self.console.print(PRICE_INFO.format(owned, price_usd, price_usd_owned))
+            capsule_price_total += price_usd_owned
 
-                        self.total_price += price_total
+        return capsule_price_total
 
-                    except (AttributeError, ValueError):
-                        self.console.print("[bold red][!] Failed to find price listing")
-                        break
+    def scrape_capsule_section_prices(self):
+        """Scrape prices for all capsule sections defined in the configuration."""
+        capsule_usd_total = 0
+        for capsule_section, capsule_info in CAPSULE_INFO.items():
+            # only scrape capsule sections where the user owns at least one item
+            if any(int(owned) > 0 for _, owned in self.config.items(capsule_section)):
+                capsule_usd_total += self._scrape_capsule_prices(capsule_section, capsule_info)
 
-            self.console.print("\n")
+        return capsule_usd_total
 
-    def _scrape_prices_case(
-        self, case_quantities, case_page_urls, case_hrefs, case_names
-    ):
-        for index, case_quantity in enumerate(case_quantities):
-            if case_quantity > 0:
-                title_string = case_names[index].center(MAX_LINE_LEN, "-")
-                self.console.print(f"[bold magenta]{title_string}")
+    def _parse_case_price(self, case_page, case_href):
+        """
+        Parse the price of a case from the given page and href.
 
-                page = self._get_page(case_page_urls[index])
-                soup = BeautifulSoup(page.content, "html.parser")
-                listing = soup.find("a", attrs={"href": case_hrefs[index]})
-                retries = 0
-                while retries < 5:
-                    if not listing:
-                        self.console.print(
-                            f"[bold red][!] Failed to load page ({page.status_code}). Retrying...\n"
-                        )
-                        page = self._get_page(case_page_urls[index])
-                        soup = BeautifulSoup(page.content, "html.parser")
-                        listing = soup.find("a", attrs={"href": case_hrefs[index]})
-                        retries += 1
-                    else:
-                        break
+        :param case_page: The HTTP response object containing the case page content.
+        :param case_href: The href of the case listing to find the price for.
+        :return: The price of the case as a float.
+        :raises ValueError: If the case listing or price span cannot be found.
+        """
+        case_soup = BeautifulSoup(case_page.content, "html.parser")
+        case_listing = case_soup.find("a", attrs={"href": case_href})
+        if not isinstance(case_listing, Tag):
+            raise ValueError(f"Failed to find case listing: {case_href}")
 
-                try:
-                    price_class = listing.find("span", attrs={"class": "normal_price"})
-                    price_str = price_class.text.split()[2]
-                    price = float(price_str.replace("$", ""))
-                    price_total = round(float(case_quantity * price), 2)
+        price_class = case_listing.find("span", attrs={"class": "normal_price"})
+        if not isinstance(price_class, Tag):
+            raise ValueError(f"Failed to find price class in case listing: {case_href}")
 
-                    self.console.print(
-                        f"Owned: {case_quantity}      Steam market price: ${price}      Total: ${price_total}"
-                    )
+        price_str = price_class.text.split()[2]
+        price = float(price_str.replace("$", ""))
 
-                    self.total_price += price_total
+        return price
 
-                except (AttributeError, ValueError):
-                    self.console.print("[bold red][!] Failed to find price listing")
+    def _scrape_case_prices(self):
+        """
+        Scrape prices for all cases defined in the configuration.
 
-                self.console.print("\n")
+        For each case, it prints the case name, owned count, price per item, and total
+        price for owned items.
+        """
+        case_price_total = 0
+        for case_index, (config_case_name, owned) in enumerate(self.config.items("Cases")):
+            if int(owned) == 0:
+                continue
 
-                if not self.use_proxy:
-                    time.sleep(1)
+            case_name = config_case_name.replace("_", " ").title()
+            case_title = case_name.center(MAX_LINE_LEN, SEPARATOR)
+            self.console.print(f"[bold magenta]{case_title}")
+
+            case_page = self._get_page(CASE_PAGES[case_index])
+            price_usd = self._parse_case_price(case_page, CASE_HREFS[case_index])
+            price_usd_owned = round(float(int(owned) * price_usd), 2)
+
+            self.console.print(PRICE_INFO.format(owned, price_usd, price_usd_owned))
+            case_price_total += price_usd_owned
+
+            if not self.config.getboolean("Settings", "Use_Proxy", fallback=False):
+                time.sleep(1)
+
+        return case_price_total
