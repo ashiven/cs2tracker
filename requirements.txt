@@ -1,3 +1,4 @@
+numpy==1.26.4
 beautifulsoup4==4.11.1
 CurrencyConverter==0.17.9
 matplotlib==3.7.0
