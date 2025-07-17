@@ -274,7 +274,7 @@ class Scraper:
         For each case, it prints the case name, owned count, price per item, and total
         price for owned items.
         """
-        case_price_total = 0
+        case_usd_total = 0
         for case_index, (config_case_name, owned) in enumerate(self.config.items("Cases")):
             if int(owned) == 0:
                 continue
@@ -288,9 +288,9 @@ class Scraper:
             price_usd_owned = round(float(int(owned) * price_usd), 2)
 
             self.console.print(PRICE_INFO.format(owned, price_usd, price_usd_owned))
-            case_price_total += price_usd_owned
+            case_usd_total += price_usd_owned
 
             if not self.config.getboolean("Settings", "Use_Proxy", fallback=False):
                 time.sleep(1)
 
-        return case_price_total
+        return case_usd_total
