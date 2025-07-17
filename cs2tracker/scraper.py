@@ -79,7 +79,7 @@ class Scraper:
         self._print_total()
         self._save_price_log()
 
-        # reset totals for next run
+        # Reset totals for next run
         self.usd_total, self.eur_total = 0, 0
 
     def _print_total(self):
@@ -246,7 +246,7 @@ class Scraper:
         """Scrape prices for all capsule sections defined in the configuration."""
         capsule_usd_total = 0
         for capsule_section, capsule_info in CAPSULE_INFO.items():
-            # only scrape capsule sections where the user owns at least one item
+            # Only scrape capsule sections where the user owns at least one item
             if any(int(owned) > 0 for _, owned in self.config.items(capsule_section)):
                 capsule_usd_total += self._scrape_capsule_prices(capsule_section, capsule_info)
 
