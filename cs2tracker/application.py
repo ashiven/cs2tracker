@@ -79,6 +79,10 @@ class Application:
         results to a file.
         """
         self.scraper.scrape_prices()
+        # TODO:
+        # - Scrape in external window on Windows (after tkinter configured to hide console)
+        # - Also add the cs2tracker banner to each external scraper window
+        # subprocess.Popen(f"start cmd /k {PYTHON_EXECUTABLE} -m cs2tracker.scraper", shell=True)
 
     def _edit_config(self):
         """Edit the configuration file using the specified text editor."""
