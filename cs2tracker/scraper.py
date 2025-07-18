@@ -15,11 +15,14 @@ from rich.console import Console
 from tenacity import RetryError, retry, stop_after_attempt
 
 from cs2tracker.constants import (
+    BATCH_FILE,
     CAPSULE_INFO,
     CASE_HREFS,
     CASE_PAGES,
     CONFIG_FILE,
     OUTPUT_FILE,
+    PROJECT_DIR,
+    PYTHON_EXECUTABLE,
 )
 
 MAX_LINE_LEN = 72
@@ -321,22 +324,14 @@ class Scraper:
 
         :param enabled: If True, the batch file will be created; if False, the batch
             file will be deleted.
-        :return: The path to the batch file that runs the scraper.
         """
-        module_dir = os.path.dirname(os.path.abspath(__file__)).replace("\\", "/")
-        project_dir = os.path.dirname(module_dir)
-        python_path = sys.executable.replace("\\", "/")
-
-        batch_file_path = f"{module_dir}/data/cs2tracker_scraper.bat"
         if enabled:
-            with open(batch_file_path, "w", encoding="utf-8") as batch_file:
-                batch_file.write(f"cd {project_dir}\n")
-                batch_file.write(f"{python_path} -m cs2tracker.scraper\n")
+            with open(BATCH_FILE, "w", encoding="utf-8") as batch_file:
+                batch_file.write(f"cd {PROJECT_DIR}\n")
+                batch_file.write(f"{PYTHON_EXECUTABLE} -m cs2tracker.scraper\n")
         else:
-            if os.path.exists(batch_file_path):
-                os.remove(batch_file_path)
-
-        return batch_file_path
+            if os.path.exists(BATCH_FILE):
+                os.remove(BATCH_FILE)
 
     def _toggle_background_task_windows(self, enabled: bool):
         """
@@ -346,7 +341,7 @@ class Scraper:
             deleted.
         :return: True if the task was created or deleted successfully, False otherwise.
         """
-        task_command = self._toggle_task_batch_file(enabled)
+        self._toggle_task_batch_file(enabled)
         if enabled:
             cmd = [
                 "schtasks",
@@ -354,7 +349,7 @@ class Scraper:
                 "/tn",
                 BACKGROUND_TASK_NAME,
                 "/tr",
-                task_command,
+                BATCH_FILE,
                 "/sc",
                 "DAILY",
                 "/st",
