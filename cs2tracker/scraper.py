@@ -29,6 +29,7 @@ MAX_LINE_LEN = 72
 SEPARATOR = "-"
 PRICE_INFO = "Owned: {}      Steam market price: ${}      Total: ${}\n"
 BACKGROUND_TASK_NAME = "CS2Tracker Daily Calculation"
+BACKGROUND_TASK_TIME = "12:00"
 
 
 class Scraper:
@@ -67,7 +68,7 @@ class Scraper:
             capsule_usd_total = self.scrape_capsule_section_prices()
         except (RequestException, AttributeError, RetryError, ValueError):
             self.console.print(
-                "[bold red] [!] Failed to scrape capsule prices. (Consider using proxies to prevent rate limiting)\n"
+                "[bold red][!] Failed to scrape capsule prices. (Consider using proxies to prevent rate limiting)\n"
             )
 
         case_usd_total = 0
@@ -353,7 +354,7 @@ class Scraper:
                 "/sc",
                 "DAILY",
                 "/st",
-                "12:00",
+                BACKGROUND_TASK_TIME,
             ]
             return_code = call(cmd, stdout=DEVNULL, stderr=DEVNULL)
             created = return_code == 0
