@@ -309,11 +309,11 @@ class Scraper:
         if sys.platform.startswith("win"):
             cmd = ["schtasks", "/query", "/tn", BACKGROUND_TASK_NAME]
             return_code = call(cmd, stdout=DEVNULL, stderr=DEVNULL)
-            found = True if return_code == 0 else False
+            found = return_code == 0
             return found
         else:
             # TODO: implement finder for cron jobs
-            pass
+            return False
 
     def _toggle_task_batch_file(self, enabled: bool):
         """
@@ -361,12 +361,12 @@ class Scraper:
                 "12:00",
             ]
             return_code = call(cmd, stdout=DEVNULL, stderr=DEVNULL)
-            created = True if return_code == 0 else False
+            created = return_code == 0
             return created
         else:
             cmd = ["schtasks", "/delete", "/tn", BACKGROUND_TASK_NAME, "/f"]
             return_code = call(cmd, stdout=DEVNULL, stderr=DEVNULL)
-            deleted = True if return_code == 0 else False
+            deleted = return_code == 0
             return deleted
 
     def toggle_background_task(self, enabled: bool):
@@ -381,7 +381,7 @@ class Scraper:
             return self._toggle_background_task_windows(enabled)
         else:
             # TODO: implement toggle for cron jobs
-            pass
+            return False
 
 
 if __name__ == "__main__":

@@ -1,8 +1,10 @@
 [MESSAGES CONTROL]
 disable=
+    fixme,
     line-too-long,
     missing-module-docstring,
     missing-class-docstring,
     too-few-public-methods,
     consider-using-with,
-    import-error
+    import-error,
+    no-else-return
