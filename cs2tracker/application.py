@@ -106,10 +106,4 @@ class Application:
 
     def _toggle_background_task(self, enabled: bool):
         """Toggle whether a daily price calculation should run in the background."""
-        success = self.scraper.toggle_background_task(enabled)
-        if success and enabled:
-            self.scraper.console.print("[bold green][+] Background task enabled.")
-        elif success and not enabled:
-            self.scraper.console.print("[bold green][-] Background task disabled.")
-        else:
-            self.scraper.console.print("[bold red][!] Failed to toggle background task.")
+        self.scraper.toggle_background_task(enabled)

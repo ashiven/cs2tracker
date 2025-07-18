@@ -340,7 +340,6 @@ class Scraper:
 
         :param enabled: If True, the task will be created; if False, the task will be
             deleted.
-        :return: True if the task was created or deleted successfully, False otherwise.
         """
         self._toggle_task_batch_file(enabled)
         if enabled:
@@ -357,13 +356,17 @@ class Scraper:
                 BACKGROUND_TASK_TIME,
             ]
             return_code = call(cmd, stdout=DEVNULL, stderr=DEVNULL)
-            created = return_code == 0
-            return created
+            if return_code == 0:
+                self.console.print("[bold green][+] Background task enabled.")
+            else:
+                self.console.print("[bold red][!] Failed to enable background task.")
         else:
             cmd = ["schtasks", "/delete", "/tn", BACKGROUND_TASK_NAME, "/f"]
             return_code = call(cmd, stdout=DEVNULL, stderr=DEVNULL)
-            deleted = return_code == 0
-            return deleted
+            if return_code == 0:
+                self.console.print("[bold green][-] Background task disabled.")
+            else:
+                self.console.print("[bold red][!] Failed to disable background task.")
 
     def toggle_background_task(self, enabled: bool):
         """
@@ -371,10 +374,9 @@ class Scraper:
 
         :param enabled: If True, the task will be created; if False, the task will be
             deleted.
-        :return: True if the task was created or deleted successfully, False otherwise.
         """
         if sys.platform.startswith("win"):
-            return self._toggle_background_task_windows(enabled)
+            self._toggle_background_task_windows(enabled)
         else:
             # TODO: implement toggle for cron jobs
             return False
