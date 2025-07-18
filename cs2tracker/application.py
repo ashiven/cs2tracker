@@ -9,6 +9,14 @@ from matplotlib.dates import DateFormatter
 from cs2tracker.constants import CONFIG_FILE, OUTPUT_FILE, TEXT_EDITOR
 from cs2tracker.scraper import Scraper
 
+WINDOW_SIZE = "450x380"
+BACKGROUND_COLOR = "#1e1e1e"
+BUTTON_COLOR = "#3c3f41"
+BUTTON_HOVER_COLOR = "#505354"
+BUTTON_ACTIVE_COLOR = "#5c5f61"
+FONT_STYLE = "Segoe UI"
+FONT_COLOR = "white"
+
 
 class Application:
     def __init__(self):
@@ -21,49 +29,59 @@ class Application:
         application_window = self._configure_window()
         application_window.mainloop()
 
+    def _add_button(self, frame, text, command):
+        """Create and style a button for the main application window."""
+        button_style = {
+            "font": (FONT_STYLE, 12),
+            "fg": FONT_COLOR,
+            "bg": BUTTON_COLOR,
+            "activebackground": BUTTON_ACTIVE_COLOR,
+        }
+        button = tk.Button(frame, text=text, command=command, **button_style)
+        button.pack(pady=5, fill="x")
+        button.bind("<Enter>", lambda _: button.config(bg=BUTTON_HOVER_COLOR))
+        button.bind("<Leave>", lambda _: button.config(bg=BUTTON_COLOR))
+        return button
+
     def _configure_window(self):
-        """Configure the main application window layout with buttons for the various
-        actions.
+        """Configure the main application window UI and add buttons for the main
+        functionalities.
         """
         window = tk.Tk()
         window.title("CS2Tracker")
-        window.geometry("450x450")
+        window.geometry(WINDOW_SIZE)
+        window.configure(bg=BACKGROUND_COLOR)
 
-        label = tk.Label(window, text="Welcome to CS2Tracker!")
-        run_button = tk.Button(window, text="Run!", command=self._scrape_prices)
-        edit_button = tk.Button(window, text="Edit Config", command=self._edit_config)
-        plot_button = tk.Button(window, text="Show History (Chart)", command=self._draw_plot)
-        plot_file_button = tk.Button(
-            window, text="Show History (File)", command=self._edit_log_file
+        frame = tk.Frame(window, bg=BACKGROUND_COLOR, padx=30, pady=30)
+        frame.pack(expand=True, fill="both")
+
+        label = tk.Label(
+            frame,
+            text="Welcome to CS2Tracker!",
+            font=(FONT_STYLE, 16, "bold"),
+            fg=FONT_COLOR,
+            bg=BACKGROUND_COLOR,
         )
+        label.pack(pady=(0, 30))
+
+        self._add_button(frame, "Run!", self._scrape_prices)
+        self._add_button(frame, "Edit Config", self._edit_config)
+        self._add_button(frame, "Show History (Chart)", self._draw_plot)
+        self._add_button(frame, "Show History (File)", self._edit_log_file)
+
         background_checkbox_value = tk.BooleanVar(value=self.scraper.identify_background_task())
         background_checkbox = tk.Checkbutton(
-            window,
+            frame,
             text="Daily Background Calculation",
-            command=lambda: self._toggle_background_task(background_checkbox_value.get()),
             variable=background_checkbox_value,
+            command=lambda: self._toggle_background_task(background_checkbox_value.get()),
+            bg=BACKGROUND_COLOR,
+            fg=FONT_COLOR,
+            selectcolor=BUTTON_COLOR,
+            activebackground=BACKGROUND_COLOR,
+            font=(FONT_STYLE, 10),
         )
-
-        label.grid(row=0, column=0, pady=50, sticky="NSEW")
-        run_button.grid(row=1, column=0, pady=10, sticky="NSEW")
-        edit_button.grid(row=2, column=0, pady=10, sticky="NSEW")
-        plot_button.grid(row=3, column=0, pady=10, sticky="NSEW")
-        plot_file_button.grid(row=4, column=0, pady=10, sticky="NSEW")
-        background_checkbox.grid(row=5, column=0, pady=10, sticky="NS")
-
-        window.grid_columnconfigure(0, weight=1)
-        window.grid_rowconfigure(1, weight=1)
-        window.grid_rowconfigure(2, weight=1)
-        window.grid_rowconfigure(3, weight=1)
-        window.grid_rowconfigure(4, weight=1)
-        window.grid_rowconfigure(5, weight=1)
-
-        label.grid_configure(sticky="NSEW")
-        run_button.grid_configure(sticky="NSEW")
-        edit_button.grid_configure(sticky="NSEW")
-        plot_button.grid_configure(sticky="NSEW")
-        plot_file_button.grid_configure(sticky="NSEW")
-        background_checkbox.grid_configure(sticky="NSEW")
+        background_checkbox.pack(pady=20)
 
         return window
 
@@ -72,6 +90,10 @@ class Application:
         results to a file.
         """
         self.scraper.scrape_prices()
+        # TODO:
+        # - Scrape in external window on Windows (after tkinter configured to hide console)
+        # - Also add the cs2tracker banner to each external scraper window
+        # subprocess.Popen(f"start cmd /k {PYTHON_EXECUTABLE} -m cs2tracker.scraper", shell=True)
 
     def _edit_config(self):
         """Edit the configuration file using the specified text editor."""
