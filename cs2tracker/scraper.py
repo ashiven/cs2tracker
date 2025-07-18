@@ -116,9 +116,6 @@ class Scraper:
         This will append a new entry to the output file if no entry has been made for
         today.
         """
-        if not os.path.isfile(OUTPUT_FILE):
-            open(OUTPUT_FILE, "w", encoding="utf-8").close()
-
         with open(OUTPUT_FILE, "r", encoding="utf-8") as price_logs:
             price_logs_reader = csv.reader(price_logs)
             last_log_date = ""
@@ -139,9 +136,6 @@ class Scraper:
 
         :return: A tuple containing three lists: dates, dollar prices, and euro prices.
         """
-        if not os.path.isfile(OUTPUT_FILE):
-            open(OUTPUT_FILE, "w", encoding="utf-8").close()
-
         dates, dollars, euros = [], [], []
         with open(OUTPUT_FILE, "r", encoding="utf-8") as price_logs:
             price_logs_reader = csv.reader(price_logs)
