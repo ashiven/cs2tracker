@@ -25,6 +25,7 @@ from cs2tracker.constants import (
 MAX_LINE_LEN = 72
 SEPARATOR = "-"
 PRICE_INFO = "Owned: {}      Steam market price: ${}      Total: ${}\n"
+BACKGROUND_TASK_NAME = "CS2Tracker Daily Calculation"
 
 
 class Scraper:
@@ -306,8 +307,7 @@ class Scraper:
         :return: True if a background task is found, False otherwise.
         """
         if sys.platform.startswith("win"):
-            task_name = "CS2Tracker Daily Calculation"
-            cmd = ["schtasks", "/query", "/tn", task_name]
+            cmd = ["schtasks", "/query", "/tn", BACKGROUND_TASK_NAME]
             return_code = call(cmd, stdout=DEVNULL, stderr=DEVNULL)
             found = True if return_code == 0 else False
             return found
@@ -315,38 +315,70 @@ class Scraper:
             # TODO: implement finder for cron jobs
             pass
 
+    def _toggle_task_batch_file(self, enabled: bool):
+        """
+        Create or delete a batch file that runs the scraper.
+
+        :param enabled: If True, the batch file will be created; if False, the batch
+            file will be deleted.
+        :return: The path to the batch file that runs the scraper.
+        """
+        module_dir = os.path.dirname(os.path.abspath(__file__)).replace("\\", "/")
+        project_dir = os.path.dirname(module_dir)
+        python_path = sys.executable.replace("\\", "/")
+
+        batch_file_path = f"{module_dir}/data/cs2tracker_scraper.bat"
+        if enabled:
+            with open(batch_file_path, "w", encoding="utf-8") as batch_file:
+                batch_file.write(f"cd {project_dir}\n")
+                batch_file.write(f"{python_path} -m cs2tracker.scraper\n")
+        else:
+            if os.path.exists(batch_file_path):
+                os.remove(batch_file_path)
+
+        return batch_file_path
+
+    def _toggle_background_task_windows(self, enabled: bool):
+        """
+        Create or delete a daily background task that runs the scraper on Windows.
+
+        :param enabled: If True, the task will be created; if False, the task will be
+            deleted.
+        :return: True if the task was created or deleted successfully, False otherwise.
+        """
+        task_command = self._toggle_task_batch_file(enabled)
+        if enabled:
+            cmd = [
+                "schtasks",
+                "/create",
+                "/tn",
+                BACKGROUND_TASK_NAME,
+                "/tr",
+                task_command,
+                "/sc",
+                "DAILY",
+                "/st",
+                "12:00",
+            ]
+            return_code = call(cmd, stdout=DEVNULL, stderr=DEVNULL)
+            created = True if return_code == 0 else False
+            return created
+        else:
+            cmd = ["schtasks", "/delete", "/tn", BACKGROUND_TASK_NAME, "/f"]
+            return_code = call(cmd, stdout=DEVNULL, stderr=DEVNULL)
+            deleted = True if return_code == 0 else False
+            return deleted
+
     def toggle_background_task(self, enabled: bool):
         """
         Create or delete a daily background task that runs the scraper.
 
         :param enabled: If True, the task will be created; if False, the task will be
             deleted.
+        :return: True if the task was created or deleted successfully, False otherwise.
         """
         if sys.platform.startswith("win"):
-            task_name = "CS2Tracker Daily Calculation"
-            if enabled:
-                python_path = sys.executable.replace("\\", "/")
-                task_command = f"{python_path} -m cs2tracker.scraper"
-                cmd = [
-                    "schtasks",
-                    "/create",
-                    "/tn",
-                    task_name,
-                    "/tr",
-                    task_command,
-                    "/sc",
-                    "DAILY",
-                    "/st",
-                    "12:00",
-                ]
-                return_code = call(cmd, stdout=DEVNULL, stderr=DEVNULL)
-                created = True if return_code == 0 else False
-                return created
-            else:
-                cmd = ["schtasks", "/delete", "/tn", task_name, "/f"]
-                return_code = call(cmd, stdout=DEVNULL, stderr=DEVNULL)
-                deleted = True if return_code == 0 else False
-                return deleted
+            return self._toggle_background_task_windows(enabled)
         else:
             # TODO: implement toggle for cron jobs
             pass
