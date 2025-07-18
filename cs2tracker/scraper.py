@@ -379,7 +379,7 @@ class Scraper:
             self._toggle_background_task_windows(enabled)
         else:
             # TODO: implement toggle for cron jobs
-            return False
+            pass
 
 
 if __name__ == "__main__":
