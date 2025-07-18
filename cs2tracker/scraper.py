@@ -28,8 +28,13 @@ from cs2tracker.constants import (
 MAX_LINE_LEN = 72
 SEPARATOR = "-"
 PRICE_INFO = "Owned: {}      Steam market price: ${}      Total: ${}\n"
-BACKGROUND_TASK_NAME = "CS2Tracker Daily Calculation"
-BACKGROUND_TASK_TIME = "12:00"
+
+WIN_BACKGROUND_TASK_NAME = "CS2Tracker Daily Calculation"
+WIN_BACKGROUND_TASK_SCHEDULE = "DAILY"
+WIN_BACKGROUND_TASK_TIME = "12:00"
+WIN_BACKGROUND_TASK_CMD = (
+    f"powershell -WindowStyle Hidden -Command \"Start-Process '{BATCH_FILE}' -WindowStyle Hidden\""
+)
 
 
 class Scraper:
@@ -311,7 +316,7 @@ class Scraper:
         :return: True if a background task is found, False otherwise.
         """
         if sys.platform.startswith("win"):
-            cmd = ["schtasks", "/query", "/tn", BACKGROUND_TASK_NAME]
+            cmd = ["schtasks", "/query", "/tn", WIN_BACKGROUND_TASK_NAME]
             return_code = call(cmd, stdout=DEVNULL, stderr=DEVNULL)
             found = return_code == 0
             return found
@@ -347,13 +352,13 @@ class Scraper:
                 "schtasks",
                 "/create",
                 "/tn",
-                BACKGROUND_TASK_NAME,
+                WIN_BACKGROUND_TASK_NAME,
                 "/tr",
-                BATCH_FILE,
+                WIN_BACKGROUND_TASK_CMD,
                 "/sc",
-                "DAILY",
+                WIN_BACKGROUND_TASK_SCHEDULE,
                 "/st",
-                BACKGROUND_TASK_TIME,
+                WIN_BACKGROUND_TASK_TIME,
             ]
             return_code = call(cmd, stdout=DEVNULL, stderr=DEVNULL)
             if return_code == 0:
@@ -361,7 +366,7 @@ class Scraper:
             else:
                 self.console.print("[bold red][!] Failed to enable background task.")
         else:
-            cmd = ["schtasks", "/delete", "/tn", BACKGROUND_TASK_NAME, "/f"]
+            cmd = ["schtasks", "/delete", "/tn", WIN_BACKGROUND_TASK_NAME, "/f"]
             return_code = call(cmd, stdout=DEVNULL, stderr=DEVNULL)
             if return_code == 0:
                 self.console.print("[bold green][-] Background task disabled.")
