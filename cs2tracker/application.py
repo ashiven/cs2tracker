@@ -82,18 +82,16 @@ class Application:
         """Draw a plot of the scraped prices over time."""
         dates, dollars, euros = self.scraper.read_price_log()
 
-        fig, ax_raw = plt.subplots()
-        ax = cast(Axes, ax_raw)
+        fig, ax_raw = plt.subplots(figsize=(10, 8), num="CS2Tracker Price History")
+        fig.suptitle("CS2Tracker Price History", fontsize=16)
+        fig.autofmt_xdate()
 
+        ax = cast(Axes, ax_raw)
         ax.plot(dates, dollars, label="Dollars")
         ax.plot(dates, euros, label="Euros")
-        ax.set_xlabel("Date")
-        ax.set_ylabel("Price")
         ax.legend()
-
         date_formatter = DateFormatter("%d-%m-%Y")
         ax.xaxis.set_major_formatter(date_formatter)
-        fig.autofmt_xdate()
 
         plt.show()
 
