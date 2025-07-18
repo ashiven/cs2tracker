@@ -9,6 +9,14 @@ from matplotlib.dates import DateFormatter
 from cs2tracker.constants import CONFIG_FILE, OUTPUT_FILE, TEXT_EDITOR
 from cs2tracker.scraper import Scraper
 
+WINDOW_SIZE = "450x380"
+BACKGROUND_COLOR = "#1e1e1e"
+BUTTON_COLOR = "#3c3f41"
+BUTTON_HOVER_COLOR = "#505354"
+BUTTON_ACTIVE_COLOR = "#5c5f61"
+FONT_STYLE = "Segoe UI"
+FONT_COLOR = "white"
+
 
 class Application:
     def __init__(self):
@@ -21,45 +29,45 @@ class Application:
         application_window = self._configure_window()
         application_window.mainloop()
 
+    def _add_button(self, frame, text, command):
+        """Create and style a button for the main application window."""
+        button_style = {
+            "font": (FONT_STYLE, 12),
+            "fg": FONT_COLOR,
+            "bg": BUTTON_COLOR,
+            "activebackground": BUTTON_ACTIVE_COLOR,
+        }
+        button = tk.Button(frame, text=text, command=command, **button_style)
+        button.pack(pady=5, fill="x")
+        button.bind("<Enter>", lambda _: button.config(bg=BUTTON_HOVER_COLOR))
+        button.bind("<Leave>", lambda _: button.config(bg=BUTTON_COLOR))
+        return button
+
     def _configure_window(self):
         """Configure the main application window UI and add buttons for the main
         functionalities.
         """
         window = tk.Tk()
         window.title("CS2Tracker")
-        window.geometry("450x360")
-        window.configure(bg="#1e1e1e")
+        window.geometry(WINDOW_SIZE)
+        window.configure(bg=BACKGROUND_COLOR)
 
-        frame = tk.Frame(window, bg="#1e1e1e", padx=30, pady=30)
+        frame = tk.Frame(window, bg=BACKGROUND_COLOR, padx=30, pady=30)
         frame.pack(expand=True, fill="both")
 
         label = tk.Label(
             frame,
             text="Welcome to CS2Tracker!",
-            font=("Segoe UI", 16, "bold"),
-            fg="white",
-            bg="#1e1e1e",
+            font=(FONT_STYLE, 16, "bold"),
+            fg=FONT_COLOR,
+            bg=BACKGROUND_COLOR,
         )
         label.pack(pady=(0, 30))
 
-        def styled_button(text, command):
-            button_style = {
-                "font": ("Segoe UI", 12),
-                "fg": "white",
-                "bg": "#3c3f41",
-                "activebackground": "#5c5f61",
-                "bd": 0,
-            }
-            button = tk.Button(frame, text=text, command=command, **button_style)
-            button.pack(pady=5, fill="x")
-            button.bind("<Enter>", lambda _: button.config(bg="#505354"))
-            button.bind("<Leave>", lambda _: button.config(bg="#3c3f41"))
-            return button
-
-        styled_button("Run!", self._scrape_prices)
-        styled_button("Edit Config", self._edit_config)
-        styled_button("Show History (Chart)", self._draw_plot)
-        styled_button("Show History (File)", self._edit_log_file)
+        self._add_button(frame, "Run!", self._scrape_prices)
+        self._add_button(frame, "Edit Config", self._edit_config)
+        self._add_button(frame, "Show History (Chart)", self._draw_plot)
+        self._add_button(frame, "Show History (File)", self._edit_log_file)
 
         background_checkbox_value = tk.BooleanVar(value=self.scraper.identify_background_task())
         background_checkbox = tk.Checkbutton(
@@ -67,11 +75,11 @@ class Application:
             text="Daily Background Calculation",
             variable=background_checkbox_value,
             command=lambda: self._toggle_background_task(background_checkbox_value.get()),
-            bg="#1e1e1e",
-            fg="white",
-            selectcolor="#3c3f41",
-            activebackground="#1e1e1e",
-            font=("Segoe UI", 10),
+            bg=BACKGROUND_COLOR,
+            fg=FONT_COLOR,
+            selectcolor=BUTTON_COLOR,
+            activebackground=BACKGROUND_COLOR,
+            font=(FONT_STYLE, 10),
         )
         background_checkbox.pack(pady=20)
 
