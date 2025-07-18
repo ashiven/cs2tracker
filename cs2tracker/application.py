@@ -22,48 +22,55 @@ class Application:
         application_window.mainloop()
 
     def _configure_window(self):
-        """Configure the main application window layout with buttons for the various
-        actions.
-        """
         window = tk.Tk()
         window.title("CS2Tracker")
-        window.geometry("450x450")
+        window.geometry("450x360")
+        window.configure(bg="#1e1e1e")
 
-        label = tk.Label(window, text="Welcome to CS2Tracker!")
-        run_button = tk.Button(window, text="Run!", command=self._scrape_prices)
-        edit_button = tk.Button(window, text="Edit Config", command=self._edit_config)
-        plot_button = tk.Button(window, text="Show History (Chart)", command=self._draw_plot)
-        plot_file_button = tk.Button(
-            window, text="Show History (File)", command=self._edit_log_file
+        frame = tk.Frame(window, bg="#1e1e1e", padx=30, pady=30)
+        frame.pack(expand=True, fill="both")
+
+        label = tk.Label(
+            frame,
+            text="Welcome to CS2Tracker!",
+            font=("Segoe UI", 16, "bold"),
+            fg="white",
+            bg="#1e1e1e",
         )
+        label.pack(pady=(0, 30))
+
+        def styled_button(text, command):
+            button_style = {
+                "font": ("Segoe UI", 12),
+                "fg": "white",
+                "bg": "#3c3f41",
+                "activebackground": "#5c5f61",
+                "bd": 0,
+            }
+            button = tk.Button(frame, text=text, command=command, **button_style)
+            button.pack(pady=5, fill="x")
+            button.bind("<Enter>", lambda _: button.config(bg="#505354"))
+            button.bind("<Leave>", lambda _: button.config(bg="#3c3f41"))
+            return button
+
+        styled_button("Run!", self._scrape_prices)
+        styled_button("Edit Config", self._edit_config)
+        styled_button("Show History (Chart)", self._draw_plot)
+        styled_button("Show History (File)", self._edit_log_file)
+
         background_checkbox_value = tk.BooleanVar(value=self.scraper.identify_background_task())
         background_checkbox = tk.Checkbutton(
-            window,
+            frame,
             text="Daily Background Calculation",
-            command=lambda: self._toggle_background_task(background_checkbox_value.get()),
             variable=background_checkbox_value,
+            command=lambda: self._toggle_background_task(background_checkbox_value.get()),
+            bg="#1e1e1e",
+            fg="white",
+            selectcolor="#3c3f41",
+            activebackground="#1e1e1e",
+            font=("Segoe UI", 10),
         )
-
-        label.grid(row=0, column=0, pady=50, sticky="NSEW")
-        run_button.grid(row=1, column=0, pady=10, sticky="NSEW")
-        edit_button.grid(row=2, column=0, pady=10, sticky="NSEW")
-        plot_button.grid(row=3, column=0, pady=10, sticky="NSEW")
-        plot_file_button.grid(row=4, column=0, pady=10, sticky="NSEW")
-        background_checkbox.grid(row=5, column=0, pady=10, sticky="NS")
-
-        window.grid_columnconfigure(0, weight=1)
-        window.grid_rowconfigure(1, weight=1)
-        window.grid_rowconfigure(2, weight=1)
-        window.grid_rowconfigure(3, weight=1)
-        window.grid_rowconfigure(4, weight=1)
-        window.grid_rowconfigure(5, weight=1)
-
-        label.grid_configure(sticky="NSEW")
-        run_button.grid_configure(sticky="NSEW")
-        edit_button.grid_configure(sticky="NSEW")
-        plot_button.grid_configure(sticky="NSEW")
-        plot_file_button.grid_configure(sticky="NSEW")
-        background_checkbox.grid_configure(sticky="NSEW")
+        background_checkbox.pack(pady=20)
 
         return window
 
