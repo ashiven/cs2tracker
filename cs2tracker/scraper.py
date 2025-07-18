@@ -28,8 +28,13 @@ from cs2tracker.constants import (
 MAX_LINE_LEN = 72
 SEPARATOR = "-"
 PRICE_INFO = "Owned: {}      Steam market price: ${}      Total: ${}\n"
+
 BACKGROUND_TASK_NAME = "CS2Tracker Daily Calculation"
+BACKGROUND_TASK_SCHEDULE = "DAILY"
 BACKGROUND_TASK_TIME = "12:00"
+BACKGROUND_TASK = (
+    f"powershell -WindowStyle Hidden -Command \"Start-Process '{BATCH_FILE}' -WindowStyle Hidden\""
+)
 
 
 class Scraper:
@@ -349,9 +354,9 @@ class Scraper:
                 "/tn",
                 BACKGROUND_TASK_NAME,
                 "/tr",
-                BATCH_FILE,
+                BACKGROUND_TASK,
                 "/sc",
-                "DAILY",
+                BACKGROUND_TASK_SCHEDULE,
                 "/st",
                 BACKGROUND_TASK_TIME,
             ]
