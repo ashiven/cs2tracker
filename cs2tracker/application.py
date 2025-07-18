@@ -28,7 +28,7 @@ class Application:
         """
         window = tk.Tk()
         window.title("CS2Tracker")
-        window.geometry("400x400")
+        window.geometry("450x450")
 
         label = tk.Label(window, text="Welcome to CS2Tracker!")
         run_button = tk.Button(window, text="Run!", command=self._scrape_prices)
@@ -37,24 +37,34 @@ class Application:
         plot_file_button = tk.Button(
             window, text="Show History (File)", command=self._edit_log_file
         )
+        background_checkbox_value = tk.BooleanVar(value=self.scraper.identify_background_task())
+        background_checkbox = tk.Checkbutton(
+            window,
+            text="Daily Background Calculation",
+            command=lambda: self._toggle_background_task(background_checkbox_value.get()),
+            variable=background_checkbox_value,
+        )
 
         label.grid(row=0, column=0, pady=50, sticky="NSEW")
         run_button.grid(row=1, column=0, pady=10, sticky="NSEW")
         edit_button.grid(row=2, column=0, pady=10, sticky="NSEW")
         plot_button.grid(row=3, column=0, pady=10, sticky="NSEW")
         plot_file_button.grid(row=4, column=0, pady=10, sticky="NSEW")
+        background_checkbox.grid(row=5, column=0, pady=10, sticky="NS")
 
         window.grid_columnconfigure(0, weight=1)
         window.grid_rowconfigure(1, weight=1)
         window.grid_rowconfigure(2, weight=1)
         window.grid_rowconfigure(3, weight=1)
         window.grid_rowconfigure(4, weight=1)
+        window.grid_rowconfigure(5, weight=1)
 
         label.grid_configure(sticky="NSEW")
         run_button.grid_configure(sticky="NSEW")
         edit_button.grid_configure(sticky="NSEW")
         plot_button.grid_configure(sticky="NSEW")
         plot_file_button.grid_configure(sticky="NSEW")
+        background_checkbox.grid_configure(sticky="NSEW")
 
         return window
 
@@ -93,3 +103,13 @@ class Application:
         if not os.path.isfile(OUTPUT_FILE):
             open(OUTPUT_FILE, "w", encoding="utf-8").close()
         subprocess.call([TEXT_EDITOR, OUTPUT_FILE])
+
+    def _toggle_background_task(self, enabled: bool):
+        """Toggle whether a daily price calculation should run in the background."""
+        success = self.scraper.toggle_background_task(enabled)
+        if success and enabled:
+            self.scraper.console.print("[bold green][+] Background task enabled.")
+        elif success and not enabled:
+            self.scraper.console.print("[bold green][-] Background task disabled.")
+        else:
+            self.scraper.console.print("[bold red][!] Failed to toggle background task.")

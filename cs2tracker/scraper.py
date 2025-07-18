@@ -1,8 +1,10 @@
 import csv
 import os
+import sys
 import time
 from configparser import ConfigParser
 from datetime import datetime
+from subprocess import DEVNULL, call
 
 from bs4 import BeautifulSoup
 from bs4.element import Tag
@@ -61,7 +63,7 @@ class Scraper:
             capsule_usd_total = self.scrape_capsule_section_prices()
         except (RequestException, AttributeError, RetryError, ValueError):
             self.console.print(
-                "[bold red]Failed to scrape capsule prices. (Consider using proxies to prevent rate limiting)\n"
+                "[bold red] [!] Failed to scrape capsule prices. (Consider using proxies to prevent rate limiting)\n"
             )
 
         case_usd_total = 0
@@ -69,7 +71,7 @@ class Scraper:
             case_usd_total = self._scrape_case_prices()
         except (RequestException, AttributeError, RetryError, ValueError):
             self.console.print(
-                "[bold red]Failed to scrape case prices. (Consider using proxies to prevent rate limiting)\n"
+                "[bold red][!] Failed to scrape case prices. (Consider using proxies to prevent rate limiting)\n"
             )
 
         self.usd_total += capsule_usd_total
@@ -296,3 +298,62 @@ class Scraper:
                 time.sleep(1)
 
         return case_usd_total
+
+    def identify_background_task(self):
+        """
+        Search the OS for a daily background task that runs the scraper.
+
+        :return: True if a background task is found, False otherwise.
+        """
+        if sys.platform.startswith("win"):
+            task_name = "CS2Tracker Daily Calculation"
+            cmd = ["schtasks", "/query", "/tn", task_name]
+            return_code = call(cmd, stdout=DEVNULL, stderr=DEVNULL)
+            found = True if return_code == 0 else False
+            return found
+        else:
+            # TODO: implement finder for cron jobs
+            pass
+
+    def toggle_background_task(self, enabled: bool):
+        """
+        Create or delete a daily background task that runs the scraper.
+
+        :param enabled: If True, the task will be created; if False, the task will be
+            deleted.
+        """
+        if sys.platform.startswith("win"):
+            task_name = "CS2Tracker Daily Calculation"
+            if enabled:
+                python_path = sys.executable.replace("\\", "/")
+                task_command = f"{python_path} -m cs2tracker.scraper"
+                cmd = [
+                    "schtasks",
+                    "/create",
+                    "/tn",
+                    task_name,
+                    "/tr",
+                    task_command,
+                    "/sc",
+                    "DAILY",
+                    "/st",
+                    "12:00",
+                ]
+                return_code = call(cmd, stdout=DEVNULL, stderr=DEVNULL)
+                created = True if return_code == 0 else False
+                return created
+            else:
+                cmd = ["schtasks", "/delete", "/tn", task_name, "/f"]
+                return_code = call(cmd, stdout=DEVNULL, stderr=DEVNULL)
+                deleted = True if return_code == 0 else False
+                return deleted
+        else:
+            # TODO: implement toggle for cron jobs
+            pass
+
+
+if __name__ == "__main__":
+    # If this file is run as a script, create a Scraper instance and run the
+    # scrape_prices method.
+    scraper = Scraper()
+    scraper.scrape_prices()
