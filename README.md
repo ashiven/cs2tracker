@@ -37,7 +37,8 @@
 
 -  `Run!` to gather the current market prices of your items and calculate the total amount in USD and EUR.
 -  `Edit Config` to change the specific numbers of each item you own and then save the config file.
--  `Show History` to see a price chart consisting of past calculations. A new data point for this chart is generated once a day upon running the program.
+-  `Show History` to see a price chart consisting of past calculations. A new data point is generated once a day upon running the program.
+-  `Daily Background Calculation` to run a daily calculation of your investment in the background and save the results such that they can later be viewed via `Show History`.
 -  If you want to prevent your requests from being rate limited by the steamcommunity server, register for an API key on [Crawlbase](crawlbase.com) and enter it into the `API_Key` field at the end of the config file. This will route every request through a different proxy server.
 
 ---
