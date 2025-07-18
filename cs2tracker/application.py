@@ -1,4 +1,3 @@
-import os
 import subprocess
 import tkinter as tk
 from typing import cast
@@ -100,8 +99,6 @@ class Application:
 
     def _edit_log_file(self):
         """Opens the file containing past price calculations."""
-        if not os.path.isfile(OUTPUT_FILE):
-            open(OUTPUT_FILE, "w", encoding="utf-8").close()
         subprocess.call([TEXT_EDITOR, OUTPUT_FILE])
 
     def _toggle_background_task(self, enabled: bool):
