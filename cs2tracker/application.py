@@ -22,6 +22,9 @@ class Application:
         application_window.mainloop()
 
     def _configure_window(self):
+        """Configure the main application window UI and add buttons for the main
+        functionalities.
+        """
         window = tk.Tk()
         window.title("CS2Tracker")
         window.geometry("450x360")
