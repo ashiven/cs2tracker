@@ -1,8 +1,10 @@
 import csv
 import os
+import sys
 import time
 from configparser import ConfigParser
 from datetime import datetime
+from subprocess import DEVNULL, call
 
 from bs4 import BeautifulSoup
 from bs4.element import Tag
@@ -13,16 +15,21 @@ from rich.console import Console
 from tenacity import RetryError, retry, stop_after_attempt
 
 from cs2tracker.constants import (
+    BATCH_FILE,
     CAPSULE_INFO,
     CASE_HREFS,
     CASE_PAGES,
     CONFIG_FILE,
     OUTPUT_FILE,
+    PROJECT_DIR,
+    PYTHON_EXECUTABLE,
 )
 
 MAX_LINE_LEN = 72
 SEPARATOR = "-"
 PRICE_INFO = "Owned: {}      Steam market price: ${}      Total: ${}\n"
+BACKGROUND_TASK_NAME = "CS2Tracker Daily Calculation"
+BACKGROUND_TASK_TIME = "12:00"
 
 
 class Scraper:
@@ -61,7 +68,7 @@ class Scraper:
             capsule_usd_total = self.scrape_capsule_section_prices()
         except (RequestException, AttributeError, RetryError, ValueError):
             self.console.print(
-                "[bold red]Failed to scrape capsule prices. (Consider using proxies to prevent rate limiting)\n"
+                "[bold red][!] Failed to scrape capsule prices. (Consider using proxies to prevent rate limiting)\n"
             )
 
         case_usd_total = 0
@@ -69,7 +76,7 @@ class Scraper:
             case_usd_total = self._scrape_case_prices()
         except (RequestException, AttributeError, RetryError, ValueError):
             self.console.print(
-                "[bold red]Failed to scrape case prices. (Consider using proxies to prevent rate limiting)\n"
+                "[bold red][!] Failed to scrape case prices. (Consider using proxies to prevent rate limiting)\n"
             )
 
         self.usd_total += capsule_usd_total
@@ -296,3 +303,87 @@ class Scraper:
                 time.sleep(1)
 
         return case_usd_total
+
+    def identify_background_task(self):
+        """
+        Search the OS for a daily background task that runs the scraper.
+
+        :return: True if a background task is found, False otherwise.
+        """
+        if sys.platform.startswith("win"):
+            cmd = ["schtasks", "/query", "/tn", BACKGROUND_TASK_NAME]
+            return_code = call(cmd, stdout=DEVNULL, stderr=DEVNULL)
+            found = return_code == 0
+            return found
+        else:
+            # TODO: implement finder for cron jobs
+            return False
+
+    def _toggle_task_batch_file(self, enabled: bool):
+        """
+        Create or delete a batch file that runs the scraper.
+
+        :param enabled: If True, the batch file will be created; if False, the batch
+            file will be deleted.
+        """
+        if enabled:
+            with open(BATCH_FILE, "w", encoding="utf-8") as batch_file:
+                batch_file.write(f"cd {PROJECT_DIR}\n")
+                batch_file.write(f"{PYTHON_EXECUTABLE} -m cs2tracker.scraper\n")
+        else:
+            if os.path.exists(BATCH_FILE):
+                os.remove(BATCH_FILE)
+
+    def _toggle_background_task_windows(self, enabled: bool):
+        """
+        Create or delete a daily background task that runs the scraper on Windows.
+
+        :param enabled: If True, the task will be created; if False, the task will be
+            deleted.
+        """
+        self._toggle_task_batch_file(enabled)
+        if enabled:
+            cmd = [
+                "schtasks",
+                "/create",
+                "/tn",
+                BACKGROUND_TASK_NAME,
+                "/tr",
+                BATCH_FILE,
+                "/sc",
+                "DAILY",
+                "/st",
+                BACKGROUND_TASK_TIME,
+            ]
+            return_code = call(cmd, stdout=DEVNULL, stderr=DEVNULL)
+            if return_code == 0:
+                self.console.print("[bold green][+] Background task enabled.")
+            else:
+                self.console.print("[bold red][!] Failed to enable background task.")
+        else:
+            cmd = ["schtasks", "/delete", "/tn", BACKGROUND_TASK_NAME, "/f"]
+            return_code = call(cmd, stdout=DEVNULL, stderr=DEVNULL)
+            if return_code == 0:
+                self.console.print("[bold green][-] Background task disabled.")
+            else:
+                self.console.print("[bold red][!] Failed to disable background task.")
+
+    def toggle_background_task(self, enabled: bool):
+        """
+        Create or delete a daily background task that runs the scraper.
+
+        :param enabled: If True, the task will be created; if False, the task will be
+            deleted.
+        """
+        if sys.platform.startswith("win"):
+            self._toggle_background_task_windows(enabled)
+        else:
+            # TODO: implement toggle for cron jobs
+            pass
+
+
+if __name__ == "__main__":
+    # If this file is run as a script, create a Scraper instance and run the
+    # scrape_prices method.
+    scraper = Scraper()
+    scraper.scrape_prices()
