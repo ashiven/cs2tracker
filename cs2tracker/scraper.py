@@ -121,30 +121,31 @@ class Scraper:
         """
         with open(OUTPUT_FILE, "r", encoding="utf-8") as price_logs:
             price_logs_reader = csv.reader(price_logs)
-            last_log_date = ""
-            for row in price_logs_reader:
-                last_log_date, _ = row
+            rows = list(price_logs_reader)
+            last_log_date, _, _ = rows[-1] if rows else ("", "", "")
 
         today = datetime.now().strftime("%Y-%m-%d")
         if last_log_date != today:
             # Append first price calculation of the day
             with open(OUTPUT_FILE, "a", newline="", encoding="utf-8") as price_logs:
                 price_logs_writer = csv.writer(price_logs)
-                price_logs_writer.writerow([today, f"{self.usd_total:.2f}$"])
-                price_logs_writer.writerow([today, f"{self.eur_total:.2f}€"])
+                price_logs_writer.writerow(
+                    [today, f"{self.usd_total:.2f}$", f"{self.eur_total:.2f}€"]
+                )
         else:
             # Replace the last calculation of today with the most recent one of today
             with open(OUTPUT_FILE, "r+", newline="", encoding="utf-8") as price_logs:
                 price_logs_reader = csv.reader(price_logs)
                 rows = list(price_logs_reader)
-                rows_without_today = rows[:-2]
+                rows_without_today = rows[:-1]
                 price_logs.seek(0)
                 price_logs.truncate()
 
                 price_logs_writer = csv.writer(price_logs)
                 price_logs_writer.writerows(rows_without_today)
-                price_logs_writer.writerow([today, f"{self.usd_total:.2f}$"])
-                price_logs_writer.writerow([today, f"{self.eur_total:.2f}€"])
+                price_logs_writer.writerow(
+                    [today, f"{self.usd_total:.2f}$", f"{self.eur_total:.2f}€"]
+                )
 
     def read_price_log(self):
         """
@@ -157,16 +158,14 @@ class Scraper:
         with open(OUTPUT_FILE, "r", encoding="utf-8") as price_logs:
             price_logs_reader = csv.reader(price_logs)
             for row in price_logs_reader:
-                date, price_with_currency = row
+                date, price_usd, price_eur = row
                 date = datetime.strptime(date, "%Y-%m-%d")
-                price = float(price_with_currency.rstrip("$€"))
-                if price_with_currency.endswith("€"):
-                    euros.append(price)
-                else:
-                    dollars.append(price)
-                    # Only append every second date since the dates are the same for euros and dollars
-                    # and we want the length of dates to match the lengths of dollars and euros
-                    dates.append(date)
+                price_usd = float(price_usd.rstrip("$"))
+                price_eur = float(price_eur.rstrip("€"))
+
+                dates.append(date)
+                dollars.append(price_usd)
+                euros.append(price_eur)
 
         return dates, dollars, euros
 
