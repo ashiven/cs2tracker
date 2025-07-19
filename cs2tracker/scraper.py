@@ -25,6 +25,9 @@ from cs2tracker.constants import (
     PYTHON_EXECUTABLE,
 )
 
+HTTP_PROXY_URL = "http://{}:@smartproxy.crawlbase.com:8012"
+HTTPS_PROXY_URL = "http://{}:@smartproxy.crawlbase.com:8012"
+
 MAX_LINE_LEN = 72
 SEPARATOR = "-"
 PRICE_INFO = "Owned: {}      Steam market price: ${}      Total: ${}\n"
@@ -124,8 +127,22 @@ class Scraper:
 
         today = datetime.now().strftime("%Y-%m-%d")
         if last_log_date != today:
+            # Append first price calculation of the day
             with open(OUTPUT_FILE, "a", newline="", encoding="utf-8") as price_logs:
                 price_logs_writer = csv.writer(price_logs)
+                price_logs_writer.writerow([today, f"{self.usd_total:.2f}$"])
+                price_logs_writer.writerow([today, f"{self.eur_total:.2f}€"])
+        else:
+            # Replace the last calculation of today with the most recent one of today
+            with open(OUTPUT_FILE, "r+", newline="", encoding="utf-8") as price_logs:
+                price_logs_reader = csv.reader(price_logs)
+                rows = list(price_logs_reader)
+                rows_without_today = rows[:-2]
+                price_logs.seek(0)
+                price_logs.truncate()
+
+                price_logs_writer = csv.writer(price_logs)
+                price_logs_writer.writerows(rows_without_today)
                 price_logs_writer.writerow([today, f"{self.usd_total:.2f}$"])
                 price_logs_writer.writerow([today, f"{self.eur_total:.2f}€"])
 
@@ -166,12 +183,13 @@ class Scraper:
         """
         use_proxy = self.config.getboolean("Settings", "Use_Proxy", fallback=False)
         api_key = self.config.get("Settings", "API_Key", fallback=None)
+        api_key = None if api_key in ("None", "") else api_key
         if use_proxy and api_key:
             page = self.session.get(
                 url=url,
                 proxies={
-                    "http": f"http://{api_key}:@smartproxy.crawlbase.com:8012",
-                    "https": f"http://{api_key}:@smartproxy.crawlbase.com:8012",
+                    "http": HTTP_PROXY_URL.format(api_key),
+                    "https": HTTPS_PROXY_URL.format(api_key),
                 },
                 verify=False,
             )
