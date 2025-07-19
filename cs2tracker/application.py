@@ -1,5 +1,6 @@
-import subprocess
 import tkinter as tk
+from subprocess import Popen
+from threading import Thread
 from typing import cast
 
 import matplotlib.pyplot as plt
@@ -93,12 +94,14 @@ class Application:
         # TODO:
         # - Scrape in external window on Windows (after tkinter configured to hide console)
         # - Also add the cs2tracker banner to each external scraper window
-        # subprocess.Popen(f"start cmd /k {PYTHON_EXECUTABLE} -m cs2tracker.scraper", shell=True)
+        # Popen(f"start cmd /k {PYTHON_EXECUTABLE} -m cs2tracker.scraper", shell=True)
 
     def _edit_config(self):
         """Edit the configuration file using the specified text editor."""
-        subprocess.call([TEXT_EDITOR, CONFIG_FILE])
-        self.scraper.parse_config()
+        _popen_and_call(
+            popen_args={"args": [TEXT_EDITOR, CONFIG_FILE], "shell": True},
+            callback=self.scraper.parse_config,
+        )
 
     def _draw_plot(self):
         """Draw a plot of the scraped prices over time."""
@@ -119,8 +122,25 @@ class Application:
 
     def _edit_log_file(self):
         """Opens the file containing past price calculations."""
-        subprocess.call([TEXT_EDITOR, OUTPUT_FILE])
+        Popen([TEXT_EDITOR, OUTPUT_FILE], shell=True)
 
     def _toggle_background_task(self, enabled: bool):
         """Toggle whether a daily price calculation should run in the background."""
         self.scraper.toggle_background_task(enabled)
+
+
+def _popen_and_call(popen_args, callback):
+    """
+    Runs the given args in a subprocess.Popen, and then calls the function callback when
+    the subprocess completes.
+
+    Source: https://stackoverflow.com/questions/2581817/python-subprocess-callback-when-cmd-exits
+    """
+
+    def process_and_callback(popen_args, callback):
+        process = Popen(**popen_args)
+        process.wait()
+        callback()
+
+    thread = Thread(target=process_and_callback, args=(popen_args, callback))
+    thread.start()
