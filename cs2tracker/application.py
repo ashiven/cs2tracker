@@ -142,5 +142,5 @@ def _popen_and_call(popen_args, callback):
         process.wait()
         callback()
 
-    thread = Thread(target=process_and_callback, args=(popen_args, callback))
+    thread = Thread(target=process_and_callback, args=(popen_args, callback), daemon=True)
     thread.start()
