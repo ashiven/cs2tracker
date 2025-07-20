@@ -47,13 +47,16 @@ WIN_BACKGROUND_TASK_CMD = (
 
 class PaddedConsole:
     def __init__(self, padding=(0, 0, 0, PADDING_LEFT)):
+        """Initialize a PaddedConsole with specified padding."""
         self.console = Console()
         self.padding = padding
 
     def print(self, text):
+        """Print text with padding to the console."""
         self.console.print(Padding(text, self.padding))
 
     def __getattr__(self, attr):
+        """Ensure console methods can be called directly on PaddedConsole."""
         return getattr(self.console, attr)
 
 
