@@ -17,7 +17,7 @@ def main():
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     console = Console()
-    console.print("[bold yellow]" + BANNER + AUTHOR_STRING)
+    console.print(f"[bold yellow]{BANNER}\n{AUTHOR_STRING}\n")
 
     application = Application()
     application.run()

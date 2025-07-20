@@ -11,6 +11,7 @@ from currency_converter import CurrencyConverter
 from requests import RequestException, Session
 from requests.adapters import HTTPAdapter, Retry
 from rich.console import Console
+from rich.padding import Padding
 from tenacity import RetryError, retry, stop_after_attempt
 
 from cs2tracker.constants import (
@@ -28,6 +29,7 @@ from cs2tracker.constants import (
     OSType,
 )
 
+PADDING_LEFT = 4
 MAX_LINE_LEN = 72
 SEPARATOR = "-"
 PRICE_INFO = "Owned: {}      Steam market price: ${}      Total: ${}\n"
@@ -43,10 +45,22 @@ WIN_BACKGROUND_TASK_CMD = (
 )
 
 
+class PaddedConsole:
+    def __init__(self, padding=(0, 0, 0, PADDING_LEFT)):
+        self.console = Console()
+        self.padding = padding
+
+    def print(self, text):
+        self.console.print(Padding(text, self.padding))
+
+    def __getattr__(self, attr):
+        return getattr(self.console, attr)
+
+
 class Scraper:
     def __init__(self):
         """Initialize the Scraper class."""
-        self.console = Console()
+        self.console = PaddedConsole()
         self.parse_config()
         self._start_session()
 
