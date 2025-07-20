@@ -10,8 +10,6 @@ from bs4.element import Tag
 from currency_converter import CurrencyConverter
 from requests import RequestException, Session
 from requests.adapters import HTTPAdapter, Retry
-from rich.console import Console
-from rich.padding import Padding
 from tenacity import RetryError, retry, stop_after_attempt
 
 from cs2tracker.constants import (
@@ -26,10 +24,11 @@ from cs2tracker.constants import (
     OUTPUT_FILE,
     PROJECT_DIR,
     PYTHON_EXECUTABLE,
+    RUNNING_IN_EXE,
     OSType,
 )
+from cs2tracker.padded_console import PaddedConsole
 
-PADDING_LEFT = 4
 MAX_LINE_LEN = 72
 SEPARATOR = "-"
 PRICE_INFO = "Owned: {}      Steam market price: ${}      Total: ${}\n"
@@ -43,21 +42,6 @@ WIN_BACKGROUND_TASK_TIME = "12:00"
 WIN_BACKGROUND_TASK_CMD = (
     f"powershell -WindowStyle Hidden -Command \"Start-Process '{BATCH_FILE}' -WindowStyle Hidden\""
 )
-
-
-class PaddedConsole:
-    def __init__(self, padding=(0, 0, 0, PADDING_LEFT)):
-        """Initialize a PaddedConsole with specified padding."""
-        self.console = Console()
-        self.padding = padding
-
-    def print(self, text):
-        """Print text with padding to the console."""
-        self.console.print(Padding(text, self.padding))
-
-    def __getattr__(self, attr):
-        """Ensure console methods can be called directly on PaddedConsole."""
-        return getattr(self.console, attr)
 
 
 class Scraper:
@@ -364,8 +348,13 @@ class Scraper:
         """
         if enabled:
             with open(BATCH_FILE, "w", encoding="utf-8") as batch_file:
-                batch_file.write(f"cd {PROJECT_DIR}\n")
-                batch_file.write(f"{PYTHON_EXECUTABLE} -m cs2tracker.scraper\n")
+                if RUNNING_IN_EXE:
+                    # The python executable is set to the executable itself
+                    # for executables created with PyInstaller
+                    batch_file.write(f"{PYTHON_EXECUTABLE} --only-scrape\n")
+                else:
+                    batch_file.write(f"cd {PROJECT_DIR}\n")
+                    batch_file.write(f"{PYTHON_EXECUTABLE} -m cs2tracker --only-scrape\n")
         else:
             if os.path.exists(BATCH_FILE):
                 os.remove(BATCH_FILE)

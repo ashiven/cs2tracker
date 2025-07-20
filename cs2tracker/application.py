@@ -78,7 +78,7 @@ class Application:
         )
         label.pack(pady=(0, 30))
 
-        self._add_button(frame, "Run!", self._scrape_prices)
+        self._add_button(frame, "Run!", self.scrape_prices)
         self._add_button(frame, "Edit Config", self._edit_config)
         self._add_button(frame, "Show History (Chart)", self._draw_plot)
         self._add_button(frame, "Show History (File)", self._edit_log_file)
@@ -99,7 +99,7 @@ class Application:
 
         return window
 
-    def _scrape_prices(self):
+    def scrape_prices(self):
         """Scrape prices from the configured sources, print the total, and save the
         results to a file.
         """
@@ -113,7 +113,7 @@ class Application:
                 "$Host.UI.RawUI.WindowSize = $size; "
                 f"$Host.UI.RawUI.BackgroundColor = '{SCRAPER_WINDOW_BACKGROUND_COLOR}'; "
                 "Clear-Host; "
-                f"{PYTHON_EXECUTABLE} -m cs2tracker.scraper"
+                f"{PYTHON_EXECUTABLE} -m cs2tracker --only-scrape"
                 '}"'
             )
             Popen(scraper_cmd, shell=True)
