@@ -202,13 +202,13 @@ AUSTIN_CAPSULES = {
 
 CAPSULE_INFO = {
     "2020 RMR Sticker Capsule": RMR_CAPSULES,
-    "Stockholm Sticker Capsule": STOCKHOLM_CAPSULES,
-    "Antwerp Sticker Capsule": ANTWERP_CAPSULES,
-    "Rio Sticker Capsule": RIO_CAPSULES,
-    "Paris Sticker Capsule": PARIS_CAPSULES,
-    "Copenhagen Sticker Capsule": COPENHAGEN_CAPSULES,
-    "Shanghai Sticker Capsule": SHANGHAI_CAPSULES,
-    "Austin Sticker Capsule": AUSTIN_CAPSULES,
+    "Stockholm 2021 Sticker Capsule": STOCKHOLM_CAPSULES,
+    "Antwerp 2022 Sticker Capsule": ANTWERP_CAPSULES,
+    "Rio 2022 Sticker Capsule": RIO_CAPSULES,
+    "Paris 2023 Sticker Capsule": PARIS_CAPSULES,
+    "Copenhagen 2024 Sticker Capsule": COPENHAGEN_CAPSULES,
+    "Shanghai 2024 Sticker Capsule": SHANGHAI_CAPSULES,
+    "Austin 2025 Sticker Capsule": AUSTIN_CAPSULES,
 }
 
 
