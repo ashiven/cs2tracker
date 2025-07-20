@@ -1,13 +1,43 @@
+import enum
 import os
 import sys
+from datetime import datetime
 
-TEXT_EDITOR = "notepad" if sys.platform.startswith("win") else "nano"
+try:
+    from cs2tracker._version import version  # pylint: disable=E0611
+except ImportError:
+    version = "0.0.0"
+
+
+class OSType(enum.Enum):
+    WINDOWS = "Windows"
+    LINUX = "Linux"
+
+
+OS = OSType.WINDOWS if sys.platform.startswith("win") else OSType.LINUX
+TEXT_EDITOR = "notepad" if OS == OSType.WINDOWS else "nano"
 PYTHON_EXECUTABLE = sys.executable
+
 MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_DIR = os.path.dirname(MODULE_DIR)
 OUTPUT_FILE = os.path.join(MODULE_DIR, "data", "output.csv")
 CONFIG_FILE = os.path.join(MODULE_DIR, "data", "config.ini")
 BATCH_FILE = os.path.join(MODULE_DIR, "data", "cs2tracker_scraper.bat")
+
+BANNER = """
+    __   _____ _____  ______  ____    ____     __  __  _    ___  ____
+   /  ] / ___/|     T|      T|    \\  /    T   /  ]|  l/ ]  /  _]|    \\
+  /  / (   \\_ l__/  ||      ||  D  )Y  o  |  /  / |  ' /  /  [_ |  D  )
+ /  /   \\__  T|   __jl_j  l_j|    / |     | /  /  |    \\ Y    _]|    /
+/   \\_  /  \\ ||  /  |  |  |  |    \\ |  _  |/   \\_ |     Y|   [_ |    \\
+\\     | \\    ||     |  |  |  |  .  Y|  |  |\\     ||  .  ||     T|  .  Y
+ \\____j  \\___jl_____j  l__j  l__j\\_jl__j__j \\____jl__j\\_jl_____jl__j\\_j
+
+
+"""
+AUTHOR_STRING = (
+    f"Version: v{version} - {datetime.today().strftime('%Y/%m/%d')} - Jannik Novak @ashiven\n"
+)
 
 
 RMR_CAPSULES = {
@@ -172,13 +202,13 @@ AUSTIN_CAPSULES = {
 
 CAPSULE_INFO = {
     "2020 RMR Sticker Capsule": RMR_CAPSULES,
-    "Stockholm Sticker Capsule": STOCKHOLM_CAPSULES,
-    "Antwerp Sticker Capsule": ANTWERP_CAPSULES,
-    "Rio Sticker Capsule": RIO_CAPSULES,
-    "Paris Sticker Capsule": PARIS_CAPSULES,
-    "Copenhagen Sticker Capsule": COPENHAGEN_CAPSULES,
-    "Shanghai Sticker Capsule": SHANGHAI_CAPSULES,
-    "Austin Sticker Capsule": AUSTIN_CAPSULES,
+    "Stockholm 2021 Sticker Capsule": STOCKHOLM_CAPSULES,
+    "Antwerp 2022 Sticker Capsule": ANTWERP_CAPSULES,
+    "Rio 2022 Sticker Capsule": RIO_CAPSULES,
+    "Paris 2023 Sticker Capsule": PARIS_CAPSULES,
+    "Copenhagen 2024 Sticker Capsule": COPENHAGEN_CAPSULES,
+    "Shanghai 2024 Sticker Capsule": SHANGHAI_CAPSULES,
+    "Austin 2025 Sticker Capsule": AUSTIN_CAPSULES,
 }
 
 

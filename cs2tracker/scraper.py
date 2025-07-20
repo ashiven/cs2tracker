@@ -1,6 +1,5 @@
 import csv
 import os
-import sys
 import time
 from configparser import ConfigParser
 from datetime import datetime
@@ -12,25 +11,31 @@ from currency_converter import CurrencyConverter
 from requests import RequestException, Session
 from requests.adapters import HTTPAdapter, Retry
 from rich.console import Console
+from rich.padding import Padding
 from tenacity import RetryError, retry, stop_after_attempt
 
 from cs2tracker.constants import (
+    AUTHOR_STRING,
+    BANNER,
     BATCH_FILE,
     CAPSULE_INFO,
     CASE_HREFS,
     CASE_PAGES,
     CONFIG_FILE,
+    OS,
     OUTPUT_FILE,
     PROJECT_DIR,
     PYTHON_EXECUTABLE,
+    OSType,
 )
 
-HTTP_PROXY_URL = "http://{}:@smartproxy.crawlbase.com:8012"
-HTTPS_PROXY_URL = "http://{}:@smartproxy.crawlbase.com:8012"
-
+PADDING_LEFT = 4
 MAX_LINE_LEN = 72
 SEPARATOR = "-"
 PRICE_INFO = "Owned: {}      Steam market price: ${}      Total: ${}\n"
+
+HTTP_PROXY_URL = "http://{}:@smartproxy.crawlbase.com:8012"
+HTTPS_PROXY_URL = "http://{}:@smartproxy.crawlbase.com:8012"
 
 WIN_BACKGROUND_TASK_NAME = "CS2Tracker Daily Calculation"
 WIN_BACKGROUND_TASK_SCHEDULE = "DAILY"
@@ -40,10 +45,25 @@ WIN_BACKGROUND_TASK_CMD = (
 )
 
 
+class PaddedConsole:
+    def __init__(self, padding=(0, 0, 0, PADDING_LEFT)):
+        """Initialize a PaddedConsole with specified padding."""
+        self.console = Console()
+        self.padding = padding
+
+    def print(self, text):
+        """Print text with padding to the console."""
+        self.console.print(Padding(text, self.padding))
+
+    def __getattr__(self, attr):
+        """Ensure console methods can be called directly on PaddedConsole."""
+        return getattr(self.console, attr)
+
+
 class Scraper:
     def __init__(self):
         """Initialize the Scraper class."""
-        self.console = Console()
+        self.console = PaddedConsole()
         self.parse_config()
         self._start_session()
 
@@ -121,30 +141,31 @@ class Scraper:
         """
         with open(OUTPUT_FILE, "r", encoding="utf-8") as price_logs:
             price_logs_reader = csv.reader(price_logs)
-            last_log_date = ""
-            for row in price_logs_reader:
-                last_log_date, _ = row
+            rows = list(price_logs_reader)
+            last_log_date, _, _ = rows[-1] if rows else ("", "", "")
 
         today = datetime.now().strftime("%Y-%m-%d")
         if last_log_date != today:
             # Append first price calculation of the day
             with open(OUTPUT_FILE, "a", newline="", encoding="utf-8") as price_logs:
                 price_logs_writer = csv.writer(price_logs)
-                price_logs_writer.writerow([today, f"{self.usd_total:.2f}$"])
-                price_logs_writer.writerow([today, f"{self.eur_total:.2f}€"])
+                price_logs_writer.writerow(
+                    [today, f"{self.usd_total:.2f}$", f"{self.eur_total:.2f}€"]
+                )
         else:
             # Replace the last calculation of today with the most recent one of today
             with open(OUTPUT_FILE, "r+", newline="", encoding="utf-8") as price_logs:
                 price_logs_reader = csv.reader(price_logs)
                 rows = list(price_logs_reader)
-                rows_without_today = rows[:-2]
+                rows_without_today = rows[:-1]
                 price_logs.seek(0)
                 price_logs.truncate()
 
                 price_logs_writer = csv.writer(price_logs)
                 price_logs_writer.writerows(rows_without_today)
-                price_logs_writer.writerow([today, f"{self.usd_total:.2f}$"])
-                price_logs_writer.writerow([today, f"{self.eur_total:.2f}€"])
+                price_logs_writer.writerow(
+                    [today, f"{self.usd_total:.2f}$", f"{self.eur_total:.2f}€"]
+                )
 
     def read_price_log(self):
         """
@@ -157,16 +178,14 @@ class Scraper:
         with open(OUTPUT_FILE, "r", encoding="utf-8") as price_logs:
             price_logs_reader = csv.reader(price_logs)
             for row in price_logs_reader:
-                date, price_with_currency = row
+                date, price_usd, price_eur = row
                 date = datetime.strptime(date, "%Y-%m-%d")
-                price = float(price_with_currency.rstrip("$€"))
-                if price_with_currency.endswith("€"):
-                    euros.append(price)
-                else:
-                    dollars.append(price)
-                    # Only append every second date since the dates are the same for euros and dollars
-                    # and we want the length of dates to match the lengths of dollars and euros
-                    dates.append(date)
+                price_usd = float(price_usd.rstrip("$"))
+                price_eur = float(price_eur.rstrip("€"))
+
+                dates.append(date)
+                dollars.append(price_usd)
+                euros.append(price_eur)
 
         return dates, dollars, euros
 
@@ -327,7 +346,7 @@ class Scraper:
 
         :return: True if a background task is found, False otherwise.
         """
-        if sys.platform.startswith("win"):
+        if OS == OSType.WINDOWS:
             cmd = ["schtasks", "/query", "/tn", WIN_BACKGROUND_TASK_NAME]
             return_code = call(cmd, stdout=DEVNULL, stderr=DEVNULL)
             found = return_code == 0
@@ -392,7 +411,7 @@ class Scraper:
         :param enabled: If True, the task will be created; if False, the task will be
             deleted.
         """
-        if sys.platform.startswith("win"):
+        if OS == OSType.WINDOWS:
             self._toggle_background_task_windows(enabled)
         else:
             # TODO: implement toggle for cron jobs
@@ -400,7 +419,6 @@ class Scraper:
 
 
 if __name__ == "__main__":
-    # If this file is run as a script, create a Scraper instance and run the
-    # scrape_prices method.
     scraper = Scraper()
+    scraper.console.print(f"[bold yellow]{BANNER}\n{AUTHOR_STRING}\n")
     scraper.scrape_prices()
