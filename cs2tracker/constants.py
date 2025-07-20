@@ -19,6 +19,12 @@ OS = OSType.WINDOWS if sys.platform.startswith("win") else OSType.LINUX
 TEXT_EDITOR = "notepad" if OS == OSType.WINDOWS else "nano"
 PYTHON_EXECUTABLE = sys.executable
 
+MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_DIR = os.path.dirname(MODULE_DIR)
+OUTPUT_FILE = os.path.join(MODULE_DIR, "data", "output.csv")
+CONFIG_FILE = os.path.join(MODULE_DIR, "data", "config.ini")
+BATCH_FILE = os.path.join(MODULE_DIR, "data", "cs2tracker_scraper.bat")
+
 RUNNING_IN_EXE = getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS")
 
 if RUNNING_IN_EXE:
@@ -36,12 +42,6 @@ if RUNNING_IN_EXE:
         copy(CONFIG_FILE_SOURCE, CONFIG_FILE)
     if not os.path.exists(OUTPUT_FILE):
         copy(OUPUT_FILE_SOURCE, OUTPUT_FILE)
-else:
-    MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
-    PROJECT_DIR = os.path.dirname(MODULE_DIR)
-    OUTPUT_FILE = os.path.join(MODULE_DIR, "data", "output.csv")
-    CONFIG_FILE = os.path.join(MODULE_DIR, "data", "config.ini")
-    BATCH_FILE = os.path.join(MODULE_DIR, "data", "cs2tracker_scraper.bat")
 
 BANNER = """
     __   _____ _____  ______  ____    ____     __  __  _    ___  ____
