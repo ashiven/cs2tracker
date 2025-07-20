@@ -7,9 +7,17 @@ import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 from matplotlib.dates import DateFormatter
 
-from cs2tracker.constants import CONFIG_FILE, OUTPUT_FILE, TEXT_EDITOR
+from cs2tracker.constants import (
+    CONFIG_FILE,
+    OS,
+    OUTPUT_FILE,
+    PYTHON_EXECUTABLE,
+    TEXT_EDITOR,
+    OSType,
+)
 from cs2tracker.scraper import Scraper
 
+WINDOW_TITLE = "CS2Tracker"
 WINDOW_SIZE = "450x380"
 BACKGROUND_COLOR = "#1e1e1e"
 BUTTON_COLOR = "#3c3f41"
@@ -17,6 +25,11 @@ BUTTON_HOVER_COLOR = "#505354"
 BUTTON_ACTIVE_COLOR = "#5c5f61"
 FONT_STYLE = "Segoe UI"
 FONT_COLOR = "white"
+
+SCRAPER_WINDOW_TITLE = "CS2Tracker"
+SCRAPER_WINDOW_HEIGHT = 40
+SCRAPER_WINDOW_WIDTH = 75
+SCRAPER_WINDOW_BACKGROUND_COLOR = "Black"
 
 
 class Application:
@@ -49,7 +62,7 @@ class Application:
         functionalities.
         """
         window = tk.Tk()
-        window.title("CS2Tracker")
+        window.title(WINDOW_TITLE)
         window.geometry(WINDOW_SIZE)
         window.configure(bg=BACKGROUND_COLOR)
 
@@ -58,7 +71,7 @@ class Application:
 
         label = tk.Label(
             frame,
-            text="Welcome to CS2Tracker!",
+            text=f"Welcome to {WINDOW_TITLE}!",
             font=(FONT_STYLE, 16, "bold"),
             fg=FONT_COLOR,
             bg=BACKGROUND_COLOR,
@@ -90,11 +103,23 @@ class Application:
         """Scrape prices from the configured sources, print the total, and save the
         results to a file.
         """
-        self.scraper.scrape_prices()
-        # TODO:
-        # - Scrape in external window on Windows (after tkinter configured to hide console)
-        # - Also add the cs2tracker banner to each external scraper window
-        # Popen(f"start cmd /k {PYTHON_EXECUTABLE} -m cs2tracker.scraper", shell=True)
+        if OS == OSType.WINDOWS:
+            scraper_cmd = (
+                'start powershell -NoExit -Command "& {'
+                f"$Host.UI.RawUI.WindowTitle = '{SCRAPER_WINDOW_TITLE}'; "
+                "$size = $Host.UI.RawUI.WindowSize; "
+                f"$size.Width = {SCRAPER_WINDOW_WIDTH}; "
+                f"$size.Height = {SCRAPER_WINDOW_HEIGHT}; "
+                "$Host.UI.RawUI.WindowSize = $size; "
+                f"$Host.UI.RawUI.BackgroundColor = '{SCRAPER_WINDOW_BACKGROUND_COLOR}'; "
+                "Clear-Host; "
+                f"{PYTHON_EXECUTABLE} -m cs2tracker.scraper"
+                '}"'
+            )
+            Popen(scraper_cmd, shell=True)
+        else:
+            self.scraper.scrape_prices()
+            # TODO: implement external window for Linux
 
     def _edit_config(self):
         """Edit the configuration file using the specified text editor."""

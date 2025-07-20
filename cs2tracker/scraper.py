@@ -1,6 +1,5 @@
 import csv
 import os
-import sys
 import time
 from configparser import ConfigParser
 from datetime import datetime
@@ -15,22 +14,26 @@ from rich.console import Console
 from tenacity import RetryError, retry, stop_after_attempt
 
 from cs2tracker.constants import (
+    AUTHOR_STRING,
+    BANNER,
     BATCH_FILE,
     CAPSULE_INFO,
     CASE_HREFS,
     CASE_PAGES,
     CONFIG_FILE,
+    OS,
     OUTPUT_FILE,
     PROJECT_DIR,
     PYTHON_EXECUTABLE,
+    OSType,
 )
-
-HTTP_PROXY_URL = "http://{}:@smartproxy.crawlbase.com:8012"
-HTTPS_PROXY_URL = "http://{}:@smartproxy.crawlbase.com:8012"
 
 MAX_LINE_LEN = 72
 SEPARATOR = "-"
 PRICE_INFO = "Owned: {}      Steam market price: ${}      Total: ${}\n"
+
+HTTP_PROXY_URL = "http://{}:@smartproxy.crawlbase.com:8012"
+HTTPS_PROXY_URL = "http://{}:@smartproxy.crawlbase.com:8012"
 
 WIN_BACKGROUND_TASK_NAME = "CS2Tracker Daily Calculation"
 WIN_BACKGROUND_TASK_SCHEDULE = "DAILY"
@@ -326,7 +329,7 @@ class Scraper:
 
         :return: True if a background task is found, False otherwise.
         """
-        if sys.platform.startswith("win"):
+        if OS == OSType.WINDOWS:
             cmd = ["schtasks", "/query", "/tn", WIN_BACKGROUND_TASK_NAME]
             return_code = call(cmd, stdout=DEVNULL, stderr=DEVNULL)
             found = return_code == 0
@@ -391,7 +394,7 @@ class Scraper:
         :param enabled: If True, the task will be created; if False, the task will be
             deleted.
         """
-        if sys.platform.startswith("win"):
+        if OS == OSType.WINDOWS:
             self._toggle_background_task_windows(enabled)
         else:
             # TODO: implement toggle for cron jobs
@@ -399,7 +402,6 @@ class Scraper:
 
 
 if __name__ == "__main__":
-    # If this file is run as a script, create a Scraper instance and run the
-    # scrape_prices method.
     scraper = Scraper()
+    scraper.console.print(f"[bold yellow]{BANNER}\n{AUTHOR_STRING}\n")
     scraper.scrape_prices()
