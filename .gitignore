@@ -2,6 +2,7 @@
 __pycache__
 venv
 build
+output
 dist
 venv-test
 cs2tracker.egg-info
