@@ -101,7 +101,9 @@ class Application:
         return window
 
     def _construct_scraper_command(self):
+        """Construct the command to run the scraper in a new window."""
         if OS == OSType.WINDOWS:
+            set_utf8_encoding = "[Console]::InputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8;"
             get_size = "$size = $Host.UI.RawUI.WindowSize;"
             set_size = "$Host.UI.RawUI.WindowSize = $size;"
             set_window_title = f"$Host.UI.RawUI.WindowTitle = '{SCRAPER_WINDOW_TITLE}';"
@@ -120,6 +122,7 @@ class Application:
 
             cmd = (
                 'start powershell -NoExit -Command "& {'
+                + set_utf8_encoding
                 + set_window_title
                 + get_size
                 + set_window_width
