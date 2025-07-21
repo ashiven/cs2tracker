@@ -42,13 +42,6 @@ jobs:
       - name: Build executable
         run: pyinstaller --noconfirm --onefile --windowed --name "cs2tracker" --icon ${{ env.ICON }} --add-data ${{ env.CONFIG }} --add-data ${{ env.OUTPUT }} --add-data ${{ env.CURRENCY }} ${{ env.MAIN_FILE }}
 
-      - name: Create Artifact (Windows)
-        if: matrix.os == 'windows-latest'
-        uses: actions/upload-artifact@v4
-        with:
-          name: windows-executable
-          path: dist/
-
       - name: List files in dist folder
         run: ls -R dist/
 
@@ -58,7 +51,7 @@ jobs:
       - name: Generate SHA256 checksum
         run: shasum -a 256 cs2tracker-windows.zip > cs2tracker-windows.zip.sha256
 
-      - name: Upload release executable
+      - name: Upload windows executable
         uses: alexellis/upload-assets@0.4.0
         env:
           GITHUB_TOKEN: ${{ github.token }}
