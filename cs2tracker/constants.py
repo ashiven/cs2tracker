@@ -64,7 +64,7 @@ AUTHOR_STRING = (
 )
 
 
-RMR_CAPSULES = {
+RMR_2020_CAPSULES = {
     "page": "https://steamcommunity.com/market/search?q=2020+rmr",
     "items": [
         "https://steamcommunity.com/market/listings/730/2020%20RMR%20Legends",
@@ -74,7 +74,7 @@ RMR_CAPSULES = {
     "names": ["RMR Legends", "RMR Challengers", "RMR Contenders"],
 }
 
-STOCKHOLM_CAPSULES = {
+STOCKHOLM_2021_CAPSULES = {
     "page": "https://steamcommunity.com/market/search?q=stockholm+capsule",
     "items": [
         "https://steamcommunity.com/market/listings/730/Stockholm%202021%20Legends%20Sticker%20Capsule",
@@ -92,7 +92,7 @@ STOCKHOLM_CAPSULES = {
     ],
 }
 
-ANTWERP_CAPSULES = {
+ANTWERP_2022_CAPSULES = {
     "page": "https://steamcommunity.com/market/search?q=antwerp+capsule",
     "items": [
         "https://steamcommunity.com/market/listings/730/Antwerp%202022%20Legends%20Sticker%20Capsule",
@@ -114,7 +114,7 @@ ANTWERP_CAPSULES = {
     ],
 }
 
-RIO_CAPSULES = {
+RIO_2022_CAPSULES = {
     "page": "https://steamcommunity.com/market/search?q=rio+capsule",
     "items": [
         "https://steamcommunity.com/market/listings/730/Rio%202022%20Legends%20Sticker%20Capsule",
@@ -136,7 +136,7 @@ RIO_CAPSULES = {
     ],
 }
 
-PARIS_CAPSULES = {
+PARIS_2023_CAPSULES = {
     "page": "https://steamcommunity.com/market/search?q=paris+capsule",
     "items": [
         "https://steamcommunity.com/market/listings/730/Paris%202023%20Legends%20Sticker%20Capsule",
@@ -158,7 +158,7 @@ PARIS_CAPSULES = {
     ],
 }
 
-COPENHAGEN_CAPSULES = {
+COPENHAGEN_2024_CAPSULES = {
     "page": "https://steamcommunity.com/market/search?q=copenhagen+capsule",
     "items": [
         "https://steamcommunity.com/market/listings/730/Copenhagen%202024%20Legends%20Sticker%20Capsule",
@@ -180,7 +180,7 @@ COPENHAGEN_CAPSULES = {
     ],
 }
 
-SHANGHAI_CAPSULES = {
+SHANGHAI_2024_CAPSULES = {
     "page": "https://steamcommunity.com/market/search?q=shanghai+capsule",
     "items": [
         "https://steamcommunity.com/market/listings/730/Shanghai%202024%20Legends%20Sticker%20Capsule",
@@ -202,7 +202,7 @@ SHANGHAI_CAPSULES = {
     ],
 }
 
-AUSTIN_CAPSULES = {
+AUSTIN_2025_CAPSULES = {
     "page": "https://steamcommunity.com/market/search?q=austin+capsule",
     "items": [
         "https://steamcommunity.com/market/listings/730/Austin%202025%20Legends%20Sticker%20Capsule",
@@ -225,14 +225,14 @@ AUSTIN_CAPSULES = {
 }
 
 CAPSULE_INFO = {
-    "2020 RMR Sticker Capsule": RMR_CAPSULES,
-    "Stockholm 2021 Sticker Capsule": STOCKHOLM_CAPSULES,
-    "Antwerp 2022 Sticker Capsule": ANTWERP_CAPSULES,
-    "Rio 2022 Sticker Capsule": RIO_CAPSULES,
-    "Paris 2023 Sticker Capsule": PARIS_CAPSULES,
-    "Copenhagen 2024 Sticker Capsule": COPENHAGEN_CAPSULES,
-    "Shanghai 2024 Sticker Capsule": SHANGHAI_CAPSULES,
-    "Austin 2025 Sticker Capsule": AUSTIN_CAPSULES,
+    "2020 RMR Sticker Capsule": RMR_2020_CAPSULES,
+    "Stockholm 2021 Sticker Capsule": STOCKHOLM_2021_CAPSULES,
+    "Antwerp 2022 Sticker Capsule": ANTWERP_2022_CAPSULES,
+    "Rio 2022 Sticker Capsule": RIO_2022_CAPSULES,
+    "Paris 2023 Sticker Capsule": PARIS_2023_CAPSULES,
+    "Copenhagen 2024 Sticker Capsule": COPENHAGEN_2024_CAPSULES,
+    "Shanghai 2024 Sticker Capsule": SHANGHAI_2024_CAPSULES,
+    "Austin 2025 Sticker Capsule": AUSTIN_2025_CAPSULES,
 }
 
 
