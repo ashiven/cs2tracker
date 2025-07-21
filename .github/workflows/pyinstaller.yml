@@ -1,9 +1,9 @@
 name: PyInstaller
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
+  release:
+    types: [created]
 
 jobs:
   build:
@@ -37,10 +37,13 @@ jobs:
       - name: Locate eurofxref-hist.zip
         run: |
           $ZIP_PATH = python -c "import currency_converter, os; print(os.path.join(os.path.dirname(currency_converter.__file__), 'eurofxref-hist.zip'))"
-          echo "CURRENCY='$ZIP_PATH;./currency_converter'" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          echo 'CURRENCY="$ZIP_PATH;./currency_converter"' | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Build executable
         run: pyinstaller --noconfirm --onefile --windowed --icon ${{ env.ICON }} --add-data ${{ env.CONFIG }} --add-data ${{ env.OUTPUT }} --add-data ${{ env.CURRENCY }} ${{ env.MAIN_FILE }}
+
+      - name: List output
+        run: ls -R output/
 
       - name: Create Artifact (Windows)
         if: matrix.os == 'windows-latest'
@@ -48,3 +51,19 @@ jobs:
         with:
           name: windows-executable
           path: dist/
+
+      - name: List files in dist folder
+        run: ls -R dist/
+
+      - name: Zip windows executable
+        run: zip -j cs2tracker-windows.zip dist/cs2tracker.exe
+
+      - name: Generate SHA256 checksum
+        run: shasum -a 256 cs2tracker-windows.zip > cs2tracker-windows.zip.sha256
+
+      - name: Upload release executable
+        uses: alexellis/upload-assets@0.4.0
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          asset_paths: '["cs2tracker-windows.zip", "cs2tracker-windows.zip.sha256"]'
