@@ -64,6 +64,309 @@ AUTHOR_STRING = (
 )
 
 
+CASE_PAGES = [
+    "https://steamcommunity.com/market/search?q=revolution+case",
+    "https://steamcommunity.com/market/search?q=recoil+case",
+    "https://steamcommunity.com/market/search?q=dreams+and+nightmares+case",
+    "https://steamcommunity.com/market/search?q=operation+riptide+case",
+    "https://steamcommunity.com/market/search?q=snakebite+case",
+    "https://steamcommunity.com/market/search?q=broken+fang+case",
+    "https://steamcommunity.com/market/search?q=fracture+case",
+    "https://steamcommunity.com/market/search?q=chroma+case",
+    "https://steamcommunity.com/market/search?q=chroma+case",
+    "https://steamcommunity.com/market/search?q=chroma+case",
+    "https://steamcommunity.com/market/search?q=clutch+case",
+    "https://steamcommunity.com/market/search?q=csgo+weapon+case",
+    "https://steamcommunity.com/market/search?q=csgo+weapon+case",
+    "https://steamcommunity.com/market/search?q=csgo+weapon+case",
+    "https://steamcommunity.com/market/search?q=cs20+case",
+    "https://steamcommunity.com/market/search?q=danger+zone+case",
+    "https://steamcommunity.com/market/search?q=esports+case",
+    "https://steamcommunity.com/market/search?q=esports+case",
+    "https://steamcommunity.com/market/search?q=esports+case",
+    "https://steamcommunity.com/market/search?q=falchion+case",
+    "https://steamcommunity.com/market/search?q=gamma+case",
+    "https://steamcommunity.com/market/search?q=gamma+case",
+    "https://steamcommunity.com/market/search?q=glove+case",
+    "https://steamcommunity.com/market/search?q=horizon+case",
+    "https://steamcommunity.com/market/search?q=huntsman+weapon+case",
+    "https://steamcommunity.com/market/search?q=operation+bravo+case",
+    "https://steamcommunity.com/market/search?q=operation+breakout+case",
+    "https://steamcommunity.com/market/search?q=operation+hydra+case",
+    "https://steamcommunity.com/market/search?q=operation+phoenix+case",
+    "https://steamcommunity.com/market/search?q=operation+vanguard+case",
+    "https://steamcommunity.com/market/search?q=operation+wildfire+case",
+    "https://steamcommunity.com/market/search?q=prisma+case",
+    "https://steamcommunity.com/market/search?q=prisma+case",
+    "https://steamcommunity.com/market/search?q=revolver+case",
+    "https://steamcommunity.com/market/search?q=shadow+case",
+    "https://steamcommunity.com/market/search?q=shattered+web+case",
+    "https://steamcommunity.com/market/search?q=spectrum+case",
+    "https://steamcommunity.com/market/search?q=spectrum+case",
+    "https://steamcommunity.com/market/search?q=winter+offensive+case",
+    "https://steamcommunity.com/market/search?q=kilowatt+case",
+    "https://steamcommunity.com/market/search?q=gallery+case",
+    "https://steamcommunity.com/market/search?q=fever+case",
+]
+
+CASE_HREFS = [
+    "https://steamcommunity.com/market/listings/730/Revolution%20Case",
+    "https://steamcommunity.com/market/listings/730/Recoil%20Case",
+    "https://steamcommunity.com/market/listings/730/Dreams%20%26%20Nightmares%20Case",
+    "https://steamcommunity.com/market/listings/730/Operation%20Riptide%20Case",
+    "https://steamcommunity.com/market/listings/730/Snakebite%20Case",
+    "https://steamcommunity.com/market/listings/730/Operation%20Broken%20Fang%20Case",
+    "https://steamcommunity.com/market/listings/730/Fracture%20Case",
+    "https://steamcommunity.com/market/listings/730/Chroma%20Case",
+    "https://steamcommunity.com/market/listings/730/Chroma%202%20Case",
+    "https://steamcommunity.com/market/listings/730/Chroma%203%20Case",
+    "https://steamcommunity.com/market/listings/730/Clutch%20Case",
+    "https://steamcommunity.com/market/listings/730/CS%3AGO%20Weapon%20Case",
+    "https://steamcommunity.com/market/listings/730/CS%3AGO%20Weapon%20Case%202",
+    "https://steamcommunity.com/market/listings/730/CS%3AGO%20Weapon%20Case%203",
+    "https://steamcommunity.com/market/listings/730/CS20%20Case",
+    "https://steamcommunity.com/market/listings/730/Danger%20Zone%20Case",
+    "https://steamcommunity.com/market/listings/730/eSports%202013%20Case",
+    "https://steamcommunity.com/market/listings/730/eSports%202013%20Winter%20Case",
+    "https://steamcommunity.com/market/listings/730/eSports%202014%20Summer%20Case",
+    "https://steamcommunity.com/market/listings/730/Falchion%20Case",
+    "https://steamcommunity.com/market/listings/730/Gamma%20Case",
+    "https://steamcommunity.com/market/listings/730/Gamma%202%20Case",
+    "https://steamcommunity.com/market/listings/730/Glove%20Case",
+    "https://steamcommunity.com/market/listings/730/Horizon%20Case",
+    "https://steamcommunity.com/market/listings/730/Huntsman%20Weapon%20Case",
+    "https://steamcommunity.com/market/listings/730/Operation%20Bravo%20Case",
+    "https://steamcommunity.com/market/listings/730/Operation%20Breakout%20Weapon%20Case",
+    "https://steamcommunity.com/market/listings/730/Operation%20Hydra%20Case",
+    "https://steamcommunity.com/market/listings/730/Operation%20Phoenix%20Weapon%20Case",
+    "https://steamcommunity.com/market/listings/730/Operation%20Vanguard%20Weapon%20Case",
+    "https://steamcommunity.com/market/listings/730/Operation%20Wildfire%20Case",
+    "https://steamcommunity.com/market/listings/730/Prisma%20Case",
+    "https://steamcommunity.com/market/listings/730/Prisma%202%20Case",
+    "https://steamcommunity.com/market/listings/730/Revolver%20Case",
+    "https://steamcommunity.com/market/listings/730/Shadow%20Case",
+    "https://steamcommunity.com/market/listings/730/Shattered%20Web%20Case",
+    "https://steamcommunity.com/market/listings/730/Spectrum%20Case",
+    "https://steamcommunity.com/market/listings/730/Spectrum%202%20Case",
+    "https://steamcommunity.com/market/listings/730/Winter%20Offensive%20Weapon%20Case",
+    "https://steamcommunity.com/market/listings/730/Kilowatt%20Case",
+    "https://steamcommunity.com/market/listings/730/Gallery%20Case",
+    "https://steamcommunity.com/market/listings/730/Fever%20Case",
+]
+
+
+KATOWICE_2014_CAPSULES = {
+    "page": "https://steamcommunity.com/market/search?q=katowice+2014+legends+challengers",
+    "items": [
+        "https://steamcommunity.com/market/listings/730/EMS%20Katowice%202014%20Legends",
+        "https://steamcommunity.com/market/listings/730/EMS%20Katowice%202014%20Challengers",
+    ],
+    "names": ["Katowice Legends", "Katowice Challengers"],
+}
+
+COLOGNE_2014_CAPSULES = {
+    "page": "https://steamcommunity.com/market/search?q=cologne+2014+legends+challengers",
+    "items": [
+        "https://steamcommunity.com/market/listings/730/ESL%20One%20Cologne%202014%20Legends",
+        "https://steamcommunity.com/market/listings/730/ESL%20One%20Cologne%202014%20Challengers",
+    ],
+    "names": ["Cologne Legends", "Cologne Challengers"],
+}
+
+DREAMHACK_2014_CAPSULES = {
+    "page": "https://steamcommunity.com/market/search?q=dreamhack+2014+legends",
+    "items": [
+        "https://steamcommunity.com/market/listings/730/DreamHack%202014%20Legends%20%28Holo-Foil%29"
+    ],
+    "names": ["DreamHack Legends"],
+}
+
+KATOWICE_2015_CAPSULES = {
+    "page": "https://steamcommunity.com/market/search?q=katowice+2015+legends+challengers",
+    "items": [
+        "https://steamcommunity.com/market/listings/730/ESL%20One%20Katowice%202015%20Legends%20%28Holo-Foil%29",
+        "https://steamcommunity.com/market/listings/730/ESL%20One%20Katowice%202015%20Challengers%20%28Holo-Foil%29",
+    ],
+    "names": ["Katowice Legends", "Katowice Challengers"],
+}
+
+COLOGNE_2015_CAPSULES = {
+    "page": "https://steamcommunity.com/market/search?q=cologne+2015+legends+challengers",
+    "items": [
+        "https://steamcommunity.com/market/listings/730/ESL%20One%20Cologne%202015%20Legends%20%28Foil%29",
+        "https://steamcommunity.com/market/listings/730/ESL%20One%20Cologne%202015%20Challengers%20%28Foil%29",
+    ],
+    "names": ["Cologne Legends", "Cologne Challengers"],
+}
+
+CLUJ_NAPOCA_2015_CAPSULES = {
+    "page": "https://steamcommunity.com/market/search?q=cluj+napoca+2015+legends+challengers",
+    "items": [
+        "https://steamcommunity.com/market/listings/730/DreamHack%20Cluj-Napoca%202015%20Legends%20%28Foil%29",
+        "https://steamcommunity.com/market/listings/730/DreamHack%20Cluj-Napoca%202015%20Challengers%20%28Foil%29",
+        "https://steamcommunity.com/market/listings/730/Autograph%20Capsule%20%7C%20Legends%20%28Foil%29%20%7C%20Cluj-Napoca%202015"
+        "https://steamcommunity.com/market/listings/730/Autograph%20Capsule%20%7C%20Challengers%20%28Foil%29%20%7C%20Cluj-Napoca%202015",
+    ],
+    "names": [
+        "Cluj-Napoca Legends",
+        "Cluj-Napoca Challengers",
+        "Cluj-Napoca Legends Autographs",
+        "Cluj-Napoca Challengers Autographs",
+    ],
+}
+
+COLUMBUS_2016_CAPSULES = {
+    "page": "https://steamcommunity.com/market/search?q=columbus+2016+legends+challengers",
+    "items": [
+        "https://steamcommunity.com/market/listings/730/MLG%20Columbus%202016%20Legends%20%28Holo-Foil%29",
+        "https://steamcommunity.com/market/listings/730/MLG%20Columbus%202016%20Challengers%20%28Holo-Foil%29",
+        "https://steamcommunity.com/market/listings/730/Autograph%20Capsule%20%7C%20Legends%20%28Foil%29%20%7C%20MLG%20Columbus%202016"
+        "https://steamcommunity.com/market/listings/730/Autograph%20Capsule%20%7C%20Challengers%20%28Foil%29%20%7C%20MLG%20Columbus%202016",
+    ],
+    "names": [
+        "Columbus Legends",
+        "Columbus Challengers",
+        "Columbus Legends Autographs",
+        "Columbus Challengers Autographs",
+    ],
+}
+
+COLOGNE_2016_CAPSULES = {
+    "page": "https://steamcommunity.com/market/search?q=cologne+2016+legends+challengers",
+    "items": [
+        "https://steamcommunity.com/market/listings/730/Cologne%202016%20Legends%20%28Holo-Foil%29",
+        "https://steamcommunity.com/market/listings/730/Cologne%202016%20Challengers%20%28Holo-Foil%29",
+        "https://steamcommunity.com/market/listings/730/Autograph%20Capsule%20%7C%20Legends%20%28Foil%29%20%7C%Cologne%202016"
+        "https://steamcommunity.com/market/listings/730/Autograph%20Capsule%20%7C%20Challengers%20%28Foil%29%20%7C%Cologne%202016",
+    ],
+    "names": [
+        "Cologne Legends",
+        "Cologne Challengers",
+        "Cologne Legends Autographs",
+        "Cologne Challengers Autographs",
+    ],
+}
+
+ATLANTA_2017_CAPSULES = {
+    "page": "https://steamcommunity.com/market/search?q=atlanta+2017+legends+challengers",
+    "items": [
+        "https://steamcommunity.com/market/listings/730/Atlanta%202017%20Legends%20%28Holo-Foil%29",
+        "https://steamcommunity.com/market/listings/730/Atlanta%202017%20Challengers%20%28Holo-Foil%29",
+        "https://steamcommunity.com/market/listings/730/Autograph%20Capsule%20%7C%20Legends%20%28Foil%29%20%7C%20Atlanta%202017"
+        "https://steamcommunity.com/market/listings/730/Autograph%20Capsule%20%7C%20Challengers%20%28Foil%29%20%7C%20Atlanta%202017",
+    ],
+    "names": [
+        "Atlanta Legends",
+        "Atlanta Challengers",
+        "Atlanta Legends Autographs",
+        "Atlanta Challengers Autographs",
+    ],
+}
+
+KRAKOW_2017_CAPSULES = {
+    "page": "https://steamcommunity.com/market/search?q=krakow+2017+legends+challengers",
+    "items": [
+        "https://steamcommunity.com/market/listings/730/Krakow%202017%20Legends%20%28Holo-Foil%29",
+        "https://steamcommunity.com/market/listings/730/Krakow%202017%20Challengers%20%28Holo-Foil%29",
+        "https://steamcommunity.com/market/listings/730/Krakow%202017%20Legends%20Autograph%20Capsule",
+        "https://steamcommunity.com/market/listings/730/Krakow%202017%20Challengers%20Autograph%20Capsule",
+    ],
+    "names": [
+        "Krakow Legends",
+        "Krakow Challengers",
+        "Krakow Legends Autographs",
+        "Krakow Challengers Autographs",
+    ],
+}
+
+BOSTON_2018_CAPSULES = {
+    "page": "https://steamcommunity.com/market/search?q=boston+2018+legends+challengers",
+    "items": [
+        "https://steamcommunity.com/market/listings/730/Boston%202018%20Legends%20%28Holo-Foil%29",
+        "https://steamcommunity.com/market/listings/730/Boston%202018%20Minor%20Challengers%20%28Holo-Foil%29",
+        "https://steamcommunity.com/market/listings/730/Boston%202018%20Returning%20Challengers%20%28Holo-Foil%29",
+        "https://steamcommunity.com/market/listings/730/Boston%202018%20Attending%20Legends%20%28Holo-Foil%29",
+        "https://steamcommunity.com/market/listings/730/Boston%202018%20Minor%20Challengers%20with%20Flash%20Gaming%20%28Holo-Foil%29",
+        "https://steamcommunity.com/market/listings/730/Boston%202018%20Legends%20Autograph%20Capsule",
+        "https://steamcommunity.com/market/listings/730/Boston%202018%20Minor%20Challengers%20Autograph%20Capsule",
+        "https://steamcommunity.com/market/listings/730/Boston%202018%20Returning%20Challengers%20Autograph%20Capsule",
+        "https://steamcommunity.com/market/listings/730/Boston%202018%20Attending%20Legends%20Autograph%20Capsule",
+        "https://steamcommunity.com/market/listings/730/Boston%202018%20Minor%20Challengers%20with%20Flash%20Gaming%20Autograph%20Capsule",
+    ],
+    "names": [
+        "Boston Legends",
+        "Boston Minor Challengers",
+        "Boston Returning Challengers",
+        "Boston Attending Legends",
+        "Boston Minor Challengers with Flash Gaming",
+        "Boston Legends Autographs",
+        "Boston Minor Challengers Autographs",
+        "Boston Returning Challengers Autographs",
+        "Boston Attending Legends Autographs",
+        "Boston Minor Challengers with Flash Gaming Autographs",
+    ],
+}
+
+LONDON_2018_CAPSULES = {
+    "page": "https://steamcommunity.com/market/search?q=london+2018+legends+challengers",
+    "items": [
+        "https://steamcommunity.com/market/listings/730/London%202018%20Legends%20%28Holo-Foil%29",
+        "https://steamcommunity.com/market/listings/730/London%202018%20Minor%20Challengers%20%28Holo-Foil%29",
+        "https://steamcommunity.com/market/listings/730/London%202018%20Returning%20Challengers%20%28Holo-Foil%29",
+        "https://steamcommunity.com/market/listings/730/London%202018%20Legends%20Autograph%20Capsule",
+        "https://steamcommunity.com/market/listings/730/London%202018%20Minor%20Challengers%20Autograph%20Capsule",
+        "https://steamcommunity.com/market/listings/730/London%202018%20Returning%20Challengers%20Autograph%20Capsule",
+    ],
+    "names": [
+        "London Legends",
+        "London Minor Challengers",
+        "London Returning Challengers",
+        "London Legends Autographs",
+        "London Minor Challengers Autographs",
+        "London Returning Challengers Autographs",
+    ],
+}
+
+KATOWICE_2019_CAPSULES = {
+    "page": "https://steamcommunity.com/market/search?q=katowice+2019+legends+challengers",
+    "items": [
+        "https://steamcommunity.com/market/listings/730/Katowice%202019%20Legends%20%28Holo-Foil%29",
+        "https://steamcommunity.com/market/listings/730/Katowice%202019%20Minor%20Challengers%20%28Holo-Foil%29",
+        "https://steamcommunity.com/market/listings/730/Katowice%202019%20Returning%20Challengers%20%28Holo-Foil%29",
+        "https://steamcommunity.com/market/listings/730/Katowice%202019%20Legends%20Autograph%20Capsule",
+        "https://steamcommunity.com/market/listings/730/Katowice%202019%20Minor%20Challengers%20Autograph%20Capsule",
+        "https://steamcommunity.com/market/listings/730/Katowice%202019%20Returning%20Challengers%20Autograph%20Capsule",
+    ],
+    "names": [
+        "Katowice Legends",
+        "Katowice Minor Challengers",
+        "Katowice Returning Challengers",
+        "Katowice Legends Autographs",
+        "Katowice Minor Challengers Autographs",
+        "Katowice Returning Challengers Autographs",
+    ],
+}
+
+BERLIN_2019_CAPSULES = {
+    "page": "https://steamcommunity.com/market/search?q=berlin+2019+legends+challengers",
+    "items": [
+        "https://steamcommunity.com/market/listings/730/Berlin%202019%20Legends%20%28Holo-Foil%29",
+        "https://steamcommunity.com/market/listings/730/Berlin%202019%20Minor%20Challengers%20%28Holo-Foil%29",
+        "https://steamcommunity.com/market/listings/730/Berlin%202019%20Returning%20Challengers%20%28Holo-Foil%29",
+        "https://steamcommunity.com/market/listings/730/Berlin%202019%20Legends%20Autograph%20Capsule",
+        "https://steamcommunity.com/market/listings/730/Berlin%202019%20Minor%20Challengers%20Autograph%20Capsule",
+        "https://steamcommunity.com/market/listings/730/Berlin%202019%20Returning%20Challengers%20Autograph%20Capsule",
+    ],
+    "names": [
+        "Berlin Legends",
+        "Berlin Minor Challengers",
+        "Berlin Returning Challengers",
+        "Berlin Legends Autographs",
+        "Berlin Minor Challengers Autographs",
+        "Berlin Returning Challengers Autographs",
+    ],
+}
+
 RMR_2020_CAPSULES = {
     "page": "https://steamcommunity.com/market/search?q=2020+rmr",
     "items": [
@@ -225,6 +528,20 @@ AUSTIN_2025_CAPSULES = {
 }
 
 CAPSULE_INFO = {
+    "Katowice 2014 Sticker Capsule": KATOWICE_2014_CAPSULES,
+    "Colgone 2014 Sticker Capsule": COLOGNE_2014_CAPSULES,
+    "DreamHack 2014 Sticker Capsule": DREAMHACK_2014_CAPSULES,
+    "Katowice 2015 Sticker Capsule": KATOWICE_2015_CAPSULES,
+    "Cologne 2015 Sticker Capsule": COLOGNE_2015_CAPSULES,
+    "Cluj-Napoca 2015 Sticker Capsule": CLUJ_NAPOCA_2015_CAPSULES,
+    "Columbus 2016 Sticker Capsule": COLUMBUS_2016_CAPSULES,
+    "Cologne 2016 Sticker Capsule": COLOGNE_2016_CAPSULES,
+    "Atlanta 2017 Sticker Capsule": ATLANTA_2017_CAPSULES,
+    "Krakow 2017 Sticker Capsule": KRAKOW_2017_CAPSULES,
+    "Boston 2018 Sticker Capsule": BOSTON_2018_CAPSULES,
+    "London 2018 Sticker Capsule": LONDON_2018_CAPSULES,
+    "Katowice 2019 Sticker Capsule": KATOWICE_2019_CAPSULES,
+    "Berlin 2019 Sticker Capsule": BERLIN_2019_CAPSULES,
     "2020 RMR Sticker Capsule": RMR_2020_CAPSULES,
     "Stockholm 2021 Sticker Capsule": STOCKHOLM_2021_CAPSULES,
     "Antwerp 2022 Sticker Capsule": ANTWERP_2022_CAPSULES,
@@ -234,94 +551,3 @@ CAPSULE_INFO = {
     "Shanghai 2024 Sticker Capsule": SHANGHAI_2024_CAPSULES,
     "Austin 2025 Sticker Capsule": AUSTIN_2025_CAPSULES,
 }
-
-
-CASE_PAGES = [
-    "https://steamcommunity.com/market/search?q=revolution+case",
-    "https://steamcommunity.com/market/search?q=recoil+case",
-    "https://steamcommunity.com/market/search?q=dreams+and+nightmares+case",
-    "https://steamcommunity.com/market/search?q=operation+riptide+case",
-    "https://steamcommunity.com/market/search?q=snakebite+case",
-    "https://steamcommunity.com/market/search?q=broken+fang+case",
-    "https://steamcommunity.com/market/search?q=fracture+case",
-    "https://steamcommunity.com/market/search?q=chroma+case",
-    "https://steamcommunity.com/market/search?q=chroma+case",
-    "https://steamcommunity.com/market/search?q=chroma+case",
-    "https://steamcommunity.com/market/search?q=clutch+case",
-    "https://steamcommunity.com/market/search?q=csgo+weapon+case",
-    "https://steamcommunity.com/market/search?q=csgo+weapon+case",
-    "https://steamcommunity.com/market/search?q=csgo+weapon+case",
-    "https://steamcommunity.com/market/search?q=cs20+case",
-    "https://steamcommunity.com/market/search?q=danger+zone+case",
-    "https://steamcommunity.com/market/search?q=esports+case",
-    "https://steamcommunity.com/market/search?q=esports+case",
-    "https://steamcommunity.com/market/search?q=esports+case",
-    "https://steamcommunity.com/market/search?q=falchion+case",
-    "https://steamcommunity.com/market/search?q=gamma+case",
-    "https://steamcommunity.com/market/search?q=gamma+case",
-    "https://steamcommunity.com/market/search?q=glove+case",
-    "https://steamcommunity.com/market/search?q=horizon+case",
-    "https://steamcommunity.com/market/search?q=huntsman+weapon+case",
-    "https://steamcommunity.com/market/search?q=operation+bravo+case",
-    "https://steamcommunity.com/market/search?q=operation+breakout+case",
-    "https://steamcommunity.com/market/search?q=operation+hydra+case",
-    "https://steamcommunity.com/market/search?q=operation+phoenix+case",
-    "https://steamcommunity.com/market/search?q=operation+vanguard+case",
-    "https://steamcommunity.com/market/search?q=operation+wildfire+case",
-    "https://steamcommunity.com/market/search?q=prisma+case",
-    "https://steamcommunity.com/market/search?q=prisma+case",
-    "https://steamcommunity.com/market/search?q=revolver+case",
-    "https://steamcommunity.com/market/search?q=shadow+case",
-    "https://steamcommunity.com/market/search?q=shattered+web+case",
-    "https://steamcommunity.com/market/search?q=spectrum+case",
-    "https://steamcommunity.com/market/search?q=spectrum+case",
-    "https://steamcommunity.com/market/search?q=winter+offensive+case",
-    "https://steamcommunity.com/market/search?q=kilowatt+case",
-    "https://steamcommunity.com/market/search?q=gallery+case",
-    "https://steamcommunity.com/market/search?q=fever+case",
-]
-
-CASE_HREFS = [
-    "https://steamcommunity.com/market/listings/730/Revolution%20Case",
-    "https://steamcommunity.com/market/listings/730/Recoil%20Case",
-    "https://steamcommunity.com/market/listings/730/Dreams%20%26%20Nightmares%20Case",
-    "https://steamcommunity.com/market/listings/730/Operation%20Riptide%20Case",
-    "https://steamcommunity.com/market/listings/730/Snakebite%20Case",
-    "https://steamcommunity.com/market/listings/730/Operation%20Broken%20Fang%20Case",
-    "https://steamcommunity.com/market/listings/730/Fracture%20Case",
-    "https://steamcommunity.com/market/listings/730/Chroma%20Case",
-    "https://steamcommunity.com/market/listings/730/Chroma%202%20Case",
-    "https://steamcommunity.com/market/listings/730/Chroma%203%20Case",
-    "https://steamcommunity.com/market/listings/730/Clutch%20Case",
-    "https://steamcommunity.com/market/listings/730/CS%3AGO%20Weapon%20Case",
-    "https://steamcommunity.com/market/listings/730/CS%3AGO%20Weapon%20Case%202",
-    "https://steamcommunity.com/market/listings/730/CS%3AGO%20Weapon%20Case%203",
-    "https://steamcommunity.com/market/listings/730/CS20%20Case",
-    "https://steamcommunity.com/market/listings/730/Danger%20Zone%20Case",
-    "https://steamcommunity.com/market/listings/730/eSports%202013%20Case",
-    "https://steamcommunity.com/market/listings/730/eSports%202013%20Winter%20Case",
-    "https://steamcommunity.com/market/listings/730/eSports%202014%20Summer%20Case",
-    "https://steamcommunity.com/market/listings/730/Falchion%20Case",
-    "https://steamcommunity.com/market/listings/730/Gamma%20Case",
-    "https://steamcommunity.com/market/listings/730/Gamma%202%20Case",
-    "https://steamcommunity.com/market/listings/730/Glove%20Case",
-    "https://steamcommunity.com/market/listings/730/Horizon%20Case",
-    "https://steamcommunity.com/market/listings/730/Huntsman%20Weapon%20Case",
-    "https://steamcommunity.com/market/listings/730/Operation%20Bravo%20Case",
-    "https://steamcommunity.com/market/listings/730/Operation%20Breakout%20Weapon%20Case",
-    "https://steamcommunity.com/market/listings/730/Operation%20Hydra%20Case",
-    "https://steamcommunity.com/market/listings/730/Operation%20Phoenix%20Weapon%20Case",
-    "https://steamcommunity.com/market/listings/730/Operation%20Vanguard%20Weapon%20Case",
-    "https://steamcommunity.com/market/listings/730/Operation%20Wildfire%20Case",
-    "https://steamcommunity.com/market/listings/730/Prisma%20Case",
-    "https://steamcommunity.com/market/listings/730/Prisma%202%20Case",
-    "https://steamcommunity.com/market/listings/730/Revolver%20Case",
-    "https://steamcommunity.com/market/listings/730/Shadow%20Case",
-    "https://steamcommunity.com/market/listings/730/Shattered%20Web%20Case",
-    "https://steamcommunity.com/market/listings/730/Spectrum%20Case",
-    "https://steamcommunity.com/market/listings/730/Spectrum%202%20Case",
-    "https://steamcommunity.com/market/listings/730/Winter%20Offensive%20Weapon%20Case",
-    "https://steamcommunity.com/market/listings/730/Kilowatt%20Case",
-    "https://steamcommunity.com/market/listings/730/Gallery%20Case",
-    "https://steamcommunity.com/market/listings/730/Fever%20Case",
-]
