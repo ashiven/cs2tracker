@@ -36,8 +36,8 @@ jobs:
 
       - name: Locate eurofxref-hist.zip
         run: |
-          CURRENCY_PATH=$(python -c "import currency_converter, os; print(os.path.join(os.path.dirname(currency_converter.__file__), 'eurofxref-hist.zip'))")
-          echo "CURRENCY=$CURRENCY_PATH;./currency_converter" >> $GITHUB_ENV
+          $ZIP_PATH = python -c "import currency_converter, os; print(os.path.join(os.path.dirname(currency_converter.__file__), 'eurofxref-hist.zip'))"
+          echo "CURRENCY=$ZIP_PATH;./currency_converter" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Build executable
         run: pyinstaller --noconfirm --onefile --windowed --icon ${{ env.ICON }} --add-data ${{ env.CONFIG }} --add-data ${{ env.OUTPUT }} --add-data ${{ env.CURRENCY }} ${{ env.MAIN_FILE }}
