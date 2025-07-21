@@ -31,7 +31,7 @@ from cs2tracker.padded_console import PaddedConsole
 
 MAX_LINE_LEN = 72
 SEPARATOR = "-"
-PRICE_INFO = "Owned: {}      Steam market price: ${}      Total: ${}\n"
+PRICE_INFO = "Owned: {:<10}  Steam market price: ${:<10}  Total: ${:<10}\n"
 
 HTTP_PROXY_URL = "http://{}:@smartproxy.crawlbase.com:8012"
 HTTPS_PROXY_URL = "http://{}:@smartproxy.crawlbase.com:8012"
