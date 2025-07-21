@@ -53,7 +53,7 @@ jobs:
         run: ls -R dist/
 
       - name: Zip windows executable
-        run: zip -j cs2tracker-windows.zip dist/cs2tracker.exe
+        run: Compress-Archive -Path "dist/cs2tracker.exe" -DestinationPath "cs2tracker-windows.zip"
 
       - name: Generate SHA256 checksum
         run: shasum -a 256 cs2tracker-windows.zip > cs2tracker-windows.zip.sha256
