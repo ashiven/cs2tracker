@@ -30,8 +30,9 @@ BATCH_FILE = os.path.join(MODULE_DIR, "data", "cs2tracker_scraper.bat")
 RUNNING_IN_EXE = getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS")
 
 if RUNNING_IN_EXE:
-    MODULE_DIR = sys._MEIPASS  # type: ignore  pylint: disable=protected-access
-    PROJECT_DIR = sys._MEIPASS  # type: ignore  pylint: disable=protected-access
+    MEIPASS_DIR = sys._MEIPASS  # type: ignore  pylint: disable=protected-access
+    MODULE_DIR = MEIPASS_DIR
+    PROJECT_DIR = MEIPASS_DIR
     CONFIG_FILE_SOURCE = os.path.join(MODULE_DIR, "data", "config.ini")
     OUTPUT_FILE_SOURCE = os.path.join(MODULE_DIR, "data", "output.csv")
 
