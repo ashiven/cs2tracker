@@ -24,7 +24,7 @@
 
 #### Windows Executable (No color support)
 
-- Simply download the [latest executable](dummy) and run it.
+- Simply download the [latest executable](https://github.com/ashiven/cs2tracker/dist) and run it.
 
 #### Install via Pip
 
