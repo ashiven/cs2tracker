@@ -22,6 +22,12 @@
 
 ### Setup
 
+#### Windows Executable (No color support)
+
+- Simply download the [latest executable](dummy) and run it.
+
+#### Install via Pip
+
 1. Install the program via pip:
 
    ```bash
