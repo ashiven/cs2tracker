@@ -100,40 +100,46 @@ class Application:
 
         return window
 
+    def _construct_scraper_command_windows(self):
+        """Construct the command to run the scraper in a new window for Windows."""
+        set_utf8_encoding = (
+            "[Console]::InputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8;"
+        )
+        get_size = "$size = $Host.UI.RawUI.WindowSize;"
+        set_size = "$Host.UI.RawUI.WindowSize = $size;"
+        set_window_title = f"$Host.UI.RawUI.WindowTitle = '{SCRAPER_WINDOW_TITLE}';"
+        set_window_width = f"$size.Width = {SCRAPER_WINDOW_WIDTH};"
+        set_window_height = f"$size.Height = {SCRAPER_WINDOW_HEIGHT};"
+        set_background_color = (
+            f"$Host.UI.RawUI.BackgroundColor = '{SCRAPER_WINDOW_BACKGROUND_COLOR}';"
+        )
+        clear = "Clear-Host;"
+
+        if RUNNING_IN_EXE:
+            # The python executable is set as the executable itself in PyInstaller
+            scraper_cmd = f"{PYTHON_EXECUTABLE} --only-scrape | Out-Host -Paging"
+        else:
+            scraper_cmd = f"{PYTHON_EXECUTABLE} -m cs2tracker --only-scrape"
+
+        cmd = (
+            'start powershell -NoExit -Command "& {'
+            + set_utf8_encoding
+            + set_window_title
+            + get_size
+            + set_window_width
+            + set_window_height
+            + set_size
+            + set_background_color
+            + clear
+            + scraper_cmd
+            + '}"'
+        )
+        return cmd
+
     def _construct_scraper_command(self):
         """Construct the command to run the scraper in a new window."""
         if OS == OSType.WINDOWS:
-            set_utf8_encoding = "[Console]::InputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8;"
-            get_size = "$size = $Host.UI.RawUI.WindowSize;"
-            set_size = "$Host.UI.RawUI.WindowSize = $size;"
-            set_window_title = f"$Host.UI.RawUI.WindowTitle = '{SCRAPER_WINDOW_TITLE}';"
-            set_window_width = f"$size.Width = {SCRAPER_WINDOW_WIDTH};"
-            set_window_height = f"$size.Height = {SCRAPER_WINDOW_HEIGHT};"
-            set_background_color = (
-                f"$Host.UI.RawUI.BackgroundColor = '{SCRAPER_WINDOW_BACKGROUND_COLOR}';"
-            )
-            clear = "Clear-Host;"
-
-            if RUNNING_IN_EXE:
-                # The python executable is set as the executable itself in PyInstaller
-                scraper_cmd = f"{PYTHON_EXECUTABLE} --only-scrape | Out-Host -Paging"
-            else:
-                scraper_cmd = f"{PYTHON_EXECUTABLE} -m cs2tracker --only-scrape"
-
-            cmd = (
-                'start powershell -NoExit -Command "& {'
-                + set_utf8_encoding
-                + set_window_title
-                + get_size
-                + set_window_width
-                + set_window_height
-                + set_size
-                + set_background_color
-                + clear
-                + scraper_cmd
-                + '}"'
-            )
-            return cmd
+            return self._construct_scraper_command_windows()
         else:
             # TODO: Implement for Linux
             return ""

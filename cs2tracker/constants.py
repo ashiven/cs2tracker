@@ -58,7 +58,6 @@ BANNER = """
 \\     | \\    ||     |  |  |  |  .  Y|  |  |\\     ||  .  ||     T|  .  Y
  \\____j  \\___jl_____j  l__j  l__j\\_jl__j__j \\____jl__j\\_jl_____jl__j\\_j
 
-
 """
 AUTHOR_STRING = (
     f"Version: v{version} - {datetime.today().strftime('%Y/%m/%d')} - Jannik Novak @ashiven\n"

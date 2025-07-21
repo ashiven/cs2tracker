@@ -19,13 +19,13 @@ def main():
     # Disable warnings for proxy requests
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+    console = PaddedConsole()
+    console.print(f"[bold yellow]{BANNER}\n{AUTHOR_STRING}\n")
+
     if "--only-scrape" in sys.argv:
         scraper = Scraper()
-        scraper.console.print(f"[bold yellow]{BANNER}\n{AUTHOR_STRING}\n")
         scraper.scrape_prices()
     else:
-        console = PaddedConsole()
-        console.print(f"[bold yellow]{BANNER}\n{AUTHOR_STRING}\n")
         application = Application()
         application.run()
 
