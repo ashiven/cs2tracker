@@ -204,14 +204,14 @@ CLUJ_NAPOCA_2015_CAPSULES = {
     "items": [
         "https://steamcommunity.com/market/listings/730/DreamHack%20Cluj-Napoca%202015%20Legends%20%28Foil%29",
         "https://steamcommunity.com/market/listings/730/DreamHack%20Cluj-Napoca%202015%20Challengers%20%28Foil%29",
-        "https://steamcommunity.com/market/listings/730/Autograph%20Capsule%20%7C%20Legends%20%28Foil%29%20%7C%20Cluj-Napoca%202015"
+        "https://steamcommunity.com/market/listings/730/Autograph%20Capsule%20%7C%20Legends%20%28Foil%29%20%7C%20Cluj-Napoca%202015",
         "https://steamcommunity.com/market/listings/730/Autograph%20Capsule%20%7C%20Challengers%20%28Foil%29%20%7C%20Cluj-Napoca%202015",
     ],
     "names": [
-        "Cluj-Napoca Legends",
-        "Cluj-Napoca Challengers",
-        "Cluj-Napoca Legends Autographs",
-        "Cluj-Napoca Challengers Autographs",
+        "Cluj Napoca Legends",
+        "Cluj Napoca Challengers",
+        "Cluj Napoca Legends Autographs",
+        "Cluj Napoca Challengers Autographs",
     ],
 }
 
@@ -220,7 +220,7 @@ COLUMBUS_2016_CAPSULES = {
     "items": [
         "https://steamcommunity.com/market/listings/730/MLG%20Columbus%202016%20Legends%20%28Holo-Foil%29",
         "https://steamcommunity.com/market/listings/730/MLG%20Columbus%202016%20Challengers%20%28Holo-Foil%29",
-        "https://steamcommunity.com/market/listings/730/Autograph%20Capsule%20%7C%20Legends%20%28Foil%29%20%7C%20MLG%20Columbus%202016"
+        "https://steamcommunity.com/market/listings/730/Autograph%20Capsule%20%7C%20Legends%20%28Foil%29%20%7C%20MLG%20Columbus%202016",
         "https://steamcommunity.com/market/listings/730/Autograph%20Capsule%20%7C%20Challengers%20%28Foil%29%20%7C%20MLG%20Columbus%202016",
     ],
     "names": [
@@ -236,8 +236,8 @@ COLOGNE_2016_CAPSULES = {
     "items": [
         "https://steamcommunity.com/market/listings/730/Cologne%202016%20Legends%20%28Holo-Foil%29",
         "https://steamcommunity.com/market/listings/730/Cologne%202016%20Challengers%20%28Holo-Foil%29",
-        "https://steamcommunity.com/market/listings/730/Autograph%20Capsule%20%7C%20Legends%20%28Foil%29%20%7C%Cologne%202016"
-        "https://steamcommunity.com/market/listings/730/Autograph%20Capsule%20%7C%20Challengers%20%28Foil%29%20%7C%Cologne%202016",
+        "https://steamcommunity.com/market/listings/730/Autograph%20Capsule%20%7C%20Legends%20%28Foil%29%20%7C%20Cologne%202016",
+        "https://steamcommunity.com/market/listings/730/Autograph%20Capsule%20%7C%20Challengers%20%28Foil%29%20%7C%20Cologne%202016",
     ],
     "names": [
         "Cologne Legends",
@@ -252,7 +252,7 @@ ATLANTA_2017_CAPSULES = {
     "items": [
         "https://steamcommunity.com/market/listings/730/Atlanta%202017%20Legends%20%28Holo-Foil%29",
         "https://steamcommunity.com/market/listings/730/Atlanta%202017%20Challengers%20%28Holo-Foil%29",
-        "https://steamcommunity.com/market/listings/730/Autograph%20Capsule%20%7C%20Legends%20%28Foil%29%20%7C%20Atlanta%202017"
+        "https://steamcommunity.com/market/listings/730/Autograph%20Capsule%20%7C%20Legends%20%28Foil%29%20%7C%20Atlanta%202017",
         "https://steamcommunity.com/market/listings/730/Autograph%20Capsule%20%7C%20Challengers%20%28Foil%29%20%7C%20Atlanta%202017",
     ],
     "names": [
@@ -529,7 +529,7 @@ AUSTIN_2025_CAPSULES = {
 
 CAPSULE_INFO = {
     "Katowice 2014 Sticker Capsule": KATOWICE_2014_CAPSULES,
-    "Colgone 2014 Sticker Capsule": COLOGNE_2014_CAPSULES,
+    "Cologne 2014 Sticker Capsule": COLOGNE_2014_CAPSULES,
     "DreamHack 2014 Sticker Capsule": DREAMHACK_2014_CAPSULES,
     "Katowice 2015 Sticker Capsule": KATOWICE_2015_CAPSULES,
     "Cologne 2015 Sticker Capsule": COLOGNE_2015_CAPSULES,

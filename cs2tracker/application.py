@@ -29,7 +29,7 @@ FONT_COLOR = "white"
 
 SCRAPER_WINDOW_TITLE = "CS2Tracker"
 SCRAPER_WINDOW_HEIGHT = 40
-SCRAPER_WINDOW_WIDTH = 80
+SCRAPER_WINDOW_WIDTH = 100
 SCRAPER_WINDOW_BACKGROUND_COLOR = "Black"
 
 
@@ -108,7 +108,9 @@ class Application:
         get_size = "$size = $Host.UI.RawUI.WindowSize;"
         set_size = "$Host.UI.RawUI.WindowSize = $size;"
         set_window_title = f"$Host.UI.RawUI.WindowTitle = '{SCRAPER_WINDOW_TITLE}';"
-        set_window_width = f"$size.Width = {SCRAPER_WINDOW_WIDTH};"
+        set_window_width = (
+            f"$size.Width = [Math]::Min({SCRAPER_WINDOW_WIDTH}, $Host.UI.RawUI.BufferSize.Width);"
+        )
         set_window_height = f"$size.Height = {SCRAPER_WINDOW_HEIGHT};"
         set_background_color = (
             f"$Host.UI.RawUI.BackgroundColor = '{SCRAPER_WINDOW_BACKGROUND_COLOR}';"
