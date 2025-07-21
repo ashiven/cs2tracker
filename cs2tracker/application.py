@@ -12,6 +12,7 @@ from cs2tracker.constants import (
     OS,
     OUTPUT_FILE,
     PYTHON_EXECUTABLE,
+    RUNNING_IN_EXE,
     TEXT_EDITOR,
     OSType,
 )
@@ -99,27 +100,51 @@ class Application:
 
         return window
 
+    def _construct_scraper_command(self):
+        if OS == OSType.WINDOWS:
+            get_size = "$size = $Host.UI.RawUI.WindowSize;"
+            set_size = "$Host.UI.RawUI.WindowSize = $size;"
+            set_window_title = f"$Host.UI.RawUI.WindowTitle = '{SCRAPER_WINDOW_TITLE}';"
+            set_window_width = f"$size.Width = {SCRAPER_WINDOW_WIDTH};"
+            set_window_height = f"$size.Height = {SCRAPER_WINDOW_HEIGHT};"
+            set_background_color = (
+                f"$Host.UI.RawUI.BackgroundColor = '{SCRAPER_WINDOW_BACKGROUND_COLOR}';"
+            )
+            clear = "Clear-Host;"
+
+            if RUNNING_IN_EXE:
+                # The python executable is set as the executable itself in PyInstaller
+                scraper_cmd = f"{PYTHON_EXECUTABLE} --only-scrape | Out-Host -Paging"
+            else:
+                scraper_cmd = f"{PYTHON_EXECUTABLE} -m cs2tracker --only-scrape"
+
+            cmd = (
+                'start powershell -NoExit -Command "& {'
+                + set_window_title
+                + get_size
+                + set_window_width
+                + set_window_height
+                + set_size
+                + set_background_color
+                + clear
+                + scraper_cmd
+                + '}"'
+            )
+            return cmd
+        else:
+            # TODO: Implement for Linux
+            return ""
+
     def scrape_prices(self):
         """Scrape prices from the configured sources, print the total, and save the
         results to a file.
         """
         if OS == OSType.WINDOWS:
-            scraper_cmd = (
-                'start powershell -NoExit -Command "& {'
-                f"$Host.UI.RawUI.WindowTitle = '{SCRAPER_WINDOW_TITLE}'; "
-                "$size = $Host.UI.RawUI.WindowSize; "
-                f"$size.Width = {SCRAPER_WINDOW_WIDTH}; "
-                f"$size.Height = {SCRAPER_WINDOW_HEIGHT}; "
-                "$Host.UI.RawUI.WindowSize = $size; "
-                f"$Host.UI.RawUI.BackgroundColor = '{SCRAPER_WINDOW_BACKGROUND_COLOR}'; "
-                "Clear-Host; "
-                f"{PYTHON_EXECUTABLE} -m cs2tracker --only-scrape"
-                '}"'
-            )
+            scraper_cmd = self._construct_scraper_command()
             Popen(scraper_cmd, shell=True)
         else:
-            self.scraper.scrape_prices()
             # TODO: implement external window for Linux
+            self.scraper.scrape_prices()
 
     def _edit_config(self):
         """Edit the configuration file using the specified text editor."""
