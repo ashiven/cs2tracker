@@ -22,19 +22,19 @@
 
 ### Setup
 
-#### Windows Executable (No color support)
+#### Windows Executable *(no color support)*
 
-- Simply download the [latest executable](https://github.com/ashiven/cs2tracker/releases) and run it.
+- Simply [download the latest executable](https://github.com/ashiven/cs2tracker/releases/latest/download/cs2tracker-windows.zip) and run it.
 
 #### Install via Pip
 
-1. Install the program via pip:
+1. Install the program:
 
    ```bash
-   pip install --user cs2tracker
+   pip install cs2tracker
    ```
 
-2. Start the program:
+2. Run it:
    ```bash
    cs2tracker
    ```
