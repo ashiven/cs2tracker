@@ -40,10 +40,7 @@ jobs:
           echo "CURRENCY='$ZIP_PATH;./currency_converter'" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Build executable
-        run: pyinstaller --noconfirm --onefile --windowed --icon ${{ env.ICON }} --add-data ${{ env.CONFIG }} --add-data ${{ env.OUTPUT }} --add-data ${{ env.CURRENCY }} ${{ env.MAIN_FILE }}
-
-      - name: List output
-        run: ls -R output/
+        run: pyinstaller --noconfirm --onefile --windowed --name "cs2tracker" --icon ${{ env.ICON }} --add-data ${{ env.CONFIG }} --add-data ${{ env.OUTPUT }} --add-data ${{ env.CURRENCY }} ${{ env.MAIN_FILE }}
 
       - name: Create Artifact (Windows)
         if: matrix.os == 'windows-latest'
