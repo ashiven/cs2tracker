@@ -4,7 +4,6 @@ disable=
     line-too-long,
     missing-module-docstring,
     missing-class-docstring,
-    too-few-public-methods,
     consider-using-with,
     import-error,
     no-else-return

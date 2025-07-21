@@ -2,6 +2,7 @@ import enum
 import os
 import sys
 from datetime import datetime
+from shutil import copy
 
 try:
     from cs2tracker._version import version  # pylint: disable=E0611
@@ -18,11 +19,35 @@ OS = OSType.WINDOWS if sys.platform.startswith("win") else OSType.LINUX
 TEXT_EDITOR = "notepad" if OS == OSType.WINDOWS else "nano"
 PYTHON_EXECUTABLE = sys.executable
 
+
 MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_DIR = os.path.dirname(MODULE_DIR)
 OUTPUT_FILE = os.path.join(MODULE_DIR, "data", "output.csv")
 CONFIG_FILE = os.path.join(MODULE_DIR, "data", "config.ini")
 BATCH_FILE = os.path.join(MODULE_DIR, "data", "cs2tracker_scraper.bat")
+
+
+RUNNING_IN_EXE = getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS")
+
+if RUNNING_IN_EXE:
+    MEIPASS_DIR = sys._MEIPASS  # type: ignore  pylint: disable=protected-access
+    MODULE_DIR = MEIPASS_DIR
+    PROJECT_DIR = MEIPASS_DIR
+    CONFIG_FILE_SOURCE = os.path.join(MODULE_DIR, "data", "config.ini")
+    OUTPUT_FILE_SOURCE = os.path.join(MODULE_DIR, "data", "output.csv")
+
+    APP_DATA_DIR = os.path.join(os.path.expanduser("~"), "AppData", "Local")
+    DATA_DIR = os.path.join(APP_DATA_DIR, "cs2tracker", "data")
+    os.makedirs(DATA_DIR, exist_ok=True)
+
+    CONFIG_FILE = os.path.join(DATA_DIR, "config.ini")
+    OUTPUT_FILE = os.path.join(DATA_DIR, "output.csv")
+    BATCH_FILE = os.path.join(DATA_DIR, "cs2tracker_scraper.bat")
+    if not os.path.exists(CONFIG_FILE):
+        copy(CONFIG_FILE_SOURCE, CONFIG_FILE)
+    if not os.path.exists(OUTPUT_FILE):
+        copy(OUTPUT_FILE_SOURCE, OUTPUT_FILE)
+
 
 BANNER = """
     __   _____ _____  ______  ____    ____     __  __  _    ___  ____
