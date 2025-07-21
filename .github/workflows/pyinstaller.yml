@@ -1,4 +1,4 @@
-name: PyInstaller Executables
+name: PyInstaller
 
 on:
   push:
@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ['windows-latest'] # Currently, other OS's are not supported
+        os: ["windows-latest"] # Currently, other OS's are not supported
 
     env:
       MAIN_FILE: "./cs2tracker/__main__.py"
@@ -22,15 +22,15 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-  
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-  
+          python-version: "3.11"
+
       - name: Install Python dependencies
         run: pip install -r requirements.txt
-  
+
       - name: Install PyInstaller
         run: pip install pyinstaller
 
@@ -38,13 +38,13 @@ jobs:
         run: |
           CURRENCY_PATH=$(python -c "import currency_converter, os; print(os.path.join(os.path.dirname(currency_converter.__file__), 'eurofxref-hist.zip'))")
           echo "CURRENCY=$CURRENCY_PATH;./currency_converter" >> $GITHUB_ENV
-  
+
       - name: Build executable
         run: pyinstaller --noconfirm --onefile --windowed --icon ${{ env.ICON }} --add-data ${{ env.CONFIG }} --add-data ${{ env.OUTPUT }} --add-data ${{ env.CURRENCY }} ${{ env.MAIN_FILE }}
-  
+
       - name: Create Artifact (Windows)
         if: matrix.os == 'windows-latest'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: windows-executable
           path: dist/
