@@ -30,18 +30,19 @@ RUNNING_IN_EXE = getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS")
 if RUNNING_IN_EXE:
     PROJECT_DIR = MODULE_DIR = sys._MEIPASS  # type: ignore  pylint: disable=protected-access
     CONFIG_FILE_SOURCE = os.path.join(MODULE_DIR, "data", "config.ini")
-    OUPUT_FILE_SOURCE = os.path.join(MODULE_DIR, "data", "output.csv")
+    OUTPUT_FILE_SOURCE = os.path.join(MODULE_DIR, "data", "output.csv")
 
     APP_DATA_DIR = os.path.join(os.path.expanduser("~"), "AppData", "Local")
     DATA_DIR = os.path.join(APP_DATA_DIR, "cs2tracker", "data")
+    os.makedirs(DATA_DIR, exist_ok=True)
+
     CONFIG_FILE = os.path.join(DATA_DIR, "config.ini")
     OUTPUT_FILE = os.path.join(DATA_DIR, "output.csv")
     BATCH_FILE = os.path.join(DATA_DIR, "cs2tracker_scraper.bat")
-
     if not os.path.exists(CONFIG_FILE):
         copy(CONFIG_FILE_SOURCE, CONFIG_FILE)
     if not os.path.exists(OUTPUT_FILE):
-        copy(OUPUT_FILE_SOURCE, OUTPUT_FILE)
+        copy(OUTPUT_FILE_SOURCE, OUTPUT_FILE)
 
 BANNER = """
     __   _____ _____  ______  ____    ____     __  __  _    ___  ____
