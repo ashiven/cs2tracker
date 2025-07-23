@@ -1,3 +1,4 @@
+import ctypes
 import tkinter as tk
 from subprocess import Popen
 from threading import Thread
@@ -9,6 +10,7 @@ from matplotlib.dates import DateFormatter
 
 from cs2tracker.constants import (
     CONFIG_FILE,
+    ICON_FILE,
     OS,
     OUTPUT_FILE,
     PYTHON_EXECUTABLE,
@@ -18,8 +20,9 @@ from cs2tracker.constants import (
 )
 from cs2tracker.scraper import Scraper
 
-WINDOW_TITLE = "CS2Tracker"
-WINDOW_SIZE = "450x380"
+APPLICATION_NAME = "CS2Tracker"
+
+WINDOW_SIZE = "500x450"
 BACKGROUND_COLOR = "#1e1e1e"
 BUTTON_COLOR = "#3c3f41"
 BUTTON_HOVER_COLOR = "#505354"
@@ -27,9 +30,8 @@ BUTTON_ACTIVE_COLOR = "#5c5f61"
 FONT_STYLE = "Segoe UI"
 FONT_COLOR = "white"
 
-SCRAPER_WINDOW_TITLE = "CS2Tracker"
 SCRAPER_WINDOW_HEIGHT = 40
-SCRAPER_WINDOW_WIDTH = 100
+SCRAPER_WINDOW_WIDTH = 120
 SCRAPER_WINDOW_BACKGROUND_COLOR = "Black"
 
 
@@ -58,21 +60,42 @@ class Application:
         button.bind("<Leave>", lambda _: button.config(bg=BUTTON_COLOR))
         return button
 
+    def _add_checkbox(self, frame, text, variable, command):
+        checkbox = tk.Checkbutton(
+            frame,
+            text=text,
+            variable=variable,
+            command=command,
+            bg=BACKGROUND_COLOR,
+            fg=FONT_COLOR,
+            selectcolor=BUTTON_COLOR,
+            activebackground=BACKGROUND_COLOR,
+            font=(FONT_STYLE, 10),
+            anchor="w",
+            padx=20,
+        )
+        checkbox.pack(fill="x", anchor="w", pady=2)
+
     def _configure_window(self):
         """Configure the main application window UI and add buttons for the main
         functionalities.
         """
         window = tk.Tk()
-        window.title(WINDOW_TITLE)
+        window.title(APPLICATION_NAME)
         window.geometry(WINDOW_SIZE)
         window.configure(bg=BACKGROUND_COLOR)
+        if OS == OSType.WINDOWS:
+            app_id = "cs2tracker.unique.id"
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(app_id)
+        icon = tk.PhotoImage(file=ICON_FILE)
+        window.wm_iconphoto(False, icon)
 
         frame = tk.Frame(window, bg=BACKGROUND_COLOR, padx=30, pady=30)
         frame.pack(expand=True, fill="both")
 
         label = tk.Label(
             frame,
-            text=f"Welcome to {WINDOW_TITLE}!",
+            text=f"Welcome to {APPLICATION_NAME}!",
             font=(FONT_STYLE, 16, "bold"),
             fg=FONT_COLOR,
             bg=BACKGROUND_COLOR,
@@ -84,30 +107,46 @@ class Application:
         self._add_button(frame, "Show History (Chart)", self._draw_plot)
         self._add_button(frame, "Show History (File)", self._edit_log_file)
 
+        checkbox_frame = tk.Frame(frame, bg=BACKGROUND_COLOR)
+        checkbox_frame.pack(pady=(20, 0), fill="x")
+
         background_checkbox_value = tk.BooleanVar(value=self.scraper.identify_background_task())
-        background_checkbox = tk.Checkbutton(
-            frame,
-            text="Daily Background Calculation",
-            variable=background_checkbox_value,
-            command=lambda: self._toggle_background_task(background_checkbox_value.get()),
-            bg=BACKGROUND_COLOR,
-            fg=FONT_COLOR,
-            selectcolor=BUTTON_COLOR,
-            activebackground=BACKGROUND_COLOR,
-            font=(FONT_STYLE, 10),
+        self._add_checkbox(
+            checkbox_frame,
+            "Daily Background Calculations",
+            background_checkbox_value,
+            lambda: self._toggle_background_task(background_checkbox_value.get()),
         )
-        background_checkbox.pack(pady=20)
+
+        discord_webhook_value = tk.BooleanVar(
+            value=self.scraper.config.getboolean(
+                "App Settings", "discord_notifications", fallback=False
+            )
+        )
+        self._add_checkbox(
+            checkbox_frame,
+            "Receive Discord Notifications",
+            discord_webhook_value,
+            lambda: self._toggle_discord_webhook(discord_webhook_value.get()),
+        )
+
+        use_proxy_checkbox_value = tk.BooleanVar(
+            value=self.scraper.config.getboolean("App Settings", "use_proxy", fallback=False)
+        )
+        self._add_checkbox(
+            checkbox_frame,
+            "Proxy Requests",
+            use_proxy_checkbox_value,
+            lambda: self._toggle_use_proxy(use_proxy_checkbox_value.get()),
+        )
 
         return window
 
     def _construct_scraper_command_windows(self):
         """Construct the command to run the scraper in a new window for Windows."""
-        set_utf8_encoding = (
-            "[Console]::InputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8;"
-        )
         get_size = "$size = $Host.UI.RawUI.WindowSize;"
         set_size = "$Host.UI.RawUI.WindowSize = $size;"
-        set_window_title = f"$Host.UI.RawUI.WindowTitle = '{SCRAPER_WINDOW_TITLE}';"
+        set_window_title = f"$Host.UI.RawUI.WindowTitle = '{APPLICATION_NAME}';"
         set_window_width = (
             f"$size.Width = [Math]::Min({SCRAPER_WINDOW_WIDTH}, $Host.UI.RawUI.BufferSize.Width);"
         )
@@ -125,7 +164,6 @@ class Application:
 
         cmd = (
             'start powershell -NoExit -Command "& {'
-            + set_utf8_encoding
             + set_window_title
             + get_size
             + set_window_width
@@ -188,6 +226,14 @@ class Application:
     def _toggle_background_task(self, enabled: bool):
         """Toggle whether a daily price calculation should run in the background."""
         self.scraper.toggle_background_task(enabled)
+
+    def _toggle_use_proxy(self, enabled: bool):
+        """Toggle whether the scraper should use proxy servers for requests."""
+        self.scraper.toggle_use_proxy(enabled)
+
+    def _toggle_discord_webhook(self, enabled: bool):
+        """Toggle whether the scraper should send notifications to a Discord webhook."""
+        self.scraper.toggle_discord_webhook(enabled)
 
 
 def _popen_and_call(popen_args, callback):

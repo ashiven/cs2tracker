@@ -36,6 +36,10 @@ PRICE_INFO = "Owned: {:<10}  Steam market price: ${:<10}  Total: ${:<10}\n"
 HTTP_PROXY_URL = "http://{}:@smartproxy.crawlbase.com:8012"
 HTTPS_PROXY_URL = "http://{}:@smartproxy.crawlbase.com:8012"
 
+DC_WEBHOOK_USERNAME = "CS2Tracker"
+DC_WEBHOOK_AVATAR_URL = "https://img.icons8.com/?size=100&id=uWQJp2tLXUH6&format=png&color=000000"
+DC_RECENT_HISTORY_LIMIT = 5
+
 WIN_BACKGROUND_TASK_NAME = "CS2Tracker Daily Calculation"
 WIN_BACKGROUND_TASK_SCHEDULE = "DAILY"
 WIN_BACKGROUND_TASK_TIME = "12:00"
@@ -97,6 +101,7 @@ class Scraper:
 
         self._print_total()
         self._save_price_log()
+        self._send_discord_notification()
 
         # Reset totals for next run
         self.usd_total, self.eur_total = 0, 0
@@ -122,6 +127,9 @@ class Scraper:
 
         This will append a new entry to the output file if no entry has been made for
         today.
+
+        :raises FileNotFoundError: If the output file does not exist.
+        :raises IOError: If there is an error writing to the output file.
         """
         with open(OUTPUT_FILE, "r", encoding="utf-8") as price_logs:
             price_logs_reader = csv.reader(price_logs)
@@ -157,6 +165,8 @@ class Scraper:
         data is used for drawing the plot of past prices.
 
         :return: A tuple containing three lists: dates, dollar prices, and euro prices.
+        :raises FileNotFoundError: If the output file does not exist.
+        :raises IOError: If there is an error reading the output file.
         """
         dates, dollars, euros = [], [], []
         with open(OUTPUT_FILE, "r", encoding="utf-8") as price_logs:
@@ -173,6 +183,82 @@ class Scraper:
 
         return dates, dollars, euros
 
+    def _construct_recent_calculations_embeds(self):
+        """
+        Construct the embeds for the Discord message that will be sent after a price
+        calculation has been made.
+
+        :return: A list of embeds for the Discord message.
+        """
+        dates, usd_logs, eur_logs = self.read_price_log()
+        dates, usd_logs, eur_logs = reversed(dates), reversed(usd_logs), reversed(eur_logs)
+
+        date_history, usd_history, eur_history = [], [], []
+        for date, usd_log, eur_log in zip(dates, usd_logs, eur_logs):
+            if len(date_history) >= DC_RECENT_HISTORY_LIMIT:
+                break
+            date_history.append(date.strftime("%Y-%m-%d"))
+            usd_history.append(f"${usd_log:.2f}")
+            eur_history.append(f"€{eur_log:.2f}")
+
+        date_history = "\n".join(date_history)
+        usd_history = "\n".join(usd_history)
+        eur_history = "\n".join(eur_history)
+
+        embeds = [
+            {
+                "title": "📊 Recent Price History",
+                "color": 5814783,
+                "fields": [
+                    {
+                        "name": "Date",
+                        "value": date_history,
+                        "inline": True,
+                    },
+                    {
+                        "name": "USD Total",
+                        "value": usd_history,
+                        "inline": True,
+                    },
+                    {
+                        "name": "EUR Total",
+                        "value": eur_history,
+                        "inline": True,
+                    },
+                ],
+            }
+        ]
+
+        return embeds
+
+    def _send_discord_notification(self):
+        """Send a message to a Discord webhook if notifications are enabled in the
+        config file and a webhook URL is provided.
+        """
+        discord_notifications = self.config.getboolean(
+            "App Settings", "discord_notifications", fallback=False
+        )
+        webhook_url = self.config.get("User Settings", "discord_webhook_url", fallback=None)
+        webhook_url = None if webhook_url in ("None", "") else webhook_url
+
+        if discord_notifications and webhook_url:
+            embeds = self._construct_recent_calculations_embeds()
+            try:
+                response = self.session.post(
+                    url=webhook_url,
+                    json={
+                        "embeds": embeds,
+                        "username": DC_WEBHOOK_USERNAME,
+                        "avatar_url": DC_WEBHOOK_AVATAR_URL,
+                    },
+                )
+                response.raise_for_status()
+                self.console.print("[bold steel_blue3][+] Discord notification sent.\n")
+            except RequestException as error:
+                self.console.print(f"[bold red][!] Failed to send Discord notification: {error}\n")
+            except Exception as error:
+                self.console.print(f"[bold red][!] An unexpected error occurred: {error}\n")
+
     @retry(stop=stop_after_attempt(10))
     def _get_page(self, url):
         """
@@ -184,8 +270,8 @@ class Scraper:
         :raises RequestException: If the request fails.
         :raises RetryError: If the retry limit is reached.
         """
-        use_proxy = self.config.getboolean("Settings", "Use_Proxy", fallback=False)
-        api_key = self.config.get("Settings", "API_Key", fallback=None)
+        use_proxy = self.config.getboolean("App Settings", "use_proxy", fallback=False)
+        api_key = self.config.get("User Settings", "api_key", fallback=None)
         api_key = None if api_key in ("None", "") else api_key
         if use_proxy and api_key:
             page = self.session.get(
@@ -319,7 +405,7 @@ class Scraper:
             self.console.print(PRICE_INFO.format(owned, price_usd, price_usd_owned))
             case_usd_total += price_usd_owned
 
-            if not self.config.getboolean("Settings", "Use_Proxy", fallback=False):
+            if not self.config.getboolean("App Settings", "use_proxy", fallback=False):
                 time.sleep(1)
 
         return case_usd_total
@@ -405,6 +491,35 @@ class Scraper:
         else:
             # TODO: implement toggle for cron jobs
             pass
+
+    def toggle_use_proxy(self, enabled: bool):
+        """
+        Toggle the use of proxies for requests. This will update the configuration file.
+
+        :param enabled: If True, proxies will be used; if False, they will not be used.
+        """
+        self.config.set("App Settings", "use_proxy", str(enabled))
+        with open(CONFIG_FILE, "w", encoding="utf-8") as config_file:
+            self.config.write(config_file)
+
+        self.console.print(
+            f"[bold green]{'[+] Enabled' if enabled else '[-] Disabled'} proxy usage for requests."
+        )
+
+    def toggle_discord_webhook(self, enabled: bool):
+        """
+        Toggle the use of a Discord webhook to notify users of price calculations.
+
+        :param enabled: If True, the webhook will be used; if False, it will not be
+            used.
+        """
+        self.config.set("App Settings", "discord_notifications", str(enabled))
+        with open(CONFIG_FILE, "w", encoding="utf-8") as config_file:
+            self.config.write(config_file)
+
+        self.console.print(
+            f"[bold green]{'[+] Enabled' if enabled else '[-] Disabled'} Discord webhook notifications."
+        )
 
 
 if __name__ == "__main__":
