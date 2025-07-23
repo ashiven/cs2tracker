@@ -20,7 +20,7 @@ def main():
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     # Set output encoding to UTF-8 with BOM for Windows compatibility
-    if OS == OSType.WINDOWS:
+    if OS == OSType.WINDOWS and sys.stdout is not None:
         sys.stdout.reconfigure(encoding="utf-8-sig")  # type: ignore
 
     console = PaddedConsole()
