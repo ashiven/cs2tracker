@@ -3,7 +3,7 @@ import sys
 import urllib3
 
 from cs2tracker.application import Application
-from cs2tracker.constants import AUTHOR_STRING, BANNER
+from cs2tracker.constants import AUTHOR_STRING, BANNER, OS, OSType
 from cs2tracker.padded_console import PaddedConsole
 from cs2tracker.scraper import Scraper
 
@@ -19,8 +19,9 @@ def main():
     # Disable warnings for proxy requests
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-    # Set output encoding to UTF-8 with BOM for Windows compatibility
-    sys.stdout.reconfigure(encoding="utf-8-sig")  # type: ignore
+    if OS == OSType.WINDOWS:
+        # Set output encoding to UTF-8 with BOM for Windows compatibility
+        sys.stdout.reconfigure(encoding="utf-8-sig")  # type: ignore
 
     console = PaddedConsole()
     console.print(f"[bold yellow]{BANNER}\n{AUTHOR_STRING}\n")

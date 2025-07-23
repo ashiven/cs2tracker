@@ -122,6 +122,9 @@ class Scraper:
 
         This will append a new entry to the output file if no entry has been made for
         today.
+
+        :raises FileNotFoundError: If the output file does not exist.
+        :raises IOError: If there is an error writing to the output file.
         """
         with open(OUTPUT_FILE, "r", encoding="utf-8") as price_logs:
             price_logs_reader = csv.reader(price_logs)
@@ -157,6 +160,8 @@ class Scraper:
         data is used for drawing the plot of past prices.
 
         :return: A tuple containing three lists: dates, dollar prices, and euro prices.
+        :raises FileNotFoundError: If the output file does not exist.
+        :raises IOError: If there is an error reading the output file.
         """
         dates, dollars, euros = [], [], []
         with open(OUTPUT_FILE, "r", encoding="utf-8") as price_logs:
