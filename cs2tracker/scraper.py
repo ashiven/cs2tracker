@@ -38,6 +38,7 @@ HTTPS_PROXY_URL = "http://{}:@smartproxy.crawlbase.com:8012"
 
 DC_WEBHOOK_USERNAME = "CS2Tracker"
 DC_WEBHOOK_AVATAR_URL = "https://img.icons8.com/?size=100&id=uWQJp2tLXUH6&format=png&color=000000"
+DC_RECENT_HISTORY_LIMIT = 4
 
 WIN_BACKGROUND_TASK_NAME = "CS2Tracker Daily Calculation"
 WIN_BACKGROUND_TASK_SCHEDULE = "DAILY"
@@ -194,7 +195,7 @@ class Scraper:
 
         date_history, usd_history, eur_history = [], [], []
         for date, usd_log, eur_log in zip(dates, usd_logs, eur_logs):
-            if len(date_history) > 4:
+            if len(date_history) > DC_RECENT_HISTORY_LIMIT:
                 break
             date_history.append(datetime.strftime(date, "%Y-%m-%d"))
             usd_history.append(f"${usd_log:.2f}")
@@ -239,17 +240,24 @@ class Scraper:
         )
         webhook_url = self.config.get("User Settings", "discord_webhook_url", fallback=None)
         webhook_url = None if webhook_url in ("None", "") else webhook_url
+
         if discord_notifications and webhook_url:
             embeds = self._construct_recent_calculations_embeds()
-            self.session.post(
-                url=webhook_url,
-                json={
-                    "embeds": embeds,
-                    "username": DC_WEBHOOK_USERNAME,
-                    "avatar_url": DC_WEBHOOK_AVATAR_URL,
-                },
-            )
-            self.console.print("[bold steel_blue3][+] Discord notification sent.\n")
+            try:
+                response = self.session.post(
+                    url=webhook_url,
+                    json={
+                        "embeds": embeds,
+                        "username": DC_WEBHOOK_USERNAME,
+                        "avatar_url": DC_WEBHOOK_AVATAR_URL,
+                    },
+                )
+                response.raise_for_status()
+                self.console.print("[bold steel_blue3][+] Discord notification sent.\n")
+            except RequestException as error:
+                self.console.print(f"[bold red][!] Failed to send Discord notification: {error}\n")
+            except Exception as error:
+                self.console.print(f"[bold red][!] An unexpected error occurred: {error}\n")
 
     @retry(stop=stop_after_attempt(10))
     def _get_page(self, url):
