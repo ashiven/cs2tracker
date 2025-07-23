@@ -38,7 +38,7 @@ HTTPS_PROXY_URL = "http://{}:@smartproxy.crawlbase.com:8012"
 
 DC_WEBHOOK_USERNAME = "CS2Tracker"
 DC_WEBHOOK_AVATAR_URL = "https://img.icons8.com/?size=100&id=uWQJp2tLXUH6&format=png&color=000000"
-DC_RECENT_HISTORY_LIMIT = 4
+DC_RECENT_HISTORY_LIMIT = 5
 
 WIN_BACKGROUND_TASK_NAME = "CS2Tracker Daily Calculation"
 WIN_BACKGROUND_TASK_SCHEDULE = "DAILY"
@@ -195,9 +195,9 @@ class Scraper:
 
         date_history, usd_history, eur_history = [], [], []
         for date, usd_log, eur_log in zip(dates, usd_logs, eur_logs):
-            if len(date_history) > DC_RECENT_HISTORY_LIMIT:
+            if len(date_history) >= DC_RECENT_HISTORY_LIMIT:
                 break
-            date_history.append(datetime.strftime(date, "%Y-%m-%d"))
+            date_history.append(date.strftime("%Y-%m-%d"))
             usd_history.append(f"${usd_log:.2f}")
             eur_history.append(f"€{eur_log:.2f}")
 
@@ -256,7 +256,7 @@ class Scraper:
                 self.console.print("[bold steel_blue3][+] Discord notification sent.\n")
             except RequestException as error:
                 self.console.print(f"[bold red][!] Failed to send Discord notification: {error}\n")
-            except Exception as error:
+            except BaseException as error:
                 self.console.print(f"[bold red][!] An unexpected error occurred: {error}\n")
 
     @retry(stop=stop_after_attempt(10))

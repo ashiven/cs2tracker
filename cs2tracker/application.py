@@ -20,7 +20,8 @@ from cs2tracker.constants import (
 )
 from cs2tracker.scraper import Scraper
 
-WINDOW_TITLE = "CS2Tracker"
+APPLICATION_NAME = "CS2Tracker"
+
 WINDOW_SIZE = "500x450"
 BACKGROUND_COLOR = "#1e1e1e"
 BUTTON_COLOR = "#3c3f41"
@@ -29,7 +30,6 @@ BUTTON_ACTIVE_COLOR = "#5c5f61"
 FONT_STYLE = "Segoe UI"
 FONT_COLOR = "white"
 
-SCRAPER_WINDOW_TITLE = "CS2Tracker"
 SCRAPER_WINDOW_HEIGHT = 40
 SCRAPER_WINDOW_WIDTH = 120
 SCRAPER_WINDOW_BACKGROUND_COLOR = "Black"
@@ -81,23 +81,21 @@ class Application:
         functionalities.
         """
         window = tk.Tk()
-        window.title(WINDOW_TITLE)
+        window.title(APPLICATION_NAME)
         window.geometry(WINDOW_SIZE)
         window.configure(bg=BACKGROUND_COLOR)
         if OS == OSType.WINDOWS:
             app_id = "cs2tracker.unique.id"
             ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(app_id)
-            icon = tk.PhotoImage(file=ICON_FILE)
-            window.wm_iconphoto(False, icon)
-        else:
-            window.iconbitmap(rf"{ICON_FILE}")
+        icon = tk.PhotoImage(file=ICON_FILE)
+        window.wm_iconphoto(False, icon)
 
         frame = tk.Frame(window, bg=BACKGROUND_COLOR, padx=30, pady=30)
         frame.pack(expand=True, fill="both")
 
         label = tk.Label(
             frame,
-            text=f"Welcome to {WINDOW_TITLE}!",
+            text=f"Welcome to {APPLICATION_NAME}!",
             font=(FONT_STYLE, 16, "bold"),
             fg=FONT_COLOR,
             bg=BACKGROUND_COLOR,
@@ -148,7 +146,7 @@ class Application:
         """Construct the command to run the scraper in a new window for Windows."""
         get_size = "$size = $Host.UI.RawUI.WindowSize;"
         set_size = "$Host.UI.RawUI.WindowSize = $size;"
-        set_window_title = f"$Host.UI.RawUI.WindowTitle = '{SCRAPER_WINDOW_TITLE}';"
+        set_window_title = f"$Host.UI.RawUI.WindowTitle = '{APPLICATION_NAME}';"
         set_window_width = (
             f"$size.Width = [Math]::Min({SCRAPER_WINDOW_WIDTH}, $Host.UI.RawUI.BufferSize.Width);"
         )
