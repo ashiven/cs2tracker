@@ -1,3 +1,4 @@
+import ctypes
 import tkinter as tk
 from subprocess import Popen
 from threading import Thread
@@ -9,6 +10,7 @@ from matplotlib.dates import DateFormatter
 
 from cs2tracker.constants import (
     CONFIG_FILE,
+    ICON_FILE,
     OS,
     OUTPUT_FILE,
     PYTHON_EXECUTABLE,
@@ -19,7 +21,7 @@ from cs2tracker.constants import (
 from cs2tracker.scraper import Scraper
 
 WINDOW_TITLE = "CS2Tracker"
-WINDOW_SIZE = "450x380"
+WINDOW_SIZE = "450x400"
 BACKGROUND_COLOR = "#1e1e1e"
 BUTTON_COLOR = "#3c3f41"
 BUTTON_HOVER_COLOR = "#505354"
@@ -70,7 +72,7 @@ class Application:
             activebackground=BACKGROUND_COLOR,
             font=(FONT_STYLE, 10),
         )
-        checkbox.pack(pady=5)
+        checkbox.pack(pady=2)
 
     def _configure_window(self):
         """Configure the main application window UI and add buttons for the main
@@ -80,6 +82,14 @@ class Application:
         window.title(WINDOW_TITLE)
         window.geometry(WINDOW_SIZE)
         window.configure(bg=BACKGROUND_COLOR)
+
+        if OS == OSType.WINDOWS:
+            app_id = "cs2tracker.unique.id"
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(app_id)
+            icon = tk.PhotoImage(file=ICON_FILE)
+            window.wm_iconphoto(False, icon)
+        else:
+            window.iconbitmap(rf"{ICON_FILE}")
 
         frame = tk.Frame(window, bg=BACKGROUND_COLOR, padx=30, pady=30)
         frame.pack(expand=True, fill="both")
@@ -106,8 +116,20 @@ class Application:
             lambda: self._toggle_background_task(background_checkbox_value.get()),
         )
 
+        discord_webhook_value = tk.BooleanVar(
+            value=self.scraper.config.getboolean(
+                "Settings", "discord_notifications", fallback=False
+            )
+        )
+        self._add_checkbox(
+            frame,
+            "Receive Discord Notifications",
+            discord_webhook_value,
+            lambda: self._toggle_discord_webhook(discord_webhook_value.get()),
+        )
+
         use_proxy_checkbox_value = tk.BooleanVar(
-            value=self.scraper.config.getboolean("Settings", "Use_Proxy", fallback=False)
+            value=self.scraper.config.getboolean("Settings", "use_proxy", fallback=False)
         )
         self._add_checkbox(
             frame,
@@ -206,6 +228,10 @@ class Application:
     def _toggle_use_proxy(self, enabled: bool):
         """Toggle whether the scraper should use proxy servers for requests."""
         self.scraper.toggle_use_proxy(enabled)
+
+    def _toggle_discord_webhook(self, enabled: bool):
+        """Toggle whether the scraper should send notifications to a Discord webhook."""
+        self.scraper.toggle_discord_webhook(enabled)
 
 
 def _popen_and_call(popen_args, callback):

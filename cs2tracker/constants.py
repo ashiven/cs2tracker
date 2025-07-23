@@ -22,6 +22,7 @@ PYTHON_EXECUTABLE = sys.executable
 
 MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_DIR = os.path.dirname(MODULE_DIR)
+ICON_FILE = os.path.join(PROJECT_DIR, "assets", "icon.png")
 OUTPUT_FILE = os.path.join(MODULE_DIR, "data", "output.csv")
 CONFIG_FILE = os.path.join(MODULE_DIR, "data", "config.ini")
 BATCH_FILE = os.path.join(MODULE_DIR, "data", "cs2tracker_scraper.bat")
@@ -33,6 +34,7 @@ if RUNNING_IN_EXE:
     MEIPASS_DIR = sys._MEIPASS  # type: ignore  pylint: disable=protected-access
     MODULE_DIR = MEIPASS_DIR
     PROJECT_DIR = MEIPASS_DIR
+    ICON_FILE = os.path.join(PROJECT_DIR, "assets", "icon.png")
     CONFIG_FILE_SOURCE = os.path.join(MODULE_DIR, "data", "config.ini")
     OUTPUT_FILE_SOURCE = os.path.join(MODULE_DIR, "data", "output.csv")
 

@@ -36,6 +36,11 @@ PRICE_INFO = "Owned: {:<10}  Steam market price: ${:<10}  Total: ${:<10}\n"
 HTTP_PROXY_URL = "http://{}:@smartproxy.crawlbase.com:8012"
 HTTPS_PROXY_URL = "http://{}:@smartproxy.crawlbase.com:8012"
 
+DISCORD_WEBHOOK_USERNAME = "CS2Tracker"
+DISCORD_WEBHOOK_AVATAR_URL = (
+    "https://img.icons8.com/?size=100&id=uWQJp2tLXUH6&format=png&color=000000",
+)
+
 WIN_BACKGROUND_TASK_NAME = "CS2Tracker Daily Calculation"
 WIN_BACKGROUND_TASK_SCHEDULE = "DAILY"
 WIN_BACKGROUND_TASK_TIME = "12:00"
@@ -97,6 +102,7 @@ class Scraper:
 
         self._print_total()
         self._save_price_log()
+        self._send_discord_notification()
 
         # Reset totals for next run
         self.usd_total, self.eur_total = 0, 0
@@ -178,6 +184,35 @@ class Scraper:
 
         return dates, dollars, euros
 
+    def _construct_recent_calculations_message(self):
+        """
+        Constructs a message containing the most recent price calculations from the
+        price log file. This message is used for Discord notifications.
+
+        :return: A string containing the formatted message with recent calculations.
+        """
+        return ""
+
+    def _send_discord_notification(self):
+        """Send a message to a Discord webhook if notifications are enabled in the
+        config file and a webhook URL is provided.
+        """
+        discord_notifications = self.config.getboolean(
+            "Settings", "discord_notifications", fallback=False
+        )
+        webhook_url = self.config.get("Settings", "discord_webhook_url", fallback=None)
+        webhook_url = None if webhook_url in ("None", "") else webhook_url
+        if discord_notifications and webhook_url:
+            content = self._construct_recent_calculations_message()
+            self.session.post(
+                url=webhook_url,
+                json={
+                    "content": content,
+                    "username": DISCORD_WEBHOOK_USERNAME,
+                    "avatar_url": DISCORD_WEBHOOK_AVATAR_URL,
+                },
+            )
+
     @retry(stop=stop_after_attempt(10))
     def _get_page(self, url):
         """
@@ -189,7 +224,7 @@ class Scraper:
         :raises RequestException: If the request fails.
         :raises RetryError: If the retry limit is reached.
         """
-        use_proxy = self.config.getboolean("Settings", "Use_Proxy", fallback=False)
+        use_proxy = self.config.getboolean("Settings", "use_proxy", fallback=False)
         api_key = self.config.get("Settings", "API_Key", fallback=None)
         api_key = None if api_key in ("None", "") else api_key
         if use_proxy and api_key:
@@ -324,7 +359,7 @@ class Scraper:
             self.console.print(PRICE_INFO.format(owned, price_usd, price_usd_owned))
             case_usd_total += price_usd_owned
 
-            if not self.config.getboolean("Settings", "Use_Proxy", fallback=False):
+            if not self.config.getboolean("Settings", "use_proxy", fallback=False):
                 time.sleep(1)
 
         return case_usd_total
@@ -417,12 +452,27 @@ class Scraper:
 
         :param enabled: If True, proxies will be used; if False, they will not be used.
         """
-        self.config.set("Settings", "Use_Proxy", str(enabled))
+        self.config.set("Settings", "use_proxy", str(enabled))
         with open(CONFIG_FILE, "w", encoding="utf-8") as config_file:
             self.config.write(config_file)
 
         self.console.print(
             f"[bold green]{'[+] Enabled' if enabled else '[-] Disabled'} proxy usage for requests."
+        )
+
+    def toggle_discord_webhook(self, enabled: bool):
+        """
+        Toggle the use of a Discord webhook to notify users of price calculations.
+
+        :param enabled: If True, the webhook will be used; if False, it will not be
+            used.
+        """
+        self.config.set("Settings", "discord_notifications", str(enabled))
+        with open(CONFIG_FILE, "w", encoding="utf-8") as config_file:
+            self.config.write(config_file)
+
+        self.console.print(
+            f"[bold green]{'[+] Enabled' if enabled else '[-] Disabled'} Discord webhook notifications."
         )
 
 
