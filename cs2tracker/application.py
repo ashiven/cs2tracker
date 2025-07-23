@@ -31,7 +31,7 @@ FONT_COLOR = "white"
 
 SCRAPER_WINDOW_TITLE = "CS2Tracker"
 SCRAPER_WINDOW_HEIGHT = 40
-SCRAPER_WINDOW_WIDTH = 100
+SCRAPER_WINDOW_WIDTH = 120
 SCRAPER_WINDOW_BACKGROUND_COLOR = "Black"
 
 
@@ -122,7 +122,7 @@ class Application:
 
         discord_webhook_value = tk.BooleanVar(
             value=self.scraper.config.getboolean(
-                "Settings", "discord_notifications", fallback=False
+                "App Settings", "discord_notifications", fallback=False
             )
         )
         self._add_checkbox(
@@ -133,7 +133,7 @@ class Application:
         )
 
         use_proxy_checkbox_value = tk.BooleanVar(
-            value=self.scraper.config.getboolean("Settings", "use_proxy", fallback=False)
+            value=self.scraper.config.getboolean("App Settings", "use_proxy", fallback=False)
         )
         self._add_checkbox(
             checkbox_frame,

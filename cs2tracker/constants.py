@@ -6,8 +6,10 @@ from shutil import copy
 
 try:
     from cs2tracker._version import version  # pylint: disable=E0611
+
+    version = f"v{version}"
 except ImportError:
-    version = "0.0.0"
+    version = "latest"
 
 
 class OSType(enum.Enum):
@@ -62,7 +64,7 @@ BANNER = """
 
 """
 AUTHOR_STRING = (
-    f"Version: v{version} - {datetime.today().strftime('%Y/%m/%d')} - Jannik Novak @ashiven\n"
+    f"Version: {version} - {datetime.today().strftime('%Y/%m/%d')} - Jannik Novak @ashiven\n"
 )
 
 
