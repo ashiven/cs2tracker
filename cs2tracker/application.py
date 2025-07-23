@@ -21,7 +21,7 @@ from cs2tracker.constants import (
 from cs2tracker.scraper import Scraper
 
 WINDOW_TITLE = "CS2Tracker"
-WINDOW_SIZE = "450x400"
+WINDOW_SIZE = "500x450"
 BACKGROUND_COLOR = "#1e1e1e"
 BUTTON_COLOR = "#3c3f41"
 BUTTON_HOVER_COLOR = "#505354"
@@ -71,8 +71,10 @@ class Application:
             selectcolor=BUTTON_COLOR,
             activebackground=BACKGROUND_COLOR,
             font=(FONT_STYLE, 10),
+            anchor="w",
+            padx=20,
         )
-        checkbox.pack(pady=2)
+        checkbox.pack(fill="x", anchor="w", pady=2)
 
     def _configure_window(self):
         """Configure the main application window UI and add buttons for the main
@@ -82,7 +84,6 @@ class Application:
         window.title(WINDOW_TITLE)
         window.geometry(WINDOW_SIZE)
         window.configure(bg=BACKGROUND_COLOR)
-
         if OS == OSType.WINDOWS:
             app_id = "cs2tracker.unique.id"
             ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(app_id)
@@ -108,10 +109,13 @@ class Application:
         self._add_button(frame, "Show History (Chart)", self._draw_plot)
         self._add_button(frame, "Show History (File)", self._edit_log_file)
 
+        checkbox_frame = tk.Frame(frame, bg=BACKGROUND_COLOR)
+        checkbox_frame.pack(pady=(20, 0), fill="x")
+
         background_checkbox_value = tk.BooleanVar(value=self.scraper.identify_background_task())
         self._add_checkbox(
-            frame,
-            "Daily Background Calculation",
+            checkbox_frame,
+            "Daily Background Calculations",
             background_checkbox_value,
             lambda: self._toggle_background_task(background_checkbox_value.get()),
         )
@@ -122,7 +126,7 @@ class Application:
             )
         )
         self._add_checkbox(
-            frame,
+            checkbox_frame,
             "Receive Discord Notifications",
             discord_webhook_value,
             lambda: self._toggle_discord_webhook(discord_webhook_value.get()),
@@ -132,7 +136,7 @@ class Application:
             value=self.scraper.config.getboolean("Settings", "use_proxy", fallback=False)
         )
         self._add_checkbox(
-            frame,
+            checkbox_frame,
             "Proxy Requests",
             use_proxy_checkbox_value,
             lambda: self._toggle_use_proxy(use_proxy_checkbox_value.get()),
