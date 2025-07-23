@@ -256,7 +256,7 @@ class Scraper:
                 self.console.print("[bold steel_blue3][+] Discord notification sent.\n")
             except RequestException as error:
                 self.console.print(f"[bold red][!] Failed to send Discord notification: {error}\n")
-            except BaseException as error:
+            except Exception as error:
                 self.console.print(f"[bold red][!] An unexpected error occurred: {error}\n")
 
     @retry(stop=stop_after_attempt(10))

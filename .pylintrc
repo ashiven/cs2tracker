@@ -6,4 +6,5 @@ disable=
     missing-class-docstring,
     consider-using-with,
     import-error,
-    no-else-return
+    no-else-return,
+    broad-exception-caught
