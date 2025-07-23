@@ -421,6 +421,10 @@ class Scraper:
         with open(CONFIG_FILE, "w", encoding="utf-8") as config_file:
             self.config.write(config_file)
 
+        self.console.print(
+            f"[bold green]{'[+] Enabled' if enabled else '[-] Disabled'} proxy usage for requests."
+        )
+
 
 if __name__ == "__main__":
     scraper = Scraper()
