@@ -22,7 +22,7 @@
 
 ### Setup
 
-#### Windows Executable *(no color support)*
+#### Windows Executable _(no color support)_
 
 - Simply [download the latest executable](https://github.com/ashiven/cs2tracker/releases/latest/download/cs2tracker-windows.zip) and run it.
 
@@ -45,7 +45,7 @@
 - `Edit Config` to change the specific numbers of each item you own and then save the config file.
 - `Show History` to see a price chart consisting of past calculations. A new data point is generated once a day upon running the program.
 - `Daily Background Calculation` to automatically run a daily calculation of your investment in the background and save the results such that they can later be viewed via `Show History`.
-- If you want to prevent your requests from being rate limited by the steamcommunity server, register for an API key on [Crawlbase](crawlbase.com) and enter it into the `API_Key` field in the config file. This will route every request through a different proxy server.
+- `Proxy Requests` to prevent your requests from being rate limited by the steamcommunity server. For this, you need to register for a free API key on [Crawlbase](crawlbase.com) and enter it into the `api_key` field in the config file.
 
 ---
 

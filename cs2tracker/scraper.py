@@ -411,6 +411,16 @@ class Scraper:
             # TODO: implement toggle for cron jobs
             pass
 
+    def toggle_use_proxy(self, enabled: bool):
+        """
+        Toggle the use of proxies for requests. This will update the configuration file.
+
+        :param enabled: If True, proxies will be used; if False, they will not be used.
+        """
+        self.config.set("Settings", "Use_Proxy", str(enabled))
+        with open(CONFIG_FILE, "w", encoding="utf-8") as config_file:
+            self.config.write(config_file)
+
 
 if __name__ == "__main__":
     scraper = Scraper()

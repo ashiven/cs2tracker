@@ -58,6 +58,20 @@ class Application:
         button.bind("<Leave>", lambda _: button.config(bg=BUTTON_COLOR))
         return button
 
+    def _add_checkbox(self, frame, text, variable, command):
+        checkbox = tk.Checkbutton(
+            frame,
+            text=text,
+            variable=variable,
+            command=command,
+            bg=BACKGROUND_COLOR,
+            fg=FONT_COLOR,
+            selectcolor=BUTTON_COLOR,
+            activebackground=BACKGROUND_COLOR,
+            font=(FONT_STYLE, 10),
+        )
+        checkbox.pack(pady=5)
+
     def _configure_window(self):
         """Configure the main application window UI and add buttons for the main
         functionalities.
@@ -85,18 +99,22 @@ class Application:
         self._add_button(frame, "Show History (File)", self._edit_log_file)
 
         background_checkbox_value = tk.BooleanVar(value=self.scraper.identify_background_task())
-        background_checkbox = tk.Checkbutton(
+        self._add_checkbox(
             frame,
-            text="Daily Background Calculation",
-            variable=background_checkbox_value,
-            command=lambda: self._toggle_background_task(background_checkbox_value.get()),
-            bg=BACKGROUND_COLOR,
-            fg=FONT_COLOR,
-            selectcolor=BUTTON_COLOR,
-            activebackground=BACKGROUND_COLOR,
-            font=(FONT_STYLE, 10),
+            "Daily Background Calculation",
+            background_checkbox_value,
+            lambda: self._toggle_background_task(background_checkbox_value.get()),
         )
-        background_checkbox.pack(pady=20)
+
+        use_proxy_checkbox_value = tk.BooleanVar(
+            value=self.scraper.config.getboolean("Settings", "Use_Proxy", fallback=False)
+        )
+        self._add_checkbox(
+            frame,
+            "Proxy Requests",
+            use_proxy_checkbox_value,
+            lambda: self._toggle_use_proxy(use_proxy_checkbox_value.get()),
+        )
 
         return window
 
@@ -184,6 +202,10 @@ class Application:
     def _toggle_background_task(self, enabled: bool):
         """Toggle whether a daily price calculation should run in the background."""
         self.scraper.toggle_background_task(enabled)
+
+    def _toggle_use_proxy(self, enabled: bool):
+        """Toggle whether the scraper should use proxy servers for requests."""
+        self.scraper.toggle_use_proxy(enabled)
 
 
 def _popen_and_call(popen_args, callback):
