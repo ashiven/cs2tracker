@@ -184,8 +184,8 @@ class Scraper:
 
     def _construct_recent_calculations_embeds(self):
         """
-        Construct the embeds for the Discord message that will be sent when after a
-        price calculation is made.
+        Construct the embeds for the Discord message that will be sent after a price
+        calculation has been made.
 
         :return: A list of embeds for the Discord message.
         """
