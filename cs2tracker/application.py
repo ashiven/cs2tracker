@@ -118,7 +118,7 @@ class Application:
             lambda: self._toggle_background_task(background_checkbox_value.get()),
         )
 
-        discord_webhook_value = tk.BooleanVar(
+        discord_webhook_checkbox_value = tk.BooleanVar(
             value=self.scraper.config.getboolean(
                 "App Settings", "discord_notifications", fallback=False
             )
@@ -126,8 +126,8 @@ class Application:
         self._add_checkbox(
             checkbox_frame,
             "Receive Discord Notifications",
-            discord_webhook_value,
-            lambda: self._toggle_discord_webhook(discord_webhook_value.get()),
+            discord_webhook_checkbox_value,
+            lambda: self._toggle_discord_webhook(discord_webhook_checkbox_value.get()),
         )
 
         use_proxy_checkbox_value = tk.BooleanVar(
