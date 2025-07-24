@@ -403,7 +403,8 @@ class Scraper:
         done by decoding the URL-encoded item name and formatting it into a search URL.
 
         :param item_href: The href of the item listing, typically ending with the item's
-            name. :return A URL string for the Steam Community Market page of the item.
+            name.
+        :return: A URL string for the Steam Community Market page of the item.
         """
         url_encoded_name = item_href.split("/")[-1]
         decoded_name = unquote(url_encoded_name)
