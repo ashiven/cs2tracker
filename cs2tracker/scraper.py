@@ -430,8 +430,8 @@ class Scraper:
             custom_item_title = custom_item_name.center(MAX_LINE_LEN, SEPARATOR)
             self.console.print(f"[bold magenta]{custom_item_title}\n")
 
-            custom_item_page = self._market_page_from_href(custom_item_href)
-            custom_item_page = self._get_page(custom_item_page)
+            custom_item_page_url = self._market_page_from_href(custom_item_href)
+            custom_item_page = self._get_page(custom_item_page_url)
             price_usd = self._parse_item_price(custom_item_page, custom_item_href)
             price_usd_owned = round(float(int(owned) * price_usd), 2)
 
