@@ -402,7 +402,8 @@ class Scraper:
         Convert an href of a Steam Community Market item to a market page URL. This is
         done by decoding the URL-encoded item name and formatting it into a search URL.
 
-        :return A URL string for the Steam Community Market page of the item.
+        :param item_href: The href of the item listing, typically ending with the item's
+            name. :return A URL string for the Steam Community Market page of the item.
         """
         url_encoded_name = item_href.split("/")[-1]
         decoded_name = unquote(url_encoded_name)
@@ -420,7 +421,7 @@ class Scraper:
         """
         custom_item_usd_total = 0
         for config_custom_item_name, owned_and_href in self.config.items("Custom Items"):
-            owned, custom_item_href = owned_and_href.split(" ")
+            owned, custom_item_href = owned_and_href.split(" ", 1)
             if int(owned) == 0:
                 continue
 
