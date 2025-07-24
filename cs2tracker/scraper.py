@@ -4,6 +4,7 @@ import time
 from configparser import ConfigParser
 from datetime import datetime
 from subprocess import DEVNULL, call
+from urllib.parse import unquote
 
 from bs4 import BeautifulSoup
 from bs4.element import Tag
@@ -60,7 +61,7 @@ class Scraper:
 
     def parse_config(self):
         """Parse the configuration file to read settings and user-owned items."""
-        self.config = ConfigParser()
+        self.config = ConfigParser(interpolation=None)
         self.config.read(CONFIG_FILE)
 
     def _start_session(self):
@@ -95,8 +96,17 @@ class Scraper:
                 "[bold red][!] Failed to scrape case prices. (Consider using proxies to prevent rate limiting)\n"
             )
 
+        custom_item_usd_total = 0
+        try:
+            custom_item_usd_total = self._scrape_custom_item_prices()
+        except (RequestException, AttributeError, RetryError, ValueError):
+            self.console.print(
+                "[bold red][!] Failed to scrape custom item prices. (Consider using proxies to prevent rate limiting)\n"
+            )
+
         self.usd_total += capsule_usd_total
         self.usd_total += case_usd_total
+        self.usd_total += custom_item_usd_total
         self.eur_total = CurrencyConverter().convert(self.usd_total, "USD", "EUR")
 
         self._print_total()
@@ -292,26 +302,26 @@ class Scraper:
 
         return page
 
-    def _parse_capsule_price(self, capsule_page, capsule_href):
+    def _parse_item_price(self, item_page, item_href):
         """
-        Parse the price of a capsule from the given page and href.
+        Parse the price of an item from the given steamcommunity market page and item
+        href.
 
-        :param capsule_page: The HTTP response object containing the capsule page
-            content.
-        :param capsule_href: The href of the capsule listing to find the price for.
-        :return: The price of the capsule as a float.
-        :raises ValueError: If the capsule listing or price span cannot be found.
+        :param item_page: The HTTP response object containing the item page content.
+        :param item_href: The href of the item listing to find the price for.
+        :return: The price of the item as a float.
+        :raises ValueError: If the item listing or price span cannot be found.
         """
-        capsule_soup = BeautifulSoup(capsule_page.content, "html.parser")
-        capsule_listing = capsule_soup.find("a", attrs={"href": f"{capsule_href}"})
-        if not isinstance(capsule_listing, Tag):
-            raise ValueError(f"Failed to find capsule listing: {capsule_href}")
+        item_soup = BeautifulSoup(item_page.content, "html.parser")
+        item_listing = item_soup.find("a", attrs={"href": f"{item_href}"})
+        if not isinstance(item_listing, Tag):
+            raise ValueError(f"Failed to find item listing: {item_href}")
 
-        price_span = capsule_listing.find("span", attrs={"class": "normal_price"})
-        if not isinstance(price_span, Tag):
-            raise ValueError(f"Failed to find price span in capsule listing: {capsule_href}")
+        item_price_span = item_listing.find("span", attrs={"class": "normal_price"})
+        if not isinstance(item_price_span, Tag):
+            raise ValueError(f"Failed to find price span in item listing: {item_href}")
 
-        price_str = price_span.text.split()[2]
+        price_str = item_price_span.text.split()[2]
         price = float(price_str.replace("$", ""))
 
         return price
@@ -330,7 +340,7 @@ class Scraper:
             hrefs, and names.
         """
         capsule_title = capsule_section.center(MAX_LINE_LEN, SEPARATOR)
-        self.console.print(f"[bold magenta]{capsule_title}")
+        self.console.print(f"[bold magenta]{capsule_title}\n")
 
         capsule_usd_total = 0
         capsule_page = self._get_page(capsule_info["page"])
@@ -340,7 +350,7 @@ class Scraper:
             if owned == 0:
                 continue
 
-            price_usd = self._parse_capsule_price(capsule_page, capsule_href)
+            price_usd = self._parse_item_price(capsule_page, capsule_href)
             price_usd_owned = round(float(owned * price_usd), 2)
 
             self.console.print(f"[bold deep_sky_blue4]{capsule_name}")
@@ -359,29 +369,6 @@ class Scraper:
 
         return capsule_usd_total
 
-    def _parse_case_price(self, case_page, case_href):
-        """
-        Parse the price of a case from the given page and href.
-
-        :param case_page: The HTTP response object containing the case page content.
-        :param case_href: The href of the case listing to find the price for.
-        :return: The price of the case as a float.
-        :raises ValueError: If the case listing or price span cannot be found.
-        """
-        case_soup = BeautifulSoup(case_page.content, "html.parser")
-        case_listing = case_soup.find("a", attrs={"href": case_href})
-        if not isinstance(case_listing, Tag):
-            raise ValueError(f"Failed to find case listing: {case_href}")
-
-        price_class = case_listing.find("span", attrs={"class": "normal_price"})
-        if not isinstance(price_class, Tag):
-            raise ValueError(f"Failed to find price class in case listing: {case_href}")
-
-        price_str = price_class.text.split()[2]
-        price = float(price_str.replace("$", ""))
-
-        return price
-
     def _scrape_case_prices(self):
         """
         Scrape prices for all cases defined in the configuration.
@@ -396,10 +383,10 @@ class Scraper:
 
             case_name = config_case_name.replace("_", " ").title()
             case_title = case_name.center(MAX_LINE_LEN, SEPARATOR)
-            self.console.print(f"[bold magenta]{case_title}")
+            self.console.print(f"[bold magenta]{case_title}\n")
 
             case_page = self._get_page(CASE_PAGES[case_index])
-            price_usd = self._parse_case_price(case_page, CASE_HREFS[case_index])
+            price_usd = self._parse_item_price(case_page, CASE_HREFS[case_index])
             price_usd_owned = round(float(int(owned) * price_usd), 2)
 
             self.console.print(PRICE_INFO.format(owned, price_usd, price_usd_owned))
@@ -409,6 +396,58 @@ class Scraper:
                 time.sleep(1)
 
         return case_usd_total
+
+    def _market_page_from_href(self, item_href):
+        """
+        Convert an href of a Steam Community Market item to a market page URL. This is
+        done by decoding the URL-encoded item name and formatting it into a search URL.
+
+        :param item_href: The href of the item listing, typically ending with the item's
+            name.
+        :return: A URL string for the Steam Community Market page of the item.
+        """
+        url_encoded_name = item_href.split("/")[-1]
+        decoded_name = unquote(url_encoded_name)
+        decoded_name_query = decoded_name.lower().replace(" ", "+")
+        page_url = f"https://steamcommunity.com/market/search?q={decoded_name_query}"
+
+        return page_url
+
+    def _scrape_custom_item_prices(self):
+        """
+        Scrape prices for custom items defined in the configuration.
+
+        For each custom item, it prints the item name, owned count, price per item, and
+        total price for owned items.
+        """
+        custom_item_usd_total = 0
+        for config_custom_item_name, owned_and_href in self.config.items("Custom Items"):
+            if " " not in owned_and_href:
+                self.console.print(
+                    "[bold red][!] Invalid custom item format (<item_name> = <owned_count> <item_url>)\n"
+                )
+                continue
+
+            owned, custom_item_href = owned_and_href.split(" ", 1)
+            if int(owned) == 0:
+                continue
+
+            custom_item_name = config_custom_item_name.replace("_", " ").title()
+            custom_item_title = custom_item_name.center(MAX_LINE_LEN, SEPARATOR)
+            self.console.print(f"[bold magenta]{custom_item_title}\n")
+
+            custom_item_page_url = self._market_page_from_href(custom_item_href)
+            custom_item_page = self._get_page(custom_item_page_url)
+            price_usd = self._parse_item_price(custom_item_page, custom_item_href)
+            price_usd_owned = round(float(int(owned) * price_usd), 2)
+
+            self.console.print(PRICE_INFO.format(owned, price_usd, price_usd_owned))
+            custom_item_usd_total += price_usd_owned
+
+            if not self.config.getboolean("App Settings", "use_proxy", fallback=False):
+                time.sleep(1)
+
+        return custom_item_usd_total
 
     def identify_background_task(self):
         """

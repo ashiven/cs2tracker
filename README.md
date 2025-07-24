@@ -36,6 +36,7 @@
    ```
 
 2. Run it:
+
    ```bash
    cs2tracker
    ```
@@ -43,7 +44,7 @@
 ### Options
 
 - `Run!` to gather the current market prices of your items and calculate the total amount in USD and EUR.
-- `Edit Config` to change the specific numbers of each item you own and then save the config file.
+- `Edit Config` to specify the numbers of items owned in the config file. You can also add items other than cases and sticker capsules following the format in the `Custom Items` section. (item_name = item_owned item_page)
 - `Show History` to see a price chart consisting of past calculations. A new data point is generated once a day upon running the program.
 - `Daily Background Calculations` to automatically run a daily calculation of your investment in the background and save the results such that they can later be viewed via `Show History`.
 - `Receive Discord Notifications` to receive a notification on your Discord server when the program has finished calculating your investment. You need to set up a [webhook](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks) in your Discord server and enter the webhook url into the `discord_webhook_url` field in the config file.
