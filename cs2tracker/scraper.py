@@ -344,8 +344,8 @@ class Scraper:
             self.console.print(
                 f"[bold red][!] An unexpected error occurred while scraping capsule prices: {error}\n"
             )
-        finally:
-            return capsule_usd_total
+
+        return capsule_usd_total
 
     def scrape_capsule_section_prices(self):
         """Scrape prices for all capsule sections defined in the configuration."""
