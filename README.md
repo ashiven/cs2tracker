@@ -23,7 +23,7 @@
 
 ### Setup
 
-#### Windows Executable _(no color support)_
+#### Windows Executable
 
 - Simply [download the latest executable](https://github.com/ashiven/cs2tracker/releases/latest/download/cs2tracker-windows.zip) and run it.
 
