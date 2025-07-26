@@ -82,8 +82,8 @@ AUTHOR_STRING = (
 POWERSHELL_COLORIZE_OUTPUT = (
     "%{ "
     "if($_ -match 'Version|\\\\|_') { Write-Host $_ -ForegroundColor yellow } "
-    "elseif($_ -match 'Case|Capsule') { Write-Host $_ -ForegroundColor magenta } "
-    "elseif($_ -match 'USD|EUR|\\-\\-\\-\\-') { Write-Host $_ -ForegroundColor green } "
+    "elseif($_ -match 'USD|EUR|\\-{60}') { Write-Host $_ -ForegroundColor green } "
+    "elseif($_ -match 'Case|Capsule|\\-[A-Za-z0-9]') { Write-Host $_ -ForegroundColor magenta } "
     "elseif($_ -match '\\[!\\]') { Write-Host $_ -ForegroundColor red } "
     "elseif($_ -match 'Legends|Challengers|Contenders|Champions|Finalists') { Write-Host $_ -ForegroundColor blue } "
     "else { Write-Host $_ } "
