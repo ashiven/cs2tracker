@@ -1,7 +1,9 @@
 import ctypes
 import tkinter as tk
+from shutil import copy
 from subprocess import Popen
 from threading import Thread
+from tkinter import messagebox
 from typing import cast
 
 import matplotlib.pyplot as plt
@@ -10,6 +12,7 @@ from matplotlib.dates import DateFormatter
 
 from cs2tracker.constants import (
     CONFIG_FILE,
+    CONFIG_FILE_BACKUP,
     ICON_FILE,
     OS,
     OUTPUT_FILE,
@@ -22,7 +25,7 @@ from cs2tracker.scraper import Scraper
 
 APPLICATION_NAME = "CS2Tracker"
 
-WINDOW_SIZE = "500x450"
+WINDOW_SIZE = "550x500"
 BACKGROUND_COLOR = "#1e1e1e"
 BUTTON_COLOR = "#3c3f41"
 BUTTON_HOVER_COLOR = "#505354"
@@ -104,6 +107,7 @@ class Application:
 
         self._add_button(frame, "Run!", self.scrape_prices)
         self._add_button(frame, "Edit Config", self._edit_config)
+        self._add_button(frame, "Reset Config", self._confirm_reset_config)
         self._add_button(frame, "Show History (Chart)", self._draw_plot)
         self._add_button(frame, "Show History (File)", self._edit_log_file)
 
@@ -201,6 +205,18 @@ class Application:
             popen_args={"args": [TEXT_EDITOR, CONFIG_FILE], "shell": True},
             callback=self.scraper.parse_config,
         )
+
+    def _confirm_reset_config(self):
+        confirm = messagebox.askokcancel(
+            "Reset Config", "Are you sure you want to reset the config file?"
+        )
+        if confirm:
+            self._reset_config()
+
+    def _reset_config(self):
+        """Reset the configuration file to its default state."""
+        copy(CONFIG_FILE_BACKUP, CONFIG_FILE)
+        self.scraper.parse_config()
 
     def _draw_plot(self):
         """Draw a plot of the scraped prices over time."""

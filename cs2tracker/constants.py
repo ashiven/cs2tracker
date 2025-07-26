@@ -22,14 +22,6 @@ TEXT_EDITOR = "notepad" if OS == OSType.WINDOWS else "nano"
 PYTHON_EXECUTABLE = sys.executable
 
 
-MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
-PROJECT_DIR = os.path.dirname(MODULE_DIR)
-ICON_FILE = os.path.join(PROJECT_DIR, "assets", "icon.png")
-OUTPUT_FILE = os.path.join(MODULE_DIR, "data", "output.csv")
-CONFIG_FILE = os.path.join(MODULE_DIR, "data", "config.ini")
-BATCH_FILE = os.path.join(MODULE_DIR, "data", "cs2tracker_scraper.bat")
-
-
 RUNNING_IN_EXE = getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS")
 
 if RUNNING_IN_EXE:
@@ -45,12 +37,31 @@ if RUNNING_IN_EXE:
     os.makedirs(DATA_DIR, exist_ok=True)
 
     CONFIG_FILE = os.path.join(DATA_DIR, "config.ini")
+    CONFIG_FILE_BACKUP = os.path.join(DATA_DIR, "config.ini.bak")
     OUTPUT_FILE = os.path.join(DATA_DIR, "output.csv")
     BATCH_FILE = os.path.join(DATA_DIR, "cs2tracker_scraper.bat")
-    if not os.path.exists(CONFIG_FILE):
-        copy(CONFIG_FILE_SOURCE, CONFIG_FILE)
+
+    # Always copy the source config into the user data directory as a backup
+    # and overwrite the existing backup if it exists
+    # (This is to ensure that no outdated config backup remains in the user data directory)
+    copy(CONFIG_FILE_SOURCE, CONFIG_FILE_BACKUP)
+
     if not os.path.exists(OUTPUT_FILE):
         copy(OUTPUT_FILE_SOURCE, OUTPUT_FILE)
+    if not os.path.exists(CONFIG_FILE):
+        copy(CONFIG_FILE_SOURCE, CONFIG_FILE)
+
+else:
+    MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
+    PROJECT_DIR = os.path.dirname(MODULE_DIR)
+    ICON_FILE = os.path.join(PROJECT_DIR, "assets", "icon.png")
+    CONFIG_FILE = os.path.join(MODULE_DIR, "data", "config.ini")
+    CONFIG_FILE_BACKUP = os.path.join(MODULE_DIR, "data", "config.ini.bak")
+    OUTPUT_FILE = os.path.join(MODULE_DIR, "data", "output.csv")
+    BATCH_FILE = os.path.join(MODULE_DIR, "data", "cs2tracker_scraper.bat")
+
+    if not os.path.exists(CONFIG_FILE_BACKUP):
+        copy(CONFIG_FILE, CONFIG_FILE_BACKUP)
 
 
 BANNER = """

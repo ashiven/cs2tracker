@@ -8,3 +8,4 @@ venv-test
 cs2tracker.egg-info
 _version.py
 cs2tracker_scraper.bat
+config.ini.bak
