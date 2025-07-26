@@ -124,7 +124,7 @@ class Scraper:
             self._validate_config()
             self.valid_config = True
         except ValueError as error:
-            self.console.print(f"[bold red][!] Configuration error: {error}")
+            self.console.print(f"[bold red][!] Config error: {error}")
             self.valid_config = False
 
     def _start_session(self):
@@ -410,12 +410,10 @@ class Scraper:
                 capsule_usd_total += price_usd_owned
         except (RetryError, ValueError):
             self.console.print(
-                "[bold red][!] Failed to scrape capsule prices. (Consider using proxies to prevent rate limiting)\n"
+                "[bold red][!] Too many requests. (Consider using proxies to prevent rate limiting)\n"
             )
         except Exception as error:
-            self.console.print(
-                f"[bold red][!] An unexpected error occurred while scraping capsule prices: {error}\n"
-            )
+            self.console.print(f"[bold red][!] An unexpected error occurred: {error}\n")
 
         return capsule_usd_total
 
@@ -471,12 +469,10 @@ class Scraper:
                     time.sleep(1)
             except (RetryError, ValueError):
                 self.console.print(
-                    "[bold red][!] Failed to scrape case prices. (Consider using proxies to prevent rate limiting)\n"
+                    "[bold red][!] Too many requests. (Consider using proxies to prevent rate limiting)\n"
                 )
             except Exception as error:
-                self.console.print(
-                    f"[bold red][!] An unexpected error occurred while scraping case prices: {error}\n"
-                )
+                self.console.print(f"[bold red][!] An unexpected error occurred: {error}\n")
 
         return case_usd_total
 
@@ -510,12 +506,10 @@ class Scraper:
                     time.sleep(1)
             except (RetryError, ValueError):
                 self.console.print(
-                    "[bold red][!] Failed to scrape custom item prices. (Consider using proxies to prevent rate limiting)\n"
+                    "[bold red][!] Too many requests. (Consider using proxies to prevent rate limiting)\n"
                 )
             except Exception as error:
-                self.console.print(
-                    f"[bold red][!] An unexpected error occurred while scraping custom item prices: {error}\n"
-                )
+                self.console.print(f"[bold red][!] An unexpected error occurred: {error}\n")
 
         return custom_item_usd_total
 
