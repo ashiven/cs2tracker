@@ -231,7 +231,7 @@ class Application:
         ax.plot(dates, dollars, label="Dollars")
         ax.plot(dates, euros, label="Euros")
         ax.legend()
-        date_formatter = DateFormatter("%d-%m-%Y")
+        date_formatter = DateFormatter("%Y-%m-%d")
         ax.xaxis.set_major_formatter(date_formatter)
 
         plt.show()
