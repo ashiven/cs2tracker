@@ -102,8 +102,8 @@ class Scraper:
 
     def _validate_config(self):
         """
-        Validate the configuration file to ensure all required sections and exist with
-        the right values.
+        Validate the configuration file to ensure all required sections exist with the
+        right values.
 
         :raises ValueError: If any required section is missing or if any value is
             invalid.
@@ -136,7 +136,7 @@ class Scraper:
         """Scrape prices for capsules and cases, calculate totals in USD and EUR, and
         print/save the results.
         """
-        capsule_usd_total = self.scrape_capsule_section_prices()
+        capsule_usd_total = self._scrape_capsule_section_prices()
         case_usd_total = self._scrape_case_prices()
         custom_item_usd_total = self._scrape_custom_item_prices()
 
