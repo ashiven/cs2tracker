@@ -405,7 +405,7 @@ class Scraper:
 
         return capsule_usd_total
 
-    def scrape_capsule_section_prices(self):
+    def _scrape_capsule_section_prices(self):
         """Scrape prices for all capsule sections defined in the configuration."""
         capsule_usd_total = 0
         for capsule_section, capsule_info in CAPSULE_INFO.items():
