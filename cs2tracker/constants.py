@@ -89,7 +89,7 @@ elseif($_ -match 'Case|Capsule') {
 elseif($_ -match 'USD|EUR|----') {
     Write-Host $_ -ForegroundColor green
 }
-elseif($_ -match '[!]') {
+elseif($_ -match '\\[!\\]') {
     Write-Host $_ -ForegroundColor red
 }
 elseif($_ -match 'Legends|Challengers|Contenders|Champions|Finalists') {
