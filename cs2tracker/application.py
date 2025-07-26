@@ -16,6 +16,7 @@ from cs2tracker.constants import (
     ICON_FILE,
     OS,
     OUTPUT_FILE,
+    POWERSHELL_COLORIZE_OUTPUT,
     PYTHON_EXECUTABLE,
     RUNNING_IN_EXE,
     TEXT_EDITOR,
@@ -162,7 +163,7 @@ class Application:
 
         if RUNNING_IN_EXE:
             # The python executable is set as the executable itself in PyInstaller
-            scraper_cmd = f"{PYTHON_EXECUTABLE} --only-scrape | Out-Host -Paging"
+            scraper_cmd = f"{PYTHON_EXECUTABLE} --only-scrape | {POWERSHELL_COLORIZE_OUTPUT}"
         else:
             scraper_cmd = f"{PYTHON_EXECUTABLE} -m cs2tracker --only-scrape"
 
