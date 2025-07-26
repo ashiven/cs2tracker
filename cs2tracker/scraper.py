@@ -4,7 +4,6 @@ import time
 from configparser import ConfigParser
 from datetime import datetime
 from subprocess import DEVNULL, call
-from urllib.parse import unquote
 
 from bs4 import BeautifulSoup
 from bs4.element import Tag
@@ -19,7 +18,6 @@ from cs2tracker.constants import (
     BATCH_FILE,
     CAPSULE_INFO,
     CASE_HREFS,
-    CASE_PAGES,
     CONFIG_FILE,
     OS,
     OUTPUT_FILE,
@@ -80,29 +78,9 @@ class Scraper:
         """Scrape prices for capsules and cases, calculate totals in USD and EUR, and
         print/save the results.
         """
-        capsule_usd_total = 0
-        try:
-            capsule_usd_total = self.scrape_capsule_section_prices()
-        except (RequestException, AttributeError, RetryError, ValueError):
-            self.console.print(
-                "[bold red][!] Failed to scrape capsule prices. (Consider using proxies to prevent rate limiting)\n"
-            )
-
-        case_usd_total = 0
-        try:
-            case_usd_total = self._scrape_case_prices()
-        except (RequestException, AttributeError, RetryError, ValueError):
-            self.console.print(
-                "[bold red][!] Failed to scrape case prices. (Consider using proxies to prevent rate limiting)\n"
-            )
-
-        custom_item_usd_total = 0
-        try:
-            custom_item_usd_total = self._scrape_custom_item_prices()
-        except (RequestException, AttributeError, RetryError, ValueError):
-            self.console.print(
-                "[bold red][!] Failed to scrape custom item prices. (Consider using proxies to prevent rate limiting)\n"
-            )
+        capsule_usd_total = self.scrape_capsule_section_prices()
+        case_usd_total = self._scrape_case_prices()
+        custom_item_usd_total = self._scrape_custom_item_prices()
 
         self.usd_total += capsule_usd_total
         self.usd_total += case_usd_total
@@ -296,8 +274,9 @@ class Scraper:
             page = self.session.get(url)
 
         if not page.ok or not page.content:
-            status = page.status_code
-            self.console.print(f"[bold red][!] Failed to load page ({status}). Retrying...\n")
+            self.console.print(
+                f"[bold red][!] Failed to load page ({page.status_code}). Retrying...\n"
+            )
             raise RequestException(f"Failed to load page: {url}")
 
         return page
@@ -343,21 +322,30 @@ class Scraper:
         self.console.print(f"[bold magenta]{capsule_title}\n")
 
         capsule_usd_total = 0
-        capsule_page = self._get_page(capsule_info["page"])
-        for capsule_name, capsule_href in zip(capsule_info["names"], capsule_info["items"]):
-            config_capsule_name = capsule_name.replace(" ", "_")
-            owned = self.config.getint(capsule_section, config_capsule_name, fallback=0)
-            if owned == 0:
-                continue
+        try:
+            capsule_page = self._get_page(capsule_info["page"])
+            for capsule_name, capsule_href in zip(capsule_info["names"], capsule_info["items"]):
+                config_capsule_name = capsule_name.replace(" ", "_")
+                owned = self.config.getint(capsule_section, config_capsule_name, fallback=0)
+                if owned == 0:
+                    continue
 
-            price_usd = self._parse_item_price(capsule_page, capsule_href)
-            price_usd_owned = round(float(owned * price_usd), 2)
+                price_usd = self._parse_item_price(capsule_page, capsule_href)
+                price_usd_owned = round(float(owned * price_usd), 2)
 
-            self.console.print(f"[bold deep_sky_blue4]{capsule_name}")
-            self.console.print(PRICE_INFO.format(owned, price_usd, price_usd_owned))
-            capsule_usd_total += price_usd_owned
-
-        return capsule_usd_total
+                self.console.print(f"[bold deep_sky_blue4]{capsule_name}")
+                self.console.print(PRICE_INFO.format(owned, price_usd, price_usd_owned))
+                capsule_usd_total += price_usd_owned
+        except (RetryError, ValueError):
+            self.console.print(
+                "[bold red][!] Failed to scrape capsule prices. (Consider using proxies to prevent rate limiting)\n"
+            )
+        except Exception as error:
+            self.console.print(
+                f"[bold red][!] An unexpected error occurred while scraping capsule prices: {error}\n"
+            )
+        finally:
+            return capsule_usd_total
 
     def scrape_capsule_section_prices(self):
         """Scrape prices for all capsule sections defined in the configuration."""
@@ -368,6 +356,19 @@ class Scraper:
                 capsule_usd_total += self._scrape_capsule_prices(capsule_section, capsule_info)
 
         return capsule_usd_total
+
+    def _market_page_from_href(self, item_href):
+        """
+        Convert an href of a Steam Community Market item to a market page URL.
+
+        :param item_href: The href of the item listing, typically ending with the item's
+            name.
+        :return: A URL string for the Steam Community Market page of the item.
+        """
+        url_encoded_name = item_href.split("/")[-1]
+        page_url = f"https://steamcommunity.com/market/search?q={url_encoded_name}"
+
+        return page_url
 
     def _scrape_case_prices(self):
         """
@@ -385,33 +386,27 @@ class Scraper:
             case_title = case_name.center(MAX_LINE_LEN, SEPARATOR)
             self.console.print(f"[bold magenta]{case_title}\n")
 
-            case_page = self._get_page(CASE_PAGES[case_index])
-            price_usd = self._parse_item_price(case_page, CASE_HREFS[case_index])
-            price_usd_owned = round(float(int(owned) * price_usd), 2)
+            try:
+                case_page_url = self._market_page_from_href(CASE_HREFS[case_index])
+                case_page = self._get_page(case_page_url)
+                price_usd = self._parse_item_price(case_page, CASE_HREFS[case_index])
+                price_usd_owned = round(float(int(owned) * price_usd), 2)
 
-            self.console.print(PRICE_INFO.format(owned, price_usd, price_usd_owned))
-            case_usd_total += price_usd_owned
+                self.console.print(PRICE_INFO.format(owned, price_usd, price_usd_owned))
+                case_usd_total += price_usd_owned
 
-            if not self.config.getboolean("App Settings", "use_proxy", fallback=False):
-                time.sleep(1)
+                if not self.config.getboolean("App Settings", "use_proxy", fallback=False):
+                    time.sleep(1)
+            except (RetryError, ValueError):
+                self.console.print(
+                    "[bold red][!] Failed to scrape case prices. (Consider using proxies to prevent rate limiting)\n"
+                )
+            except Exception as error:
+                self.console.print(
+                    f"[bold red][!] An unexpected error occurred while scraping case prices: {error}\n"
+                )
 
         return case_usd_total
-
-    def _market_page_from_href(self, item_href):
-        """
-        Convert an href of a Steam Community Market item to a market page URL. This is
-        done by decoding the URL-encoded item name and formatting it into a search URL.
-
-        :param item_href: The href of the item listing, typically ending with the item's
-            name.
-        :return: A URL string for the Steam Community Market page of the item.
-        """
-        url_encoded_name = item_href.split("/")[-1]
-        decoded_name = unquote(url_encoded_name)
-        decoded_name_query = decoded_name.lower().replace(" ", "+")
-        page_url = f"https://steamcommunity.com/market/search?q={decoded_name_query}"
-
-        return page_url
 
     def _scrape_custom_item_prices(self):
         """
@@ -436,16 +431,25 @@ class Scraper:
             custom_item_title = custom_item_name.center(MAX_LINE_LEN, SEPARATOR)
             self.console.print(f"[bold magenta]{custom_item_title}\n")
 
-            custom_item_page_url = self._market_page_from_href(custom_item_href)
-            custom_item_page = self._get_page(custom_item_page_url)
-            price_usd = self._parse_item_price(custom_item_page, custom_item_href)
-            price_usd_owned = round(float(int(owned) * price_usd), 2)
+            try:
+                custom_item_page_url = self._market_page_from_href(custom_item_href)
+                custom_item_page = self._get_page(custom_item_page_url)
+                price_usd = self._parse_item_price(custom_item_page, custom_item_href)
+                price_usd_owned = round(float(int(owned) * price_usd), 2)
 
-            self.console.print(PRICE_INFO.format(owned, price_usd, price_usd_owned))
-            custom_item_usd_total += price_usd_owned
+                self.console.print(PRICE_INFO.format(owned, price_usd, price_usd_owned))
+                custom_item_usd_total += price_usd_owned
 
-            if not self.config.getboolean("App Settings", "use_proxy", fallback=False):
-                time.sleep(1)
+                if not self.config.getboolean("App Settings", "use_proxy", fallback=False):
+                    time.sleep(1)
+            except (RetryError, ValueError):
+                self.console.print(
+                    "[bold red][!] Failed to scrape custom item prices. (Consider using proxies to prevent rate limiting)\n"
+                )
+            except Exception as error:
+                self.console.print(
+                    f"[bold red][!] An unexpected error occurred while scraping custom item prices: {error}\n"
+                )
 
         return custom_item_usd_total
 
