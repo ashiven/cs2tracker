@@ -98,7 +98,7 @@ class Scraper:
         except ValueError as error:
             if "Invalid " in str(error):
                 raise
-            raise ValueError("Invalid value type. All owned values must be integers.") from error
+            raise ValueError("Invalid value type. All values must be integers.") from error
 
     def _validate_config(self):
         """
@@ -112,13 +112,20 @@ class Scraper:
         self._validate_config_values()
 
     def parse_config(self):
-        """Parse the configuration file to read settings and user-owned items."""
+        """
+        Parse the configuration file to read settings and user-owned items.
+
+        Sets self.valid_config to True if the configuration is valid, and False if it is
+        not.
+        """
         self.config = ConfigParser(interpolation=None)
         self.config.read(CONFIG_FILE)
         try:
             self._validate_config()
+            self.valid_config = True
         except ValueError as error:
             self.console.print(f"[bold red][!] Configuration error: {error}")
+            self.valid_config = False
 
     def _start_session(self):
         """Start a requests session with custom headers and retry logic."""
@@ -136,6 +143,12 @@ class Scraper:
         """Scrape prices for capsules and cases, calculate totals in USD and EUR, and
         print/save the results.
         """
+        if not self.valid_config:
+            self.console.print(
+                "[bold red][!] Invalid configuration. Please fix the config file before running."
+            )
+            return
+
         capsule_usd_total = self._scrape_capsule_section_prices()
         case_usd_total = self._scrape_case_prices()
         custom_item_usd_total = self._scrape_custom_item_prices()
