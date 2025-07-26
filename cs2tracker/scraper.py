@@ -319,6 +319,7 @@ class Scraper:
         use_proxy = self.config.getboolean("App Settings", "use_proxy", fallback=False)
         api_key = self.config.get("User Settings", "api_key", fallback=None)
         api_key = None if api_key in ("None", "") else api_key
+
         if use_proxy and api_key:
             page = self.session.get(
                 url=url,
@@ -475,12 +476,6 @@ class Scraper:
         """
         custom_item_usd_total = 0
         for config_custom_item_name, owned_and_href in self.config.items("Custom Items"):
-            if " " not in owned_and_href:
-                self.console.print(
-                    "[bold red][!] Invalid custom item format (<item_name> = <owned_count> <item_url>)\n"
-                )
-                continue
-
             owned, custom_item_href = owned_and_href.split(" ", 1)
             if int(owned) == 0:
                 continue
