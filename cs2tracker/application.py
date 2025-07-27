@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 from matplotlib.dates import DateFormatter
 
+from cs2tracker.background_task import BackgroundTask
 from cs2tracker.constants import (
     CONFIG_FILE,
     CONFIG_FILE_BACKUP,
@@ -102,7 +103,7 @@ class Application:
 
     def _configure_checkbox_frame(self, checkbox_frame):
         """Configure the checkbox frame for background tasks and settings."""
-        background_checkbox_value = tk.BooleanVar(value=self.scraper.identify_background_task())
+        background_checkbox_value = tk.BooleanVar(value=BackgroundTask.identify())
         self._add_checkbox(
             checkbox_frame,
             "Daily Background Calculations",
@@ -268,7 +269,7 @@ class Application:
 
     def _toggle_background_task(self, enabled: bool):
         """Toggle whether a daily price calculation should run in the background."""
-        self.scraper.toggle_background_task(enabled)
+        BackgroundTask.toggle(enabled)
 
     def _toggle_use_proxy(self, enabled: bool):
         """Toggle whether the scraper should use proxy servers for requests."""

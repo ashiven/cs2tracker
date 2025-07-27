@@ -1,7 +1,5 @@
-import os
 import time
 from configparser import ConfigParser
-from subprocess import DEVNULL, call
 
 from bs4 import BeautifulSoup
 from bs4.element import Tag
@@ -13,15 +11,9 @@ from tenacity import RetryError, retry, stop_after_attempt
 from cs2tracker.constants import (
     AUTHOR_STRING,
     BANNER,
-    BATCH_FILE,
     CAPSULE_INFO,
     CASE_HREFS,
     CONFIG_FILE,
-    OS,
-    PROJECT_DIR,
-    PYTHON_EXECUTABLE,
-    RUNNING_IN_EXE,
-    OSType,
 )
 from cs2tracker.padded_console import PaddedConsole
 from cs2tracker.price_logs import PriceLogs
@@ -37,18 +29,12 @@ DC_WEBHOOK_USERNAME = "CS2Tracker"
 DC_WEBHOOK_AVATAR_URL = "https://img.icons8.com/?size=100&id=uWQJp2tLXUH6&format=png&color=000000"
 DC_RECENT_HISTORY_LIMIT = 5
 
-WIN_BACKGROUND_TASK_NAME = "CS2Tracker Daily Calculation"
-WIN_BACKGROUND_TASK_SCHEDULE = "DAILY"
-WIN_BACKGROUND_TASK_TIME = "12:00"
-WIN_BACKGROUND_TASK_CMD = (
-    f"powershell -WindowStyle Hidden -Command \"Start-Process '{BATCH_FILE}' -WindowStyle Hidden\""
-)
+console = PaddedConsole()
 
 
 class Scraper:
     def __init__(self):
         """Initialize the Scraper class."""
-        self.console = PaddedConsole()
         self.parse_config()
         self._start_session()
 
@@ -122,7 +108,7 @@ class Scraper:
             self._validate_config()
             self.valid_config = True
         except ValueError as error:
-            self.console.print(f"[bold red][!] Config error: {error}")
+            console.print(f"[bold red][!] Config error: {error}")
             self.valid_config = False
 
     def _start_session(self):
@@ -142,7 +128,7 @@ class Scraper:
         print/save the results.
         """
         if not self.valid_config:
-            self.console.print(
+            console.print(
                 "[bold red][!] Invalid configuration. Please fix the config file before running."
             )
             return
@@ -168,15 +154,15 @@ class Scraper:
         separators.
         """
         usd_title = "USD Total".center(MAX_LINE_LEN, SEPARATOR)
-        self.console.print(f"[bold green]{usd_title}")
-        self.console.print(f"${self.usd_total:.2f}")
+        console.print(f"[bold green]{usd_title}")
+        console.print(f"${self.usd_total:.2f}")
 
         eur_title = "EUR Total".center(MAX_LINE_LEN, SEPARATOR)
-        self.console.print(f"[bold green]{eur_title}")
-        self.console.print(f"€{self.eur_total:.2f}")
+        console.print(f"[bold green]{eur_title}")
+        console.print(f"€{self.eur_total:.2f}")
 
         end_string = SEPARATOR * MAX_LINE_LEN
-        self.console.print(f"[bold green]{end_string}\n")
+        console.print(f"[bold green]{end_string}\n")
 
     def _construct_recent_calculations_embeds(self):
         """
@@ -248,11 +234,11 @@ class Scraper:
                     },
                 )
                 response.raise_for_status()
-                self.console.print("[bold steel_blue3][+] Discord notification sent.\n")
+                console.print("[bold steel_blue3][+] Discord notification sent.\n")
             except RequestException as error:
-                self.console.print(f"[bold red][!] Failed to send Discord notification: {error}\n")
+                console.print(f"[bold red][!] Failed to send Discord notification: {error}\n")
             except Exception as error:
-                self.console.print(f"[bold red][!] An unexpected error occurred: {error}\n")
+                console.print(f"[bold red][!] An unexpected error occurred: {error}\n")
 
     @retry(stop=stop_after_attempt(10))
     def _get_page(self, url):
@@ -282,9 +268,7 @@ class Scraper:
             page = self.session.get(url)
 
         if not page.ok or not page.content:
-            self.console.print(
-                f"[bold red][!] Failed to load page ({page.status_code}). Retrying...\n"
-            )
+            console.print(f"[bold red][!] Failed to load page ({page.status_code}). Retrying...\n")
             raise RequestException(f"Failed to load page: {url}")
 
         return page
@@ -327,7 +311,7 @@ class Scraper:
             hrefs, and names.
         """
         capsule_title = capsule_section.center(MAX_LINE_LEN, SEPARATOR)
-        self.console.print(f"[bold magenta]{capsule_title}\n")
+        console.print(f"[bold magenta]{capsule_title}\n")
 
         capsule_usd_total = 0
         try:
@@ -341,15 +325,15 @@ class Scraper:
                 price_usd = self._parse_item_price(capsule_page, capsule_href)
                 price_usd_owned = round(float(owned * price_usd), 2)
 
-                self.console.print(f"[bold deep_sky_blue4]{capsule_name}")
-                self.console.print(PRICE_INFO.format(owned, price_usd, price_usd_owned))
+                console.print(f"[bold deep_sky_blue4]{capsule_name}")
+                console.print(PRICE_INFO.format(owned, price_usd, price_usd_owned))
                 capsule_usd_total += price_usd_owned
         except (RetryError, ValueError):
-            self.console.print(
+            console.print(
                 "[bold red][!] Too many requests. (Consider using proxies to prevent rate limiting)\n"
             )
         except Exception as error:
-            self.console.print(f"[bold red][!] An unexpected error occurred: {error}\n")
+            console.print(f"[bold red][!] An unexpected error occurred: {error}\n")
 
         return capsule_usd_total
 
@@ -390,7 +374,7 @@ class Scraper:
 
             case_name = config_case_name.replace("_", " ").title()
             case_title = case_name.center(MAX_LINE_LEN, SEPARATOR)
-            self.console.print(f"[bold magenta]{case_title}\n")
+            console.print(f"[bold magenta]{case_title}\n")
 
             try:
                 case_page_url = self._market_page_from_href(CASE_HREFS[case_index])
@@ -398,17 +382,17 @@ class Scraper:
                 price_usd = self._parse_item_price(case_page, CASE_HREFS[case_index])
                 price_usd_owned = round(float(int(owned) * price_usd), 2)
 
-                self.console.print(PRICE_INFO.format(owned, price_usd, price_usd_owned))
+                console.print(PRICE_INFO.format(owned, price_usd, price_usd_owned))
                 case_usd_total += price_usd_owned
 
                 if not self.config.getboolean("App Settings", "use_proxy", fallback=False):
                     time.sleep(1)
             except (RetryError, ValueError):
-                self.console.print(
+                console.print(
                     "[bold red][!] Too many requests. (Consider using proxies to prevent rate limiting)\n"
                 )
             except Exception as error:
-                self.console.print(f"[bold red][!] An unexpected error occurred: {error}\n")
+                console.print(f"[bold red][!] An unexpected error occurred: {error}\n")
 
         return case_usd_total
 
@@ -427,7 +411,7 @@ class Scraper:
 
             custom_item_name = config_custom_item_name.replace("_", " ").title()
             custom_item_title = custom_item_name.center(MAX_LINE_LEN, SEPARATOR)
-            self.console.print(f"[bold magenta]{custom_item_title}\n")
+            console.print(f"[bold magenta]{custom_item_title}\n")
 
             try:
                 custom_item_page_url = self._market_page_from_href(custom_item_href)
@@ -435,101 +419,19 @@ class Scraper:
                 price_usd = self._parse_item_price(custom_item_page, custom_item_href)
                 price_usd_owned = round(float(int(owned) * price_usd), 2)
 
-                self.console.print(PRICE_INFO.format(owned, price_usd, price_usd_owned))
+                console.print(PRICE_INFO.format(owned, price_usd, price_usd_owned))
                 custom_item_usd_total += price_usd_owned
 
                 if not self.config.getboolean("App Settings", "use_proxy", fallback=False):
                     time.sleep(1)
             except (RetryError, ValueError):
-                self.console.print(
+                console.print(
                     "[bold red][!] Too many requests. (Consider using proxies to prevent rate limiting)\n"
                 )
             except Exception as error:
-                self.console.print(f"[bold red][!] An unexpected error occurred: {error}\n")
+                console.print(f"[bold red][!] An unexpected error occurred: {error}\n")
 
         return custom_item_usd_total
-
-    def identify_background_task(self):
-        """
-        Search the OS for a daily background task that runs the scraper.
-
-        :return: True if a background task is found, False otherwise.
-        """
-        if OS == OSType.WINDOWS:
-            cmd = ["schtasks", "/query", "/tn", WIN_BACKGROUND_TASK_NAME]
-            return_code = call(cmd, stdout=DEVNULL, stderr=DEVNULL)
-            found = return_code == 0
-            return found
-        else:
-            # TODO: implement finder for cron jobs
-            return False
-
-    def _toggle_task_batch_file(self, enabled: bool):
-        """
-        Create or delete a batch file that runs the scraper.
-
-        :param enabled: If True, the batch file will be created; if False, the batch
-            file will be deleted.
-        """
-        if enabled:
-            with open(BATCH_FILE, "w", encoding="utf-8") as batch_file:
-                if RUNNING_IN_EXE:
-                    # The python executable is set to the executable itself
-                    # for executables created with PyInstaller
-                    batch_file.write(f"{PYTHON_EXECUTABLE} --only-scrape\n")
-                else:
-                    batch_file.write(f"cd {PROJECT_DIR}\n")
-                    batch_file.write(f"{PYTHON_EXECUTABLE} -m cs2tracker --only-scrape\n")
-        else:
-            if os.path.exists(BATCH_FILE):
-                os.remove(BATCH_FILE)
-
-    def _toggle_background_task_windows(self, enabled: bool):
-        """
-        Create or delete a daily background task that runs the scraper on Windows.
-
-        :param enabled: If True, the task will be created; if False, the task will be
-            deleted.
-        """
-        self._toggle_task_batch_file(enabled)
-        if enabled:
-            cmd = [
-                "schtasks",
-                "/create",
-                "/tn",
-                WIN_BACKGROUND_TASK_NAME,
-                "/tr",
-                WIN_BACKGROUND_TASK_CMD,
-                "/sc",
-                WIN_BACKGROUND_TASK_SCHEDULE,
-                "/st",
-                WIN_BACKGROUND_TASK_TIME,
-            ]
-            return_code = call(cmd, stdout=DEVNULL, stderr=DEVNULL)
-            if return_code == 0:
-                self.console.print("[bold green][+] Background task enabled.")
-            else:
-                self.console.print("[bold red][!] Failed to enable background task.")
-        else:
-            cmd = ["schtasks", "/delete", "/tn", WIN_BACKGROUND_TASK_NAME, "/f"]
-            return_code = call(cmd, stdout=DEVNULL, stderr=DEVNULL)
-            if return_code == 0:
-                self.console.print("[bold green][-] Background task disabled.")
-            else:
-                self.console.print("[bold red][!] Failed to disable background task.")
-
-    def toggle_background_task(self, enabled: bool):
-        """
-        Create or delete a daily background task that runs the scraper.
-
-        :param enabled: If True, the task will be created; if False, the task will be
-            deleted.
-        """
-        if OS == OSType.WINDOWS:
-            self._toggle_background_task_windows(enabled)
-        else:
-            # TODO: implement toggle for cron jobs
-            pass
 
     def toggle_use_proxy(self, enabled: bool):
         """
@@ -541,7 +443,7 @@ class Scraper:
         with open(CONFIG_FILE, "w", encoding="utf-8") as config_file:
             self.config.write(config_file)
 
-        self.console.print(
+        console.print(
             f"[bold green]{'[+] Enabled' if enabled else '[-] Disabled'} proxy usage for requests."
         )
 
@@ -556,12 +458,12 @@ class Scraper:
         with open(CONFIG_FILE, "w", encoding="utf-8") as config_file:
             self.config.write(config_file)
 
-        self.console.print(
+        console.print(
             f"[bold green]{'[+] Enabled' if enabled else '[-] Disabled'} Discord webhook notifications."
         )
 
 
 if __name__ == "__main__":
     scraper = Scraper()
-    scraper.console.print(f"[bold yellow]{BANNER}\n{AUTHOR_STRING}\n")
+    console.print(f"[bold yellow]{BANNER}\n{AUTHOR_STRING}\n")
     scraper.scrape_prices()
