@@ -23,6 +23,7 @@ from cs2tracker.constants import (
     TEXT_EDITOR,
     OSType,
 )
+from cs2tracker.price_logs import PriceLogs
 from cs2tracker.scraper import Scraper
 
 APPLICATION_NAME = "CS2Tracker"
@@ -229,7 +230,7 @@ class Application:
 
     def _draw_plot(self):
         """Draw a plot of the scraped prices over time."""
-        dates, usd_prices, eur_prices = self.scraper.read_price_logs()
+        dates, usd_prices, eur_prices = PriceLogs.read()
 
         fig, ax_raw = plt.subplots(figsize=(10, 8), num="CS2Tracker Price History")
         fig.suptitle("CS2Tracker Price History", fontsize=16)
@@ -261,7 +262,7 @@ class Application:
             defaultextension=".csv",
             filetypes=[("CSV files", "*.csv")],
         )
-        if not self.scraper.validate_price_log_file(import_path):
+        if not PriceLogs.validate_file(import_path):
             return
         copy(import_path, OUTPUT_FILE)
 

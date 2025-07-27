@@ -1,8 +1,6 @@
-import csv
 import os
 import time
 from configparser import ConfigParser
-from datetime import datetime
 from subprocess import DEVNULL, call
 
 from bs4 import BeautifulSoup
@@ -20,13 +18,13 @@ from cs2tracker.constants import (
     CASE_HREFS,
     CONFIG_FILE,
     OS,
-    OUTPUT_FILE,
     PROJECT_DIR,
     PYTHON_EXECUTABLE,
     RUNNING_IN_EXE,
     OSType,
 )
 from cs2tracker.padded_console import PaddedConsole
+from cs2tracker.price_logs import PriceLogs
 
 MAX_LINE_LEN = 72
 SEPARATOR = "-"
@@ -159,7 +157,7 @@ class Scraper:
         self.eur_total = CurrencyConverter().convert(self.usd_total, "USD", "EUR")
 
         self._print_total()
-        self._save_price_logs()
+        PriceLogs.save(self.usd_total, self.eur_total)
         self._send_discord_notification()
 
         # Reset totals for next run
@@ -180,92 +178,6 @@ class Scraper:
         end_string = SEPARATOR * MAX_LINE_LEN
         self.console.print(f"[bold green]{end_string}\n")
 
-    def _save_price_logs(self):
-        """
-        Save the current date and total prices in USD and EUR to a CSV file.
-
-        This will append a new entry to the output file if no entry has been made for
-        today.
-
-        :raises FileNotFoundError: If the output file does not exist.
-        :raises IOError: If there is an error writing to the output file.
-        """
-        with open(OUTPUT_FILE, "r", encoding="utf-8") as price_logs:
-            price_logs_reader = csv.reader(price_logs)
-            rows = list(price_logs_reader)
-            last_log_date, _, _ = rows[-1] if rows else ("", "", "")
-
-        today = datetime.now().strftime("%Y-%m-%d")
-        if last_log_date != today:
-            # Append first price calculation of the day
-            with open(OUTPUT_FILE, "a", newline="", encoding="utf-8") as price_logs:
-                price_logs_writer = csv.writer(price_logs)
-                price_logs_writer.writerow(
-                    [today, f"{self.usd_total:.2f}$", f"{self.eur_total:.2f}€"]
-                )
-        else:
-            # Replace the last calculation of today with the most recent one of today
-            with open(OUTPUT_FILE, "r+", newline="", encoding="utf-8") as price_logs:
-                price_logs_reader = csv.reader(price_logs)
-                rows = list(price_logs_reader)
-                rows_without_today = rows[:-1]
-                price_logs.seek(0)
-                price_logs.truncate()
-
-                price_logs_writer = csv.writer(price_logs)
-                price_logs_writer.writerows(rows_without_today)
-                price_logs_writer.writerow(
-                    [today, f"{self.usd_total:.2f}$", f"{self.eur_total:.2f}€"]
-                )
-
-    def read_price_logs(self):
-        """
-        Parse the output file to extract dates, dollar prices, and euro prices. This
-        data is used for drawing the plot of past prices.
-
-        :return: A tuple containing three lists: dates, dollar prices, and euro prices.
-        :raises FileNotFoundError: If the output file does not exist.
-        :raises IOError: If there is an error reading the output file.
-        """
-        dates, usd_prices, eur_prices = [], [], []
-        with open(OUTPUT_FILE, "r", encoding="utf-8") as price_logs:
-            price_logs_reader = csv.reader(price_logs)
-            for row in price_logs_reader:
-                date, price_usd, price_eur = row
-                date = datetime.strptime(date, "%Y-%m-%d")
-                price_usd = float(price_usd.rstrip("$"))
-                price_eur = float(price_eur.rstrip("€"))
-
-                dates.append(date)
-                usd_prices.append(price_usd)
-                eur_prices.append(price_eur)
-
-        return dates, usd_prices, eur_prices
-
-    def validate_price_log_file(self, log_file_path):
-        """
-        Ensures that the provided price log file has the right format.
-
-        :param log_file_path: The path to the price log file to validate.
-        :return: True if the log file is valid, False otherwise.
-        """
-        try:
-            with open(log_file_path, "r", encoding="utf-8") as price_logs:
-                price_logs_reader = csv.reader(price_logs)
-                for row in price_logs_reader:
-                    date_str, price_usd, price_eur = row
-                    datetime.strptime(date_str, "%Y-%m-%d")
-                    float(price_usd.rstrip("$"))
-                    float(price_eur.rstrip("€"))
-        except (FileNotFoundError, IOError, ValueError, TypeError) as error:
-            self.console.print(f"[bold red][!] Invalid price log file: {error}")
-            return False
-        except Exception as error:
-            self.console.print(f"[bold red][!] An unexpected error occurred: {error}")
-            return False
-
-        return True
-
     def _construct_recent_calculations_embeds(self):
         """
         Construct the embeds for the Discord message that will be sent after a price
@@ -273,7 +185,7 @@ class Scraper:
 
         :return: A list of embeds for the Discord message.
         """
-        dates, usd_prices, eur_prices = self.read_price_logs()
+        dates, usd_prices, eur_prices = PriceLogs.read()
         dates, usd_prices, eur_prices = reversed(dates), reversed(usd_prices), reversed(eur_prices)
 
         date_history, usd_history, eur_history = [], [], []
