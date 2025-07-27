@@ -4,6 +4,7 @@ from shutil import copy
 from subprocess import Popen
 from threading import Thread
 from tkinter import messagebox
+from tkinter.filedialog import askopenfilename, asksaveasfile
 from typing import cast
 
 import matplotlib.pyplot as plt
@@ -26,7 +27,7 @@ from cs2tracker.scraper import Scraper
 
 APPLICATION_NAME = "CS2Tracker"
 
-WINDOW_SIZE = "550x500"
+WINDOW_SIZE = "600x550"
 BACKGROUND_COLOR = "#1e1e1e"
 BUTTON_COLOR = "#3c3f41"
 BUTTON_HOVER_COLOR = "#505354"
@@ -80,23 +81,8 @@ class Application:
         )
         checkbox.pack(fill="x", anchor="w", pady=2)
 
-    def _configure_window(self):
-        """Configure the main application window UI and add buttons for the main
-        functionalities.
-        """
-        window = tk.Tk()
-        window.title(APPLICATION_NAME)
-        window.geometry(WINDOW_SIZE)
-        window.configure(bg=BACKGROUND_COLOR)
-        if OS == OSType.WINDOWS:
-            app_id = "cs2tracker.unique.id"
-            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(app_id)
-        icon = tk.PhotoImage(file=ICON_FILE)
-        window.wm_iconphoto(False, icon)
-
-        frame = tk.Frame(window, bg=BACKGROUND_COLOR, padx=30, pady=30)
-        frame.pack(expand=True, fill="both")
-
+    def _configure_main_frame(self, frame):
+        """Configure the main frame of the application window."""
         label = tk.Label(
             frame,
             text=f"Welcome to {APPLICATION_NAME}!",
@@ -109,12 +95,12 @@ class Application:
         self._add_button(frame, "Run!", self.scrape_prices)
         self._add_button(frame, "Edit Config", self._edit_config)
         self._add_button(frame, "Reset Config", self._confirm_reset_config)
-        self._add_button(frame, "Show History (Chart)", self._draw_plot)
-        self._add_button(frame, "Show History (File)", self._edit_log_file)
+        self._add_button(frame, "Show History", self._draw_plot)
+        self._add_button(frame, "Export History", self._export_log_file)
+        self._add_button(frame, "Import History", self._import_log_file)
 
-        checkbox_frame = tk.Frame(frame, bg=BACKGROUND_COLOR)
-        checkbox_frame.pack(pady=(20, 0), fill="x")
-
+    def _configure_checkbox_frame(self, checkbox_frame):
+        """Configure the checkbox frame for background tasks and settings."""
         background_checkbox_value = tk.BooleanVar(value=self.scraper.identify_background_task())
         self._add_checkbox(
             checkbox_frame,
@@ -144,6 +130,28 @@ class Application:
             use_proxy_checkbox_value,
             lambda: self._toggle_use_proxy(use_proxy_checkbox_value.get()),
         )
+
+    def _configure_window(self):
+        """Configure the main application window UI and add buttons for the main
+        functionalities.
+        """
+        window = tk.Tk()
+        window.title(APPLICATION_NAME)
+        window.geometry(WINDOW_SIZE)
+        window.configure(bg=BACKGROUND_COLOR)
+        if OS == OSType.WINDOWS:
+            app_id = "cs2tracker.unique.id"
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(app_id)
+        icon = tk.PhotoImage(file=ICON_FILE)
+        window.wm_iconphoto(False, icon)
+
+        frame = tk.Frame(window, bg=BACKGROUND_COLOR, padx=30, pady=30)
+        frame.pack(expand=True, fill="both")
+        self._configure_main_frame(frame)
+
+        checkbox_frame = tk.Frame(frame, bg=BACKGROUND_COLOR)
+        checkbox_frame.pack(pady=(20, 0), fill="x")
+        self._configure_checkbox_frame(checkbox_frame)
 
         return window
 
@@ -221,24 +229,41 @@ class Application:
 
     def _draw_plot(self):
         """Draw a plot of the scraped prices over time."""
-        dates, dollars, euros = self.scraper.read_price_log()
+        dates, usd_prices, eur_prices = self.scraper.read_price_logs()
 
         fig, ax_raw = plt.subplots(figsize=(10, 8), num="CS2Tracker Price History")
         fig.suptitle("CS2Tracker Price History", fontsize=16)
         fig.autofmt_xdate()
 
         ax = cast(Axes, ax_raw)
-        ax.plot(dates, dollars, label="Dollars")
-        ax.plot(dates, euros, label="Euros")
+        ax.plot(dates, usd_prices, label="Dollars")
+        ax.plot(dates, eur_prices, label="Euros")
         ax.legend()
         date_formatter = DateFormatter("%Y-%m-%d")
         ax.xaxis.set_major_formatter(date_formatter)
 
         plt.show()
 
-    def _edit_log_file(self):
-        """Opens the file containing past price calculations."""
-        Popen([TEXT_EDITOR, OUTPUT_FILE], shell=True)
+    def _export_log_file(self):
+        """Lets the user export the log file to a different location."""
+        export_path = asksaveasfile(
+            title="Export Log File",
+            defaultextension=".csv",
+            filetypes=[("CSV files", "*.csv")],
+        )
+        if export_path:
+            copy(OUTPUT_FILE, export_path.name)
+
+    def _import_log_file(self):
+        """Lets the user import a log file from a different location."""
+        import_path = askopenfilename(
+            title="Import Log File",
+            defaultextension=".csv",
+            filetypes=[("CSV files", "*.csv")],
+        )
+        if not self.scraper.validate_price_log_file(import_path):
+            return
+        copy(import_path, OUTPUT_FILE)
 
     def _toggle_background_task(self, enabled: bool):
         """Toggle whether a daily price calculation should run in the background."""
