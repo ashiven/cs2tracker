@@ -30,6 +30,9 @@ from cs2tracker.scraper import Scraper
 APPLICATION_NAME = "CS2Tracker"
 WINDOW_SIZE = "630x380"
 
+CONFIG_EDITOR_TITLE = "Config Editor"
+CONFIG_EDITOR_SIZE = "800x750"
+
 SCRAPER_WINDOW_HEIGHT = 40
 SCRAPER_WINDOW_WIDTH = 120
 SCRAPER_WINDOW_BACKGROUND_COLOR = "Black"
@@ -63,7 +66,7 @@ class Application:
 
         self._add_button(button_frame, "Run!", self.scrape_prices, 0)
         self._add_button(button_frame, "Edit Config", self._edit_config, 1)
-        self._add_button(button_frame, "Reset Config", self._confirm_reset_config, 2)
+        self._add_button(button_frame, "Reset Config", self._reset_config, 2)
         self._add_button(button_frame, "Show History", self._draw_plot, 3)
         self._add_button(button_frame, "Export History", self._export_log_file, 4)
         self._add_button(button_frame, "Import History", self._import_log_file, 5)
@@ -209,7 +212,7 @@ class Application:
             # TODO: implement external window for Linux
             self.scraper.scrape_prices()
 
-    def _make_tree_editable(self, editor_frame, tree):
+    def _make_tree_editable(self, editor_frame, tree, scrollbar):
         """
         Add a binding to the treeview that allows double-clicking on a cell to edit its
         value.
@@ -238,9 +241,19 @@ class Application:
             except Exception:
                 pass
 
-        tree.bind("<Double-1>", set_cell_value)
+        def destroy_entries(_):
+            """Destroy any entry widgets in the treeview when the mouse wheel is
+            used.
+            """
+            for widget in editor_frame.winfo_children():
+                if isinstance(widget, ttk.Entry):
+                    widget.destroy()
 
-    def _configure_save_button(self, editor_frame, tree):
+        tree.bind("<Double-1>", set_cell_value)
+        tree.bind("<MouseWheel>", destroy_entries)
+        scrollbar.bind("<MouseWheel>", destroy_entries)
+
+    def _add_save_button(self, editor_frame, tree):
         """Save updated options and values from the treeview back to the config file."""
 
         def save_options():
@@ -254,19 +267,22 @@ class Application:
 
             self.scraper.config.write_to_file()
             if self.scraper.config.valid:
-                messagebox.showinfo("Config Saved")
-            else:
-                messagebox.showerror(
-                    "Config Error", "The configuration file is invalid. Please fix it."
+                messagebox.showinfo(
+                    "Config Saved", "The configuration has been saved successfully."
                 )
+            else:
+                messagebox.showerror("Config Error", "The configuration is invalid. Please fix it.")
 
         save_button = ttk.Button(editor_frame, text="Save", command=save_options)
         save_button.pack(side="bottom", pady=10, padx=10)
 
-    def _configure_option_tree(self, editor_frame):
-        """Configure a treeview to display the configuration options in a structured
-        way.
+    def _configure_editor_frame(self, config_editor_window):
+        """Configure the main editor frame which displays the configuration options in a
+        structured way.
         """
+        editor_frame = ttk.Frame(config_editor_window, padding=30)
+        editor_frame.pack(expand=True, fill="both")
+
         scrollbar = ttk.Scrollbar(editor_frame)
         scrollbar.pack(side="right", fill="y", padx=(5, 0))
 
@@ -286,39 +302,31 @@ class Application:
         tree.heading(1, text="Value")
 
         for section in self.scraper.config.sections():
-            section_level = tree.insert("", tk.END, text=section)
+            if section == "App Settings":
+                continue
+            section_level = tree.insert("", "end", text=section)
             for key, value in self.scraper.config.items(section):
-                tree.insert(section_level, tk.END, text=key, values=(value,))
+                tree.insert(section_level, "end", text=key, values=(value,))
 
-        self._make_tree_editable(editor_frame, tree)
-        self._configure_save_button(editor_frame, tree)
-
-    def _configure_editor_window(self):
-        """Open a new window with a config editor GUI."""
-        config_editor_window = tk.Toplevel(self.application_window)
-        config_editor_window.geometry("800x750")
-        config_editor_window.title("Config Editor")
-
-        editor_frame = ttk.Frame(config_editor_window, padding=30)
-        editor_frame.pack(expand=True, fill="both")
-
-        self._configure_option_tree(editor_frame)
+        self._make_tree_editable(editor_frame, tree, scrollbar)
+        self._add_save_button(editor_frame, tree)
 
     def _edit_config(self):
-        """Edit the configuration file using the specified text editor."""
-        self._configure_editor_window()
+        """Open a new window with a config editor GUI."""
+        config_editor_window = tk.Toplevel(self.application_window)
+        config_editor_window.geometry(CONFIG_EDITOR_SIZE)
+        config_editor_window.title(CONFIG_EDITOR_TITLE)
 
-    def _confirm_reset_config(self):
+        self._configure_editor_frame(config_editor_window)
+
+    def _reset_config(self):
+        """Reset the configuration file to its default state."""
         confirm = messagebox.askokcancel(
             "Reset Config", "Are you sure you want to reset the config file?"
         )
         if confirm:
-            self._reset_config()
-
-    def _reset_config(self):
-        """Reset the configuration file to its default state."""
-        copy(CONFIG_FILE_BACKUP, CONFIG_FILE)
-        self.scraper.load_config()
+            copy(CONFIG_FILE_BACKUP, CONFIG_FILE)
+            self.scraper.load_config()
 
     def _draw_plot(self):
         """Draw a plot of the scraped prices over time."""
