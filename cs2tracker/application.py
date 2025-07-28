@@ -51,7 +51,7 @@ class Application:
         application_window.mainloop()
 
     def _add_button(self, frame, text, command, row):
-        """Create and style a button for the main application window."""
+        """Create and style a button for the button frame."""
         grid_pos = {"row": row, "column": 0, "sticky": "ew", "padx": 10, "pady": 10}
         button = ttk.Button(frame, text=text, command=command)
         button.grid(**grid_pos)
@@ -70,6 +70,7 @@ class Application:
         self._add_button(button_frame, "Import History", self._import_log_file, 5)
 
     def _add_checkbox(self, frame, text, variable, command, row):
+        """Create and style a checkbox for the checkbox frame."""
         grid_pos = {"row": row, "column": 0, "sticky": "w", "padx": (20, 0), "pady": 10}
         checkbox = ttk.Checkbutton(
             frame,
