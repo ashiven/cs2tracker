@@ -44,13 +44,13 @@
 ### Options
 
 - `Run!` to gather the current market prices of your items and calculate the total amount in USD and EUR.
-- `Edit Config` to specify the numbers of items owned in the config file. You can also add items other than cases and sticker capsules following the format in the `Custom Items` section. (item_name = item_owned item_page)
-- `Reset Config` to reset the config file to its original state. This will remove any custom items you have added and reset the number of items owned for all items.
+- `Edit Config` to specify the numbers of items owned in the configuration. You can also add items other than cases and sticker capsules via `Add Custom Item`
+- `Reset Config` to reset the configuration to its original state. This will remove any custom items you have added and reset the number of items owned for all items.
 - `Show History` to see a price chart consisting of past calculations. A new data point is generated once a day upon running the program.
-- `Export / Import History` to export the history data to a CSV file or import it from a CSV file. This may be used to back up your history data or perform further analysis on it.
+- `Export / Import History` to export the price history to a CSV file or import it from a CSV file. This may be used to back up your history data or perform further analysis on it.
 - `Daily Background Calculations` to automatically run a daily calculation of your investment in the background and save the results such that they can later be viewed via `Show History`.
 - `Receive Discord Notifications` to receive a notification on your Discord server when the program has finished calculating your investment. You need to set up a [webhook](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks) in your Discord server and enter the webhook url into the `discord_webhook_url` field in the config file.
-- `Proxy Requests` to prevent your requests from being rate limited by the steamcommunity server. You need to register for a free API key on [Crawlbase](crawlbase.com) and enter it into the `proxy_api_key` field in the config file.
+- `Proxy Requests` to prevent your requests from being rate limited by the steamcommunity server. You need to register for a free API key on [Crawlbase](crawlbase.com) and enter it into the `proxy_api_key` field in the `User Settings` configuration section.
 
 ---
 
