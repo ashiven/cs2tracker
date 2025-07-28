@@ -11,6 +11,9 @@ class ValidatedConfig(ConfigParser):
         """Initialize the ValidatedConfig class."""
         super().__init__(interpolation=None)
         super().read(CONFIG_FILE)
+
+        self.valid = False
+        self.last_error = None
         self._validate_config()
 
     def _validate_config_sections(self):

@@ -263,7 +263,7 @@ class Application:
         self.config_editor_window.bind("<MouseWheel>", destroy_entries)  # type: ignore
         self.config_editor_window.bind("<Button-1>", destroy_entry)  # type: ignore
 
-    def _add_treeview(self, editor_frame):
+    def _configure_treeview(self, editor_frame):
         """Add a treeview to the editor frame to display and edit configuration
         options.
         """
@@ -279,7 +279,6 @@ class Application:
         )
         scrollbar.config(command=tree.yview)
 
-        tree.pack(expand=True, fill="both")
         tree.column("#0", anchor="w", width=200)
         tree.column(1, anchor="w", width=25)
         tree.heading("#0", text="Option")
@@ -288,7 +287,7 @@ class Application:
         for section in self.scraper.config.sections():
             if section == "App Settings":
                 continue
-            section_level = tree.insert("", "end", text=section)
+            section_level = tree.insert("", "end", iid=section, text=section)
             for config_option, value in self.scraper.config.items(section):
                 title_option = config_option.replace("_", " ").title()
                 tree.insert(section_level, "end", text=title_option, values=(value,))
@@ -297,7 +296,7 @@ class Application:
 
         return tree
 
-    def _add_save_button(self, editor_frame, tree):
+    def _configure_save_button(self, button_frame, tree):
         """Save updated options and values from the treeview back to the config file."""
 
         def save_config():
@@ -321,8 +320,69 @@ class Application:
                     f"The configuration is invalid. ({self.scraper.config.last_error})",
                 )
 
-        save_button = ttk.Button(editor_frame, text="Save", command=save_config)
-        save_button.pack(side="bottom", pady=10, padx=10)
+        save_button = ttk.Button(button_frame, text="Save", command=save_config)
+        save_button.pack(side="left", expand=True, padx=5)
+
+    def _configure_custom_item_button(self, button_frame, tree):
+        """Add a button that opens an entry dialog to add a custom item to the
+        configuration.
+        """
+
+        def add_custom_item(item_name, item_owned, item_url):
+            """Add a custom item to the configuration."""
+            if not item_name or not item_owned or not item_url:
+                messagebox.showerror("Input Error", "All fields must be filled out.")
+                return
+
+            try:
+                owned_count = int(item_owned)
+                if owned_count < 0:
+                    raise ValueError("Owned count must be a non-negative integer.")
+            except ValueError as error:
+                messagebox.showerror("Input Error", f"Invalid owned count: {error}")
+                return
+
+            tree.insert(
+                "Custom Items", "end", text=item_name, values=(f"{owned_count} {item_url}",)
+            )
+            self.scraper.config.set("Custom Items", item_name, f"{owned_count} {item_url}")
+            self.scraper.config.write_to_file()
+            messagebox.showinfo("Custom Item Added", f"{item_name} has been added successfully.")
+
+        def open_custom_item_dialog():
+            """Open a dialog to enter custom item details."""
+            dialog = tk.Toplevel(self.config_editor_window)
+            dialog.title("Add Custom Item")
+            dialog.geometry("500x250")
+
+            dialog_frame = ttk.Frame(dialog, style="Card.TFrame", padding=20)
+            dialog_frame.pack(expand=True, fill="both")
+
+            ttk.Label(dialog_frame, text="Item Name:").pack(pady=5)
+            item_name_entry = ttk.Entry(dialog_frame)
+            item_name_entry.pack(fill="x", padx=10)
+
+            ttk.Label(dialog_frame, text="Owned Count:").pack(pady=5)
+            item_owned_entry = ttk.Entry(dialog_frame)
+            item_owned_entry.pack(fill="x", padx=10)
+
+            ttk.Label(dialog_frame, text="Item URL:").pack(pady=5)
+            item_url_entry = ttk.Entry(dialog_frame)
+            item_url_entry.pack(fill="x", padx=10)
+
+            add_button = ttk.Button(
+                dialog_frame,
+                text="Add",
+                command=lambda: add_custom_item(
+                    item_name_entry.get(), item_owned_entry.get(), item_url_entry.get()
+                ),
+            )
+            add_button.pack(pady=10)
+
+        custom_item_button = ttk.Button(
+            button_frame, text="Add Custom Item", command=open_custom_item_dialog
+        )
+        custom_item_button.pack(side="left", expand=True, padx=5)
 
     def _configure_editor_frame(self):
         """Configure the main editor frame which displays the configuration options in a
@@ -331,8 +391,15 @@ class Application:
         editor_frame = ttk.Frame(self.config_editor_window, padding=30)
         editor_frame.pack(expand=True, fill="both")
 
-        tree = self._add_treeview(editor_frame)
-        self._add_save_button(editor_frame, tree)
+        tree = self._configure_treeview(editor_frame)
+        tree.pack(expand=True, fill="both")
+
+        button_frame = ttk.Frame(editor_frame, padding=10)
+
+        self._configure_save_button(button_frame, tree)
+        self._configure_custom_item_button(button_frame, tree)
+
+        button_frame.pack(side="bottom", padx=10, pady=(0, 10))
 
     def _edit_config(self):
         """Open a new window with a config editor GUI."""
