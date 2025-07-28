@@ -33,6 +33,9 @@ WINDOW_SIZE = "630x380"
 CONFIG_EDITOR_TITLE = "Config Editor"
 CONFIG_EDITOR_SIZE = "800x750"
 
+NEW_CUSTOM_ITEM_TITLE = "Add Custom Item"
+NEW_CUSTOM_ITEM_SIZE = "500x250"
+
 SCRAPER_WINDOW_HEIGHT = 40
 SCRAPER_WINDOW_WIDTH = 120
 SCRAPER_WINDOW_BACKGROUND_COLOR = "Black"
@@ -352,10 +355,10 @@ class Application:
         def open_custom_item_dialog():
             """Open a dialog to enter custom item details."""
             dialog = tk.Toplevel(self.config_editor_window)
-            dialog.title("Add Custom Item")
-            dialog.geometry("500x250")
+            dialog.title(NEW_CUSTOM_ITEM_TITLE)
+            dialog.geometry(NEW_CUSTOM_ITEM_SIZE)
 
-            dialog_frame = ttk.Frame(dialog, style="Card.TFrame", padding=20)
+            dialog_frame = ttk.Frame(dialog, padding=10)
             dialog_frame.pack(expand=True, fill="both")
 
             ttk.Label(dialog_frame, text="Item Name:").pack(pady=5)
