@@ -102,7 +102,9 @@ class Application:
             checkbox_frame,
             "Receive Discord Notifications",
             discord_webhook_checkbox_value,
-            lambda: self._toggle_discord_webhook(discord_webhook_checkbox_value.get()),
+            lambda: discord_webhook_checkbox_value.set(
+                self._toggle_discord_webhook(discord_webhook_checkbox_value.get())
+            ),
             1,
         )
 
@@ -113,7 +115,9 @@ class Application:
             checkbox_frame,
             "Proxy Requests",
             use_proxy_checkbox_value,
-            lambda: self._toggle_use_proxy(use_proxy_checkbox_value.get()),
+            lambda: use_proxy_checkbox_value.set(
+                self._toggle_use_proxy(use_proxy_checkbox_value.get())
+            ),
             2,
         )
 
@@ -266,11 +270,31 @@ class Application:
 
     def _toggle_use_proxy(self, enabled: bool):
         """Toggle whether the scraper should use proxy servers for requests."""
+        proxy_api_key = self.scraper.config.get("User Settings", "proxy_api_key", fallback=None)
+        if not proxy_api_key and enabled:
+            messagebox.showerror(
+                "Config Error",
+                "You need to enter a valid crawlbase API key into the config file to use this feature.",
+            )
+            return False
+
         self.scraper.toggle_use_proxy(enabled)
+        return True
 
     def _toggle_discord_webhook(self, enabled: bool):
         """Toggle whether the scraper should send notifications to a Discord webhook."""
+        discord_webhook_url = self.scraper.config.get(
+            "User Settings", "discord_webhook_url", fallback=None
+        )
+        if not discord_webhook_url and enabled:
+            messagebox.showerror(
+                "Config Error",
+                "You need to enter a valid Discord webhook URL into the config file to use this feature.",
+            )
+            return False
+
         self.scraper.toggle_discord_webhook(enabled)
+        return True
 
 
 def _popen_and_call(popen_args, callback):
