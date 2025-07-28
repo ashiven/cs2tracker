@@ -251,7 +251,14 @@ class Application:
                     section = tree.parent(item)
                     section_name = tree.item(section, "text") if section else "User Settings"
                     self.scraper.config.set(section_name, key, value)
+
             self.scraper.config.write_to_file()
+            if self.scraper.config.valid:
+                messagebox.showinfo("Config Saved")
+            else:
+                messagebox.showerror(
+                    "Config Error", "The configuration file is invalid. Please fix it."
+                )
 
         save_button = ttk.Button(editor_frame, text="Save", command=save_options)
         save_button.pack(side="bottom", pady=10, padx=10)
