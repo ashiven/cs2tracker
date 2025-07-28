@@ -15,12 +15,11 @@ class ValidatedConfig(ConfigParser):
         """Initialize the ValidatedConfig class."""
         super().__init__(delimiters=("~"), interpolation=None)
         self.optionxform = str  # type: ignore
+        super().read(CONFIG_FILE)
 
         self.valid = False
         self.last_error = None
         self._validate_config()
-        if self.valid:
-            super().read(CONFIG_FILE)
 
     def _validate_config_sections(self):
         """Validate that the configuration file has all required sections."""
