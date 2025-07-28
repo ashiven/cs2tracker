@@ -212,7 +212,7 @@ class Application:
             # TODO: implement external window for Linux
             self.scraper.scrape_prices()
 
-    def _make_tree_editable(self, editor_frame, tree, scrollbar):
+    def _make_tree_editable(self, editor_frame, tree):
         """
         Add a binding to the treeview that allows double-clicking on a cell to edit its
         value.
@@ -249,9 +249,14 @@ class Application:
                 if isinstance(widget, ttk.Entry):
                     widget.destroy()
 
+        def destroy_entry(event):
+            """Destroy the entry widget if the user clicks outside of it."""
+            if isinstance(event.widget, ttk.Entry):
+                event.widget.destroy()
+
         tree.bind("<Double-1>", set_cell_value)
-        tree.bind("<MouseWheel>", destroy_entries)
-        scrollbar.bind("<MouseWheel>", destroy_entries)
+        self.config_editor_window.bind("<MouseWheel>", destroy_entries)
+        self.config_editor_window.bind("<Button-1>", destroy_entry)
 
     def _add_save_button(self, editor_frame, tree):
         """Save updated options and values from the treeview back to the config file."""
@@ -276,11 +281,11 @@ class Application:
         save_button = ttk.Button(editor_frame, text="Save", command=save_options)
         save_button.pack(side="bottom", pady=10, padx=10)
 
-    def _configure_editor_frame(self, config_editor_window):
+    def _configure_editor_frame(self):
         """Configure the main editor frame which displays the configuration options in a
         structured way.
         """
-        editor_frame = ttk.Frame(config_editor_window, padding=30)
+        editor_frame = ttk.Frame(self.config_editor_window, padding=30)
         editor_frame.pack(expand=True, fill="both")
 
         scrollbar = ttk.Scrollbar(editor_frame)
@@ -308,16 +313,16 @@ class Application:
             for key, value in self.scraper.config.items(section):
                 tree.insert(section_level, "end", text=key, values=(value,))
 
-        self._make_tree_editable(editor_frame, tree, scrollbar)
+        self._make_tree_editable(editor_frame, tree)
         self._add_save_button(editor_frame, tree)
 
     def _edit_config(self):
         """Open a new window with a config editor GUI."""
-        config_editor_window = tk.Toplevel(self.application_window)
-        config_editor_window.geometry(CONFIG_EDITOR_SIZE)
-        config_editor_window.title(CONFIG_EDITOR_TITLE)
+        self.config_editor_window = tk.Toplevel(self.application_window)
+        self.config_editor_window.geometry(CONFIG_EDITOR_SIZE)
+        self.config_editor_window.title(CONFIG_EDITOR_TITLE)
 
-        self._configure_editor_frame(config_editor_window)
+        self._configure_editor_frame()
 
     def _reset_config(self):
         """Reset the configuration file to its default state."""
