@@ -41,6 +41,8 @@ SCRAPER_WINDOW_BACKGROUND_COLOR = "Black"
 class Application:
     def __init__(self):
         self.scraper = Scraper()
+        self.application_window = None
+        self.config_editor_window = None
 
     def run(self):
         """Run the main application window with buttons for scraping prices, editing the
@@ -255,8 +257,8 @@ class Application:
                 event.widget.destroy()
 
         tree.bind("<Double-1>", set_cell_value)
-        self.config_editor_window.bind("<MouseWheel>", destroy_entries)
-        self.config_editor_window.bind("<Button-1>", destroy_entry)
+        self.config_editor_window.bind("<MouseWheel>", destroy_entries)  # type: ignore
+        self.config_editor_window.bind("<Button-1>", destroy_entry)  # type: ignore
 
     def _add_save_button(self, editor_frame, tree):
         """Save updated options and values from the treeview back to the config file."""
