@@ -18,7 +18,6 @@ class OSType(enum.Enum):
 
 
 OS = OSType.WINDOWS if sys.platform.startswith("win") else OSType.LINUX
-TEXT_EDITOR = "notepad" if OS == OSType.WINDOWS else "nano"
 PYTHON_EXECUTABLE = sys.executable
 
 
