@@ -86,6 +86,7 @@ class Application:
             text=text,
             variable=variable,
             command=command,
+            style="Switch.TCheckbutton",
         )
         checkbox.grid(**grid_pos)
 
@@ -129,6 +130,11 @@ class Application:
                 self._toggle_use_proxy(use_proxy_checkbox_value.get())
             ),
             2,
+        )
+
+        dark_theme_checkbox_value = tk.BooleanVar(value=True)
+        self._add_checkbox(
+            checkbox_frame, "Dark Theme", dark_theme_checkbox_value, sv_ttk.toggle_theme, 3
         )
 
     def _configure_main_frame(self, window):
