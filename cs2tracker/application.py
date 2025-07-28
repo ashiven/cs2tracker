@@ -69,7 +69,9 @@ class Application:
         self._add_button(button_frame, "Export History", self._export_log_file, 4)
         self._add_button(button_frame, "Import History", self._import_log_file, 5)
 
-    def _add_checkbox(self, frame, text, variable, command, row):
+    def _add_checkbox(
+        self, frame, text, variable, command, row
+    ):  # pylint: disable=too-many-arguments,too-many-positional-arguments
         """Create and style a checkbox for the checkbox frame."""
         grid_pos = {"row": row, "column": 0, "sticky": "w", "padx": (20, 0), "pady": 10}
         checkbox = ttk.Checkbutton(
