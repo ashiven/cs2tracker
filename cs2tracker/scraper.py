@@ -7,13 +7,7 @@ from requests import RequestException, Session
 from requests.adapters import HTTPAdapter, Retry
 from tenacity import RetryError, retry, stop_after_attempt
 
-from cs2tracker.constants import (
-    AUTHOR_STRING,
-    BANNER,
-    CAPSULE_INFO,
-    CASE_HREFS,
-    CONFIG_FILE,
-)
+from cs2tracker.constants import AUTHOR_STRING, BANNER, CAPSULE_INFO, CASE_HREFS
 from cs2tracker.padded_console import PaddedConsole
 from cs2tracker.price_logs import PriceLogs
 from cs2tracker.validated_config import ValidatedConfig
@@ -373,13 +367,7 @@ class Scraper:
 
         :param enabled: If True, proxies will be used; if False, they will not be used.
         """
-        self.config.set("App Settings", "use_proxy", str(enabled))
-        with open(CONFIG_FILE, "w", encoding="utf-8") as config_file:
-            self.config.write(config_file)
-
-        console.print(
-            f"[bold green]{'[+] Enabled' if enabled else '[-] Disabled'} proxy usage for requests."
-        )
+        self.config.toggle_use_proxy(enabled)
 
     def toggle_discord_webhook(self, enabled: bool):
         """
@@ -388,13 +376,7 @@ class Scraper:
         :param enabled: If True, the webhook will be used; if False, it will not be
             used.
         """
-        self.config.set("App Settings", "discord_notifications", str(enabled))
-        with open(CONFIG_FILE, "w", encoding="utf-8") as config_file:
-            self.config.write(config_file)
-
-        console.print(
-            f"[bold green]{'[+] Enabled' if enabled else '[-] Disabled'} Discord webhook notifications."
-        )
+        self.config.toggle_discord_webhook(enabled)
 
 
 if __name__ == "__main__":

@@ -72,3 +72,32 @@ class ValidatedConfig(ConfigParser):
         """
         self._validate_config_sections()
         self._validate_config_values()
+
+    def toggle_use_proxy(self, enabled: bool):
+        """
+        Toggle the use of proxies for requests. This will update the configuration file.
+
+        :param enabled: If True, proxies will be used; if False, they will not be used.
+        """
+        self.set("App Settings", "use_proxy", str(enabled))
+        with open(CONFIG_FILE, "w", encoding="utf-8") as config_file:
+            self.write(config_file)
+
+        console.print(
+            f"[bold green]{'[+] Enabled' if enabled else '[-] Disabled'} proxy usage for requests."
+        )
+
+    def toggle_discord_webhook(self, enabled: bool):
+        """
+        Toggle the use of a Discord webhook to notify users of price calculations.
+
+        :param enabled: If True, the webhook will be used; if False, it will not be
+            used.
+        """
+        self.set("App Settings", "discord_notifications", str(enabled))
+        with open(CONFIG_FILE, "w", encoding="utf-8") as config_file:
+            self.write(config_file)
+
+        console.print(
+            f"[bold green]{'[+] Enabled' if enabled else '[-] Disabled'} Discord webhook notifications."
+        )
