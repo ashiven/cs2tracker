@@ -34,7 +34,7 @@ CONFIG_EDITOR_TITLE = "Config Editor"
 CONFIG_EDITOR_SIZE = "800x750"
 
 NEW_CUSTOM_ITEM_TITLE = "Add Custom Item"
-NEW_CUSTOM_ITEM_SIZE = "500x250"
+NEW_CUSTOM_ITEM_SIZE = "500x200"
 
 SCRAPER_WINDOW_HEIGHT = 40
 SCRAPER_WINDOW_WIDTH = 120
@@ -310,6 +310,9 @@ class Application:
                     value = tree.item(item, "values")[0]
                     section = tree.parent(item)
                     section_name = tree.item(section, "text")
+                    if section_name == "Custom Items":
+                        # custom items are already saved upon creation (Saving them again would result in duplicates)
+                        continue
                     self.scraper.config.set(section_name, config_option, value)
 
             self.scraper.config.write_to_file()
@@ -331,26 +334,30 @@ class Application:
         configuration.
         """
 
-        def add_custom_item(item_name, item_owned, item_url):
+        def add_custom_item(item_url, item_owned):
             """Add a custom item to the configuration."""
-            if not item_name or not item_owned or not item_url:
+            if not item_url or not item_owned:
                 messagebox.showerror("Input Error", "All fields must be filled out.")
                 return
 
             try:
-                owned_count = int(item_owned)
-                if owned_count < 0:
+                if int(item_owned) < 0:
                     raise ValueError("Owned count must be a non-negative integer.")
             except ValueError as error:
                 messagebox.showerror("Input Error", f"Invalid owned count: {error}")
                 return
 
-            tree.insert(
-                "Custom Items", "end", text=item_name, values=(f"{owned_count} {item_url}",)
-            )
-            self.scraper.config.set("Custom Items", item_name, f"{owned_count} {item_url}")
+            self.scraper.config.set("Custom Items", item_url, item_owned)
             self.scraper.config.write_to_file()
-            messagebox.showinfo("Custom Item Added", f"{item_name} has been added successfully.")
+            if self.scraper.config.valid:
+                tree.insert("Custom Items", "end", text=item_url, values=(item_owned,))
+                messagebox.showinfo("Custom Item Added", "Custom item has been added successfully.")
+            else:
+                self.scraper.config.remove_option("Custom Items", item_url)
+                messagebox.showerror(
+                    "Config Error",
+                    f"The configuration is invalid. ({self.scraper.config.last_error})",
+                )
 
         def open_custom_item_dialog():
             """Open a dialog to enter custom item details."""
@@ -361,24 +368,18 @@ class Application:
             dialog_frame = ttk.Frame(dialog, padding=10)
             dialog_frame.pack(expand=True, fill="both")
 
-            ttk.Label(dialog_frame, text="Item Name:").pack(pady=5)
-            item_name_entry = ttk.Entry(dialog_frame)
-            item_name_entry.pack(fill="x", padx=10)
+            ttk.Label(dialog_frame, text="Item URL:").pack(pady=5)
+            item_url_entry = ttk.Entry(dialog_frame)
+            item_url_entry.pack(fill="x", padx=10)
 
             ttk.Label(dialog_frame, text="Owned Count:").pack(pady=5)
             item_owned_entry = ttk.Entry(dialog_frame)
             item_owned_entry.pack(fill="x", padx=10)
 
-            ttk.Label(dialog_frame, text="Item URL:").pack(pady=5)
-            item_url_entry = ttk.Entry(dialog_frame)
-            item_url_entry.pack(fill="x", padx=10)
-
             add_button = ttk.Button(
                 dialog_frame,
                 text="Add",
-                command=lambda: add_custom_item(
-                    item_name_entry.get(), item_owned_entry.get(), item_url_entry.get()
-                ),
+                command=lambda: add_custom_item(item_url_entry.get(), item_owned_entry.get()),
             )
             add_button.pack(pady=10)
 
