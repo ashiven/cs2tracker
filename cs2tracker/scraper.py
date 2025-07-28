@@ -1,5 +1,4 @@
 import time
-from configparser import ConfigParser
 
 from bs4 import BeautifulSoup
 from bs4.element import Tag
@@ -17,6 +16,7 @@ from cs2tracker.constants import (
 )
 from cs2tracker.padded_console import PaddedConsole
 from cs2tracker.price_logs import PriceLogs
+from cs2tracker.validated_config import ValidatedConfig
 
 MAX_LINE_LEN = 72
 SEPARATOR = "-"
@@ -35,81 +35,15 @@ console = PaddedConsole()
 class Scraper:
     def __init__(self):
         """Initialize the Scraper class."""
-        self.parse_config()
+        self.load_config()
         self._start_session()
 
         self.usd_total = 0
         self.eur_total = 0
 
-    def _validate_config_sections(self):
-        """Validate that the configuration file has all required sections."""
-        if not self.config.has_section("User Settings"):
-            raise ValueError("Missing 'User Settings' section in the configuration file.")
-        if not self.config.has_section("App Settings"):
-            raise ValueError("Missing 'App Settings' section in the configuration file.")
-        if not self.config.has_section("Custom Items"):
-            raise ValueError("Missing 'Custom Items' section in the configuration file.")
-        if not self.config.has_section("Cases"):
-            raise ValueError("Missing 'Cases' section in the configuration file.")
-        for capsule_section in CAPSULE_INFO:
-            if not self.config.has_section(capsule_section):
-                raise ValueError(f"Missing '{capsule_section}' section in the configuration file.")
-
-    def _validate_config_values(self):
-        """Validate that the configuration file has valid values for all sections."""
-        try:
-            for custom_item_name, custom_item_owned in self.config.items("Custom Items"):
-                if " " not in custom_item_owned:
-                    raise ValueError(
-                        f"Invalid custom item format (<item_name> = <owned_count> <item_url>): {custom_item_name} = {custom_item_owned}"
-                    )
-                owned, _ = custom_item_owned.split(" ", 1)
-                if int(owned) < 0:
-                    raise ValueError(
-                        f"Invalid value in 'Custom Items' section: {custom_item_name} = {custom_item_owned}"
-                    )
-            for case_name, case_owned in self.config.items("Cases"):
-                if int(case_owned) < 0:
-                    raise ValueError(
-                        f"Invalid value in 'Cases' section: {case_name} = {case_owned}"
-                    )
-            for capsule_section in CAPSULE_INFO:
-                for capsule_name, capsule_owned in self.config.items(capsule_section):
-                    if int(capsule_owned) < 0:
-                        raise ValueError(
-                            f"Invalid value in '{capsule_section}' section: {capsule_name} = {capsule_owned}"
-                        )
-        except ValueError as error:
-            if "Invalid " in str(error):
-                raise
-            raise ValueError("Invalid value type. All values must be integers.") from error
-
-    def _validate_config(self):
-        """
-        Validate the configuration file to ensure all required sections exist with the
-        right values.
-
-        :raises ValueError: If any required section is missing or if any value is
-            invalid.
-        """
-        self._validate_config_sections()
-        self._validate_config_values()
-
-    def parse_config(self):
-        """
-        Parse the configuration file to read settings and user-owned items.
-
-        Sets self.valid_config to True if the configuration is valid, and False if it is
-        not.
-        """
-        self.config = ConfigParser(interpolation=None)
-        self.config.read(CONFIG_FILE)
-        try:
-            self._validate_config()
-            self.valid_config = True
-        except ValueError as error:
-            console.print(f"[bold red][!] Config error: {error}")
-            self.valid_config = False
+    def load_config(self):
+        """Load the configuration file and validate its contents."""
+        self.config = ValidatedConfig()
 
     def _start_session(self):
         """Start a requests session with custom headers and retry logic."""
@@ -127,7 +61,7 @@ class Scraper:
         """Scrape prices for capsules and cases, calculate totals in USD and EUR, and
         print/save the results.
         """
-        if not self.valid_config:
+        if not self.config.valid:
             console.print(
                 "[bold red][!] Invalid configuration. Please fix the config file before running."
             )

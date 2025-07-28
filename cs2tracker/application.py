@@ -214,7 +214,7 @@ class Application:
         """Edit the configuration file using the specified text editor."""
         _popen_and_call(
             popen_args={"args": [TEXT_EDITOR, CONFIG_FILE], "shell": True},
-            callback=self.scraper.parse_config,
+            callback=self.scraper.load_config,
         )
 
     def _confirm_reset_config(self):
@@ -227,7 +227,7 @@ class Application:
     def _reset_config(self):
         """Reset the configuration file to its default state."""
         copy(CONFIG_FILE_BACKUP, CONFIG_FILE)
-        self.scraper.parse_config()
+        self.scraper.load_config()
 
     def _draw_plot(self):
         """Draw a plot of the scraped prices over time."""
