@@ -7,4 +7,5 @@ disable=
     consider-using-with,
     import-error,
     no-else-return,
-    broad-exception-caught
+    broad-exception-caught,
+    too-few-public-methods
