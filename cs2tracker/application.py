@@ -155,7 +155,7 @@ class Application:
             ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(app_id)
 
         icon = tk.PhotoImage(file=ICON_FILE)
-        window.wm_iconphoto(False, icon)
+        window.wm_iconphoto(True, icon)
 
         self._configure_main_frame(window)
 
@@ -260,36 +260,10 @@ class Application:
         self.config_editor_window.bind("<MouseWheel>", destroy_entries)  # type: ignore
         self.config_editor_window.bind("<Button-1>", destroy_entry)  # type: ignore
 
-    def _add_save_button(self, editor_frame, tree):
-        """Save updated options and values from the treeview back to the config file."""
-
-        def save_options():
-            for child in tree.get_children():
-                for item in tree.get_children(child):
-                    key = tree.item(item, "text")
-                    value = tree.item(item, "values")[0]
-                    section = tree.parent(item)
-                    section_name = tree.item(section, "text") if section else "User Settings"
-                    self.scraper.config.set(section_name, key, value)
-
-            self.scraper.config.write_to_file()
-            if self.scraper.config.valid:
-                messagebox.showinfo(
-                    "Config Saved", "The configuration has been saved successfully."
-                )
-            else:
-                messagebox.showerror("Config Error", "The configuration is invalid. Please fix it.")
-
-        save_button = ttk.Button(editor_frame, text="Save", command=save_options)
-        save_button.pack(side="bottom", pady=10, padx=10)
-
-    def _configure_editor_frame(self):
-        """Configure the main editor frame which displays the configuration options in a
-        structured way.
+    def _add_treeview(self, editor_frame):
+        """Add a treeview to the editor frame to display and edit configuration
+        options.
         """
-        editor_frame = ttk.Frame(self.config_editor_window, padding=30)
-        editor_frame.pack(expand=True, fill="both")
-
         scrollbar = ttk.Scrollbar(editor_frame)
         scrollbar.pack(side="right", fill="y", padx=(5, 0))
 
@@ -312,10 +286,46 @@ class Application:
             if section == "App Settings":
                 continue
             section_level = tree.insert("", "end", text=section)
-            for key, value in self.scraper.config.items(section):
-                tree.insert(section_level, "end", text=key, values=(value,))
+            for config_option, value in self.scraper.config.items(section):
+                title_option = config_option.replace("_", " ").title()
+                tree.insert(section_level, "end", text=title_option, values=(value,))
 
         self._make_tree_editable(editor_frame, tree)
+
+        return tree
+
+    def _add_save_button(self, editor_frame, tree):
+        """Save updated options and values from the treeview back to the config file."""
+
+        def save_config():
+            for child in tree.get_children():
+                for item in tree.get_children(child):
+                    title_option = tree.item(item, "text")
+                    config_option = title_option.lower().replace(" ", "_")
+                    value = tree.item(item, "values")[0]
+                    section = tree.parent(item)
+                    section_name = tree.item(section, "text")
+                    self.scraper.config.set(section_name, config_option, value)
+
+            self.scraper.config.write_to_file()
+            if self.scraper.config.valid:
+                messagebox.showinfo(
+                    "Config Saved", "The configuration has been saved successfully."
+                )
+            else:
+                messagebox.showerror("Config Error", "The configuration is invalid. Please fix it.")
+
+        save_button = ttk.Button(editor_frame, text="Save", command=save_config)
+        save_button.pack(side="bottom", pady=10, padx=10)
+
+    def _configure_editor_frame(self):
+        """Configure the main editor frame which displays the configuration options in a
+        structured way.
+        """
+        editor_frame = ttk.Frame(self.config_editor_window, padding=30)
+        editor_frame.pack(expand=True, fill="both")
+
+        tree = self._add_treeview(editor_frame)
         self._add_save_button(editor_frame, tree)
 
     def _edit_config(self):
