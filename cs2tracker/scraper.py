@@ -8,6 +8,7 @@ from requests.adapters import HTTPAdapter, Retry
 from tenacity import RetryError, retry, stop_after_attempt
 
 from cs2tracker.constants import AUTHOR_STRING, BANNER, CAPSULE_INFO, CASE_HREFS
+from cs2tracker.discord_notifier import DiscordNotifier
 from cs2tracker.padded_console import PaddedConsole
 from cs2tracker.price_logs import PriceLogs
 from cs2tracker.validated_config import ValidatedConfig
@@ -18,10 +19,6 @@ PRICE_INFO = "Owned: {:<10}  Steam market price: ${:<10}  Total: ${:<10}\n"
 
 HTTP_PROXY_URL = "http://{}:@smartproxy.crawlbase.com:8012"
 HTTPS_PROXY_URL = "http://{}:@smartproxy.crawlbase.com:8012"
-
-DC_WEBHOOK_USERNAME = "CS2Tracker"
-DC_WEBHOOK_AVATAR_URL = "https://img.icons8.com/?size=100&id=uWQJp2tLXUH6&format=png&color=000000"
-DC_RECENT_HISTORY_LIMIT = 5
 
 console = PaddedConsole()
 
@@ -92,54 +89,6 @@ class Scraper:
         end_string = SEPARATOR * MAX_LINE_LEN
         console.print(f"[bold green]{end_string}\n")
 
-    def _construct_recent_calculations_embeds(self):
-        """
-        Construct the embeds for the Discord message that will be sent after a price
-        calculation has been made.
-
-        :return: A list of embeds for the Discord message.
-        """
-        dates, usd_prices, eur_prices = PriceLogs.read()
-        dates, usd_prices, eur_prices = reversed(dates), reversed(usd_prices), reversed(eur_prices)
-
-        date_history, usd_history, eur_history = [], [], []
-        for date, usd_log, eur_log in zip(dates, usd_prices, eur_prices):
-            if len(date_history) >= DC_RECENT_HISTORY_LIMIT:
-                break
-            date_history.append(date.strftime("%Y-%m-%d"))
-            usd_history.append(f"${usd_log:.2f}")
-            eur_history.append(f"€{eur_log:.2f}")
-
-        date_history = "\n".join(date_history)
-        usd_history = "\n".join(usd_history)
-        eur_history = "\n".join(eur_history)
-
-        embeds = [
-            {
-                "title": "📊 Recent Price History",
-                "color": 5814783,
-                "fields": [
-                    {
-                        "name": "Date",
-                        "value": date_history,
-                        "inline": True,
-                    },
-                    {
-                        "name": "USD Total",
-                        "value": usd_history,
-                        "inline": True,
-                    },
-                    {
-                        "name": "EUR Total",
-                        "value": eur_history,
-                        "inline": True,
-                    },
-                ],
-            }
-        ]
-
-        return embeds
-
     def _send_discord_notification(self):
         """Send a message to a Discord webhook if notifications are enabled in the
         config file and a webhook URL is provided.
@@ -151,22 +100,7 @@ class Scraper:
         webhook_url = None if webhook_url in ("None", "") else webhook_url
 
         if discord_notifications and webhook_url:
-            embeds = self._construct_recent_calculations_embeds()
-            try:
-                response = self.session.post(
-                    url=webhook_url,
-                    json={
-                        "embeds": embeds,
-                        "username": DC_WEBHOOK_USERNAME,
-                        "avatar_url": DC_WEBHOOK_AVATAR_URL,
-                    },
-                )
-                response.raise_for_status()
-                console.print("[bold steel_blue3][+] Discord notification sent.\n")
-            except RequestException as error:
-                console.print(f"[bold red][!] Failed to send Discord notification: {error}\n")
-            except Exception as error:
-                console.print(f"[bold red][!] An unexpected error occurred: {error}\n")
+            DiscordNotifier.notify(webhook_url)
 
     @retry(stop=stop_after_attempt(10))
     def _get_page(self, url):
