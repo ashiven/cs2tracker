@@ -77,6 +77,7 @@ class DiscordNotifier:
                     "username": DC_WEBHOOK_USERNAME,
                     "avatar_url": DC_WEBHOOK_AVATAR_URL,
                 },
+                timeout=10,
             )
             response.raise_for_status()
             console.print("[bold steel_blue3][+] Discord notification sent.\n")

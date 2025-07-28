@@ -8,3 +8,4 @@ disable=
     import-error,
     no-else-return,
     broad-exception-caught
+    too-few-public-methods
