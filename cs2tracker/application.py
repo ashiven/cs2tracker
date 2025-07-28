@@ -232,7 +232,10 @@ class Application:
                 column = tree.identify_column(event.x)
                 item_text = tree.set(row, column)
                 if item_text.strip() == "":
-                    return
+                    left_item_text = tree.item(row, "text")
+                    # Don't allow editing of section headers
+                    if any(left_item_text == section for section in self.scraper.config.sections()):
+                        return
                 x, y, w, h = tree.bbox(row, column)
                 entryedit = ttk.Entry(editor_frame)
                 entryedit.place(x=x, y=y, width=w, height=h + 3)  # type: ignore
