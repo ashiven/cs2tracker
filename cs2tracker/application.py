@@ -77,7 +77,7 @@ class Application:
         self, frame, text, variable, command, row
     ):  # pylint: disable=too-many-arguments,too-many-positional-arguments
         """Create and style a checkbox for the checkbox frame."""
-        grid_pos = {"row": row, "column": 0, "sticky": "w", "padx": (20, 0), "pady": 10}
+        grid_pos = {"row": row, "column": 0, "sticky": "w", "padx": (10, 0), "pady": 5}
         checkbox = ttk.Checkbutton(
             frame,
             text=text,
