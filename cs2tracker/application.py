@@ -3,11 +3,12 @@ import tkinter as tk
 from shutil import copy
 from subprocess import Popen
 from threading import Thread
-from tkinter import messagebox
+from tkinter import messagebox, ttk
 from tkinter.filedialog import askopenfilename, asksaveasfile
 from typing import cast
 
 import matplotlib.pyplot as plt
+import sv_ttk
 from matplotlib.axes import Axes
 from matplotlib.dates import DateFormatter
 
@@ -28,14 +29,7 @@ from cs2tracker.price_logs import PriceLogs
 from cs2tracker.scraper import Scraper
 
 APPLICATION_NAME = "CS2Tracker"
-
-WINDOW_SIZE = "600x550"
-BACKGROUND_COLOR = "#1e1e1e"
-BUTTON_COLOR = "#3c3f41"
-BUTTON_HOVER_COLOR = "#505354"
-BUTTON_ACTIVE_COLOR = "#5c5f61"
-FONT_STYLE = "Segoe UI"
-FONT_COLOR = "white"
+WINDOW_SIZE = "600x400"
 
 SCRAPER_WINDOW_HEIGHT = 40
 SCRAPER_WINDOW_WIDTH = 120
@@ -51,64 +45,52 @@ class Application:
         configuration, showing history in a chart, and editing the log file.
         """
         application_window = self._configure_window()
+
+        sv_ttk.use_dark_theme()
+
         application_window.mainloop()
 
-    def _add_button(self, frame, text, command):
+    def _add_button(self, frame, text, command, row):
         """Create and style a button for the main application window."""
-        button_style = {
-            "font": (FONT_STYLE, 12),
-            "fg": FONT_COLOR,
-            "bg": BUTTON_COLOR,
-            "activebackground": BUTTON_ACTIVE_COLOR,
-        }
-        button = tk.Button(frame, text=text, command=command, **button_style)
-        button.pack(pady=5, fill="x")
-        button.bind("<Enter>", lambda _: button.config(bg=BUTTON_HOVER_COLOR))
-        button.bind("<Leave>", lambda _: button.config(bg=BUTTON_COLOR))
-        return button
+        grid_pos = {"row": row, "column": 0, "sticky": "ew", "padx": 10, "pady": 10}
+        button = ttk.Button(frame, text=text, command=command)
+        button.grid(**grid_pos)
 
-    def _add_checkbox(self, frame, text, variable, command):
-        checkbox = tk.Checkbutton(
+    def _configure_button_frame(self, main_frame):
+        """Configure the button frame of the application main frame."""
+        button_frame = ttk.Frame(main_frame, style="Card.TFrame", padding=15)
+        button_frame.columnconfigure(0, weight=1)
+        button_frame.grid(row=0, column=0, padx=10, pady=(7, 20), sticky="nsew")
+
+        self._add_button(button_frame, "Run!", self.scrape_prices, 0)
+        self._add_button(button_frame, "Edit Config", self._edit_config, 1)
+        self._add_button(button_frame, "Reset Config", self._confirm_reset_config, 2)
+        self._add_button(button_frame, "Show History", self._draw_plot, 3)
+        self._add_button(button_frame, "Export History", self._export_log_file, 4)
+        self._add_button(button_frame, "Import History", self._import_log_file, 5)
+
+    def _add_checkbox(self, frame, text, variable, command, row):
+        grid_pos = {"row": row, "column": 0, "sticky": "w", "padx": (20, 0), "pady": 10}
+        checkbox = ttk.Checkbutton(
             frame,
             text=text,
             variable=variable,
             command=command,
-            bg=BACKGROUND_COLOR,
-            fg=FONT_COLOR,
-            selectcolor=BUTTON_COLOR,
-            activebackground=BACKGROUND_COLOR,
-            font=(FONT_STYLE, 10),
-            anchor="w",
-            padx=20,
         )
-        checkbox.pack(fill="x", anchor="w", pady=2)
+        checkbox.grid(**grid_pos)
 
-    def _configure_main_frame(self, frame):
-        """Configure the main frame of the application window."""
-        label = tk.Label(
-            frame,
-            text=f"Welcome to {APPLICATION_NAME}!",
-            font=(FONT_STYLE, 16, "bold"),
-            fg=FONT_COLOR,
-            bg=BACKGROUND_COLOR,
-        )
-        label.pack(pady=(0, 30))
-
-        self._add_button(frame, "Run!", self.scrape_prices)
-        self._add_button(frame, "Edit Config", self._edit_config)
-        self._add_button(frame, "Reset Config", self._confirm_reset_config)
-        self._add_button(frame, "Show History", self._draw_plot)
-        self._add_button(frame, "Export History", self._export_log_file)
-        self._add_button(frame, "Import History", self._import_log_file)
-
-    def _configure_checkbox_frame(self, checkbox_frame):
+    def _configure_checkbox_frame(self, main_frame):
         """Configure the checkbox frame for background tasks and settings."""
+        checkbox_frame = ttk.LabelFrame(main_frame, text="Settings", padding=15)
+        checkbox_frame.grid(row=0, column=1, padx=10, pady=(0, 20), sticky="nsew")
+
         background_checkbox_value = tk.BooleanVar(value=BackgroundTask.identify())
         self._add_checkbox(
             checkbox_frame,
             "Daily Background Calculations",
             background_checkbox_value,
             lambda: self._toggle_background_task(background_checkbox_value.get()),
+            0,
         )
 
         discord_webhook_checkbox_value = tk.BooleanVar(
@@ -121,6 +103,7 @@ class Application:
             "Receive Discord Notifications",
             discord_webhook_checkbox_value,
             lambda: self._toggle_discord_webhook(discord_webhook_checkbox_value.get()),
+            1,
         )
 
         use_proxy_checkbox_value = tk.BooleanVar(
@@ -131,7 +114,22 @@ class Application:
             "Proxy Requests",
             use_proxy_checkbox_value,
             lambda: self._toggle_use_proxy(use_proxy_checkbox_value.get()),
+            2,
         )
+
+    def _configure_main_frame(self, window):
+        """Configure the main frame of the application window with buttons and
+        checkboxes.
+        """
+        main_frame = ttk.Frame(window, padding=15)
+        main_frame.columnconfigure(0, weight=1)
+        main_frame.columnconfigure(1, weight=1)
+        main_frame.rowconfigure(0, weight=1)
+
+        self._configure_button_frame(main_frame)
+        self._configure_checkbox_frame(main_frame)
+
+        main_frame.pack(expand=True, fill="both")
 
     def _configure_window(self):
         """Configure the main application window UI and add buttons for the main
@@ -140,20 +138,15 @@ class Application:
         window = tk.Tk()
         window.title(APPLICATION_NAME)
         window.geometry(WINDOW_SIZE)
-        window.configure(bg=BACKGROUND_COLOR)
+
         if OS == OSType.WINDOWS:
             app_id = "cs2tracker.unique.id"
             ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(app_id)
+
         icon = tk.PhotoImage(file=ICON_FILE)
         window.wm_iconphoto(False, icon)
 
-        frame = tk.Frame(window, bg=BACKGROUND_COLOR, padx=30, pady=30)
-        frame.pack(expand=True, fill="both")
-        self._configure_main_frame(frame)
-
-        checkbox_frame = tk.Frame(frame, bg=BACKGROUND_COLOR)
-        checkbox_frame.pack(pady=(20, 0), fill="x")
-        self._configure_checkbox_frame(checkbox_frame)
+        self._configure_main_frame(window)
 
         return window
 
