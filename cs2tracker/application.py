@@ -316,7 +316,10 @@ class Application:
                     "Config Saved", "The configuration has been saved successfully."
                 )
             else:
-                messagebox.showerror("Config Error", "The configuration is invalid. Please fix it.")
+                messagebox.showerror(
+                    "Config Error",
+                    f"The configuration is invalid. ({self.scraper.config.last_error})",
+                )
 
         save_button = ttk.Button(editor_frame, text="Save", command=save_config)
         save_button.pack(side="bottom", pady=10, padx=10)
@@ -342,7 +345,7 @@ class Application:
     def _reset_config(self):
         """Reset the configuration file to its default state."""
         confirm = messagebox.askokcancel(
-            "Reset Config", "Are you sure you want to reset the config file?"
+            "Reset Config", "Are you sure you want to reset the configuration?"
         )
         if confirm:
             copy(CONFIG_FILE_BACKUP, CONFIG_FILE)

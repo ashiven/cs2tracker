@@ -71,6 +71,7 @@ class ValidatedConfig(ConfigParser):
         except ValueError as error:
             console.print(f"[bold red][!] Config error: {error}")
             self.valid = False
+            self.last_error = error
 
     def write_to_file(self):
         """Write the current configuration to the configuration file."""
