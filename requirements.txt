@@ -6,3 +6,4 @@ Requests==2.31.0
 rich==13.6.0
 tenacity==8.2.2
 urllib3==2.1.0
+sv_ttk==2.6.1

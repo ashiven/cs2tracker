@@ -97,7 +97,6 @@ class Scraper:
             "App Settings", "discord_notifications", fallback=False
         )
         webhook_url = self.config.get("User Settings", "discord_webhook_url", fallback=None)
-        webhook_url = None if webhook_url in ("None", "") else webhook_url
 
         if discord_notifications and webhook_url:
             DiscordNotifier.notify(webhook_url)
@@ -114,15 +113,14 @@ class Scraper:
         :raises RetryError: If the retry limit is reached.
         """
         use_proxy = self.config.getboolean("App Settings", "use_proxy", fallback=False)
-        api_key = self.config.get("User Settings", "api_key", fallback=None)
-        api_key = None if api_key in ("None", "") else api_key
+        proxy_api_key = self.config.get("User Settings", "proxy_api_key", fallback=None)
 
-        if use_proxy and api_key:
+        if use_proxy and proxy_api_key:
             page = self.session.get(
                 url=url,
                 proxies={
-                    "http": HTTP_PROXY_URL.format(api_key),
-                    "https": HTTPS_PROXY_URL.format(api_key),
+                    "http": HTTP_PROXY_URL.format(proxy_api_key),
+                    "https": HTTPS_PROXY_URL.format(proxy_api_key),
                 },
                 verify=False,
             )
