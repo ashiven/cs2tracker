@@ -11,13 +11,7 @@ class ValidatedConfig(ConfigParser):
         """Initialize the ValidatedConfig class."""
         super().__init__(interpolation=None)
         super().read(CONFIG_FILE)
-
-        try:
-            self._validate_config()
-            self.valid = True
-        except ValueError as error:
-            console.print(f"[bold red][!] Config error: {error}")
-            self.valid = False
+        self._validate_config()
 
     def _validate_config_sections(self):
         """Validate that the configuration file has all required sections."""
@@ -70,8 +64,21 @@ class ValidatedConfig(ConfigParser):
         :raises ValueError: If any required section is missing or if any value is
             invalid.
         """
-        self._validate_config_sections()
-        self._validate_config_values()
+        try:
+            self._validate_config_sections()
+            self._validate_config_values()
+            self.valid = True
+        except ValueError as error:
+            console.print(f"[bold red][!] Config error: {error}")
+            self.valid = False
+
+    def write_to_file(self):
+        """Write the current configuration to the configuration file."""
+        self._validate_config()
+
+        if self.valid:
+            with open(CONFIG_FILE, "w", encoding="utf-8") as config_file:
+                self.write(config_file)
 
     def toggle_use_proxy(self, enabled: bool):
         """
@@ -80,8 +87,7 @@ class ValidatedConfig(ConfigParser):
         :param enabled: If True, proxies will be used; if False, they will not be used.
         """
         self.set("App Settings", "use_proxy", str(enabled))
-        with open(CONFIG_FILE, "w", encoding="utf-8") as config_file:
-            self.write(config_file)
+        self.write_to_file()
 
         console.print(
             f"[bold green]{'[+] Enabled' if enabled else '[-] Disabled'} proxy usage for requests."
@@ -95,8 +101,7 @@ class ValidatedConfig(ConfigParser):
             used.
         """
         self.set("App Settings", "discord_notifications", str(enabled))
-        with open(CONFIG_FILE, "w", encoding="utf-8") as config_file:
-            self.write(config_file)
+        self.write_to_file()
 
         console.print(
             f"[bold green]{'[+] Enabled' if enabled else '[-] Disabled'} Discord webhook notifications."

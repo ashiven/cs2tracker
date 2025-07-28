@@ -22,14 +22,13 @@ from cs2tracker.constants import (
     POWERSHELL_COLORIZE_OUTPUT,
     PYTHON_EXECUTABLE,
     RUNNING_IN_EXE,
-    TEXT_EDITOR,
     OSType,
 )
 from cs2tracker.price_logs import PriceLogs
 from cs2tracker.scraper import Scraper
 
 APPLICATION_NAME = "CS2Tracker"
-WINDOW_SIZE = "600x400"
+WINDOW_SIZE = "630x380"
 
 SCRAPER_WINDOW_HEIGHT = 40
 SCRAPER_WINDOW_WIDTH = 120
@@ -44,11 +43,11 @@ class Application:
         """Run the main application window with buttons for scraping prices, editing the
         configuration, showing history in a chart, and editing the log file.
         """
-        application_window = self._configure_window()
+        self.application_window = self._configure_window()
 
         sv_ttk.use_dark_theme()
 
-        application_window.mainloop()
+        self.application_window.mainloop()
 
     def _add_button(self, frame, text, command, row):
         """Create and style a button for the button frame."""
@@ -90,7 +89,7 @@ class Application:
         background_checkbox_value = tk.BooleanVar(value=BackgroundTask.identify())
         self._add_checkbox(
             checkbox_frame,
-            "Daily Background Calculations",
+            "Background Task",
             background_checkbox_value,
             lambda: self._toggle_background_task(background_checkbox_value.get()),
             0,
@@ -103,7 +102,7 @@ class Application:
         )
         self._add_checkbox(
             checkbox_frame,
-            "Receive Discord Notifications",
+            "Discord Notifications",
             discord_webhook_checkbox_value,
             lambda: discord_webhook_checkbox_value.set(
                 self._toggle_discord_webhook(discord_webhook_checkbox_value.get())
@@ -210,12 +209,97 @@ class Application:
             # TODO: implement external window for Linux
             self.scraper.scrape_prices()
 
+    def _make_tree_editable(self, editor_frame, tree):
+        """
+        Add a binding to the treeview that allows double-clicking on a cell to edit its
+        value.
+
+        Source: https://stackoverflow.com/questions/75787251/create-an-editable-tkinter-treeview-with-keyword-connection
+        """
+
+        def set_cell_value(event):
+            def save_edit(event):
+                tree.set(row, column=column, value=event.widget.get())
+                event.widget.destroy()
+
+            try:
+                row = tree.identify_row(event.y)
+                column = tree.identify_column(event.x)
+                item_text = tree.set(row, column)
+                if item_text.strip() == "":
+                    return
+                x, y, w, h = tree.bbox(row, column)
+                entryedit = ttk.Entry(editor_frame)
+                entryedit.place(x=x, y=y, width=w, height=h + 3)  # type: ignore
+                entryedit.insert("end", item_text)
+                entryedit.bind("<Return>", save_edit)
+                entryedit.focus_set()
+                entryedit.grab_set()
+            except Exception:
+                pass
+
+        tree.bind("<Double-1>", set_cell_value)
+
+    def _configure_save_button(self, editor_frame, tree):
+        """Save updated options and values from the treeview back to the config file."""
+
+        def save_options():
+            for child in tree.get_children():
+                for item in tree.get_children(child):
+                    key = tree.item(item, "text")
+                    value = tree.item(item, "values")[0]
+                    section = tree.parent(item)
+                    section_name = tree.item(section, "text") if section else "User Settings"
+                    self.scraper.config.set(section_name, key, value)
+            self.scraper.config.write_to_file()
+
+        save_button = ttk.Button(editor_frame, text="Save", command=save_options)
+        save_button.pack(side="bottom", pady=10, padx=10)
+
+    def _configure_option_tree(self, editor_frame):
+        """Configure a treeview to display the configuration options in a structured
+        way.
+        """
+        scrollbar = ttk.Scrollbar(editor_frame)
+        scrollbar.pack(side="right", fill="y", padx=(5, 0))
+
+        tree = ttk.Treeview(
+            editor_frame,
+            columns=(1,),
+            height=10,
+            selectmode="browse",
+            yscrollcommand=scrollbar.set,
+        )
+        scrollbar.config(command=tree.yview)
+
+        tree.pack(expand=True, fill="both")
+        tree.column("#0", anchor="w", width=200)
+        tree.column(1, anchor="w", width=25)
+        tree.heading("#0", text="Option")
+        tree.heading(1, text="Value")
+
+        for section in self.scraper.config.sections():
+            section_level = tree.insert("", tk.END, text=section)
+            for key, value in self.scraper.config.items(section):
+                tree.insert(section_level, tk.END, text=key, values=(value,))
+
+        self._make_tree_editable(editor_frame, tree)
+        self._configure_save_button(editor_frame, tree)
+
+    def _configure_editor_window(self):
+        """Open a new window with a config editor GUI."""
+        config_editor_window = tk.Toplevel(self.application_window)
+        config_editor_window.geometry("800x750")
+        config_editor_window.title("Config Editor")
+
+        editor_frame = ttk.Frame(config_editor_window, padding=30)
+        editor_frame.pack(expand=True, fill="both")
+
+        self._configure_option_tree(editor_frame)
+
     def _edit_config(self):
         """Edit the configuration file using the specified text editor."""
-        _popen_and_call(
-            popen_args={"args": [TEXT_EDITOR, CONFIG_FILE], "shell": True},
-            callback=self.scraper.load_config,
-        )
+        self._configure_editor_window()
 
     def _confirm_reset_config(self):
         confirm = messagebox.askokcancel(
