@@ -34,7 +34,7 @@ CONFIG_EDITOR_TITLE = "Config Editor"
 CONFIG_EDITOR_SIZE = "800x750"
 
 NEW_CUSTOM_ITEM_TITLE = "Add Custom Item"
-NEW_CUSTOM_ITEM_SIZE = "500x250"
+NEW_CUSTOM_ITEM_SIZE = "500x200"
 
 SCRAPER_WINDOW_HEIGHT = 40
 SCRAPER_WINDOW_WIDTH = 120
@@ -310,6 +310,9 @@ class Application:
                     value = tree.item(item, "values")[0]
                     section = tree.parent(item)
                     section_name = tree.item(section, "text")
+                    if section_name == "Custom Items":
+                        # custom items are already saved upon creation (Saving them again would result in duplicates)
+                        continue
                     self.scraper.config.set(section_name, config_option, value)
 
             self.scraper.config.write_to_file()
@@ -344,10 +347,17 @@ class Application:
                 messagebox.showerror("Input Error", f"Invalid owned count: {error}")
                 return
 
-            tree.insert("Custom Items", "end", text=item_url, values=(item_owned,))
             self.scraper.config.set("Custom Items", item_url, item_owned)
             self.scraper.config.write_to_file()
-            messagebox.showinfo("Custom Item Added", "Custom item has been added successfully.")
+            if self.scraper.config.valid:
+                tree.insert("Custom Items", "end", text=item_url, values=(item_owned,))
+                messagebox.showinfo("Custom Item Added", "Custom item has been added successfully.")
+            else:
+                self.scraper.config.remove_option("Custom Items", item_url)
+                messagebox.showerror(
+                    "Config Error",
+                    f"The configuration is invalid. ({self.scraper.config.last_error})",
+                )
 
         def open_custom_item_dialog():
             """Open a dialog to enter custom item details."""

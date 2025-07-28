@@ -1,9 +1,13 @@
+import re
 from configparser import ConfigParser
 
 from cs2tracker.constants import CAPSULE_INFO, CONFIG_FILE
 from cs2tracker.padded_console import PaddedConsole
 
 console = PaddedConsole()
+
+
+STEAM_MARKET_LISTING_REGEX = r"^https://steamcommunity.com/market/listings/\d+/.+$"
 
 
 class ValidatedConfig(ConfigParser):
@@ -35,6 +39,11 @@ class ValidatedConfig(ConfigParser):
         """Validate that the configuration file has valid values for all sections."""
         try:
             for custom_item_href, custom_item_owned in self.items("Custom Items"):
+                if not re.match(STEAM_MARKET_LISTING_REGEX, custom_item_href):
+                    raise ValueError(
+                        f"Invalid Steam market listing URL in 'Custom Items' section: {custom_item_href}"
+                    )
+
                 if int(custom_item_owned) < 0:
                     raise ValueError(
                         f"Invalid value in 'Custom Items' section: {custom_item_href} = {custom_item_owned}"
