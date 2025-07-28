@@ -1,4 +1,5 @@
 import time
+from urllib.parse import unquote
 
 from bs4 import BeautifulSoup
 from bs4.element import Tag
@@ -264,12 +265,11 @@ class Scraper:
         total price for owned items.
         """
         custom_item_usd_total = 0
-        for config_custom_item_name, owned_and_href in self.config.items("Custom Items"):
-            owned, custom_item_href = owned_and_href.split(" ", 1)
+        for custom_item_href, owned in self.config.items("Custom Items"):
             if int(owned) == 0:
                 continue
 
-            custom_item_name = config_custom_item_name.replace("_", " ").title()
+            custom_item_name = unquote(custom_item_href.split("/")[-1])
             custom_item_title = custom_item_name.center(MAX_LINE_LEN, SEPARATOR)
             console.print(f"[bold magenta]{custom_item_title}\n")
 

@@ -9,7 +9,8 @@ console = PaddedConsole()
 class ValidatedConfig(ConfigParser):
     def __init__(self):
         """Initialize the ValidatedConfig class."""
-        super().__init__(interpolation=None)
+        super().__init__(delimiters=("~"), interpolation=None)
+        self.optionxform = str  # type: ignore
         super().read(CONFIG_FILE)
 
         self.valid = False
@@ -33,15 +34,10 @@ class ValidatedConfig(ConfigParser):
     def _validate_config_values(self):
         """Validate that the configuration file has valid values for all sections."""
         try:
-            for custom_item_name, custom_item_owned in self.items("Custom Items"):
-                if " " not in custom_item_owned:
+            for custom_item_href, custom_item_owned in self.items("Custom Items"):
+                if int(custom_item_owned) < 0:
                     raise ValueError(
-                        f"Invalid custom item format (<item_name> = <owned_count> <item_url>): {custom_item_name} = {custom_item_owned}"
-                    )
-                owned, _ = custom_item_owned.split(" ", 1)
-                if int(owned) < 0:
-                    raise ValueError(
-                        f"Invalid value in 'Custom Items' section: {custom_item_name} = {custom_item_owned}"
+                        f"Invalid value in 'Custom Items' section: {custom_item_href} = {custom_item_owned}"
                     )
             for case_name, case_owned in self.items("Cases"):
                 if int(case_owned) < 0:
