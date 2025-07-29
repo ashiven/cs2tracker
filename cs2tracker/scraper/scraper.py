@@ -176,7 +176,7 @@ class Scraper:
         try:
             capsule_page = self._get_page(capsule_info["page"])
             for capsule_name, capsule_href in zip(capsule_info["names"], capsule_info["items"]):
-                config_capsule_name = capsule_name.replace(" ", "_")
+                config_capsule_name = capsule_name.replace(" ", "_").lower()
                 owned = self.config.getint(capsule_section, config_capsule_name, fallback=0)
                 if owned == 0:
                     continue
