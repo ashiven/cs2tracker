@@ -84,7 +84,8 @@ This will open the config editor where you can change any setting by simply doub
 - Enable **Daily Background Calculations** to automatically run a daily calculation of your investment in the background.
 - Use **Receive Discord Notifications** to receive a notification on your Discord server whenever the program has finished calculating your investment.
 - You need to set up a [webhook](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks) in your Discord server and enter the webhook url into the `discord_webhook_url` field in the config `User Settings`.
-- Enable **Proxy Requests** to prevent your requests from being rate limited by the steamcommunity server. You need to register for a free API key on [Crawlbase](crawlbase.com) and enter it into the `proxy_api_key` field in the config `User Settings`.
+- Enable **Proxy Requests** to prevent your requests from being rate limited by the steamcommunity server.
+- You need to register for a free API key on [Crawlbase](crawlbase.com) and enter it into the `proxy_api_key` field in the config `User Settings`.
 
 ## Contributing
 
