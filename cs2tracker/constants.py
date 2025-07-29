@@ -77,19 +77,6 @@ AUTHOR_STRING = (
     f"Version: {VERSION} - {datetime.today().strftime('%Y/%m/%d')} - Jannik Novak @ashiven\n"
 )
 
-
-POWERSHELL_COLORIZE_OUTPUT = (
-    "%{ "
-    "if($_ -match '\\[!\\]') { Write-Host $_ -ForegroundColor red } "
-    "elseif($_ -match 'Version|\\\\|_') { Write-Host $_ -ForegroundColor yellow } "
-    "elseif($_ -match 'USD|EUR|^[-|\\s]+$') { Write-Host $_ -ForegroundColor green } "
-    "elseif($_ -match 'Case|Capsule|-[A-Za-z0-9]') { Write-Host $_ -ForegroundColor magenta } "
-    "elseif($_ -match 'Legends|Challengers|Contenders|Champions|Finalists') { Write-Host $_ -ForegroundColor blue } "
-    "else { Write-Host $_ } "
-    "}"
-)
-
-
 CASE_HREFS = [
     "https://steamcommunity.com/market/listings/730/Revolution%20Case",
     "https://steamcommunity.com/market/listings/730/Recoil%20Case",
