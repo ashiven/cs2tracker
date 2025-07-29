@@ -2,7 +2,6 @@ import ctypes
 import tkinter as tk
 from shutil import copy
 from subprocess import Popen
-from threading import Thread
 from tkinter import messagebox, ttk
 from tkinter.filedialog import askopenfilename, asksaveasfile
 from typing import cast
@@ -306,20 +305,3 @@ class Application:
 
         self.scraper.toggle_discord_webhook(enabled)
         return True
-
-
-def _popen_and_call(popen_args, callback):
-    """
-    Runs the given args in a subprocess.Popen, and then calls the function callback when
-    the subprocess completes.
-
-    Source: https://stackoverflow.com/questions/2581817/python-subprocess-callback-when-cmd-exits
-    """
-
-    def process_and_callback(popen_args, callback):
-        process = Popen(**popen_args)
-        process.wait()
-        callback()
-
-    thread = Thread(target=process_and_callback, args=(popen_args, callback), daemon=True)
-    thread.start()
