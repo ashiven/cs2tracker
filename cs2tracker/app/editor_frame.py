@@ -22,6 +22,21 @@ class ConfigEditorFrame(ttk.Frame):
         self.scraper = scraper
         self._add_widgets()
 
+    def reload_config_into_tree(self):
+        """Reload the configuration options into the treeview for display and
+        editing.
+        """
+        for item in self.tree.get_children():
+            self.tree.delete(item)
+
+        for section in self.scraper.config.sections():
+            if section == "App Settings":
+                continue
+            section_level = self.tree.insert("", "end", iid=section, text=section)
+            for config_option, value in self.scraper.config.items(section):
+                title_option = config_option.replace("_", " ").title()
+                self.tree.insert(section_level, "end", text=title_option, values=[value])
+
     def _add_widgets(self):
         """Configure the main editor frame which displays the configuration options in a
         structured way.
@@ -84,7 +99,7 @@ class ConfigEditorFrame(ttk.Frame):
         self.parent.bind("<MouseWheel>", self._destroy_entries)  # type: ignore
         self.parent.bind("<Button-1>", self._destroy_entry)  # type: ignore
 
-    def load_config_into_tree(self):
+    def _load_config_into_tree(self):
         """Load the configuration options into the treeview for display and editing."""
         for section in self.scraper.config.sections():
             if section == "App Settings":
@@ -113,7 +128,7 @@ class ConfigEditorFrame(ttk.Frame):
         self.tree.heading("#0", text="Option")
         self.tree.heading(1, text="Value")
 
-        self.load_config_into_tree()
+        self._load_config_into_tree()
         self._make_tree_editable()
 
 
@@ -178,9 +193,7 @@ class ConfigEditorButtonFrame(ttk.Frame):
         if confirm:
             copy(CONFIG_FILE_BACKUP, CONFIG_FILE)
             self.scraper.load_config()
-            for item in self.tree.get_children():
-                self.tree.delete(item)
-            self.parent.load_config_into_tree(self.tree)
+            self.parent.reload_config_into_tree()
 
     def _add_custom_item(self, item_url, item_owned):
         """Add a custom item to the configuration."""

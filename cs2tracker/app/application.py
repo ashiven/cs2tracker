@@ -21,7 +21,7 @@ WINDOW_SIZE = "630x335"
 DARK_THEME = True
 
 SCRAPER_WINDOW_TITLE = "CS2Tracker Scraper"
-SCRAPER_WINDOW_SIZE = "800x750"
+SCRAPER_WINDOW_SIZE = "900x750"
 
 CONFIG_EDITOR_TITLE = "Config Editor"
 CONFIG_EDITOR_SIZE = "800x750"
@@ -206,7 +206,7 @@ class Application:
         export_path = asksaveasfile(
             title="Export Log File",
             defaultextension=".csv",
-            filetypes=[("CSV files", "*.csv")],
+            filetypes=[("CSV File", "*.csv")],
         )
         if export_path:
             copy(OUTPUT_FILE, export_path.name)

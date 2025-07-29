@@ -1,4 +1,5 @@
 import time
+from datetime import datetime
 from urllib.parse import unquote
 
 from bs4 import BeautifulSoup
@@ -69,6 +70,17 @@ class Scraper:
         self.usd_total += case_usd_total
         self.usd_total += custom_item_usd_total
         self.eur_total = CurrencyConverter().convert(self.usd_total, "USD", "EUR")
+
+        if update_sheet_callback:
+            update_sheet_callback(["", "", "", ""])
+            update_sheet_callback(
+                [
+                    f"[{datetime.now().strftime('%Y-%m-%d')}] Total:",
+                    f"${self.usd_total:.2f}",
+                    f"€{self.eur_total:.2f}",
+                    "",
+                ]
+            )
 
         self._print_total()
         PriceLogs.save(self.usd_total, self.eur_total)
