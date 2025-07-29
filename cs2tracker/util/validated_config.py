@@ -2,7 +2,7 @@ import re
 from configparser import ConfigParser
 
 from cs2tracker.constants import CAPSULE_INFO, CONFIG_FILE
-from cs2tracker.util import PaddedConsole
+from cs2tracker.util.padded_console import PaddedConsole
 
 console = PaddedConsole()
 
