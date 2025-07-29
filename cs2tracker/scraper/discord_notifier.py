@@ -1,8 +1,7 @@
 import requests
 from requests.exceptions import RequestException
 
-from cs2tracker.padded_console import PaddedConsole
-from cs2tracker.price_logs import PriceLogs
+from cs2tracker.util import PaddedConsole, PriceLogs
 
 DC_WEBHOOK_USERNAME = "CS2Tracker"
 DC_WEBHOOK_AVATAR_URL = "https://img.icons8.com/?size=100&id=uWQJp2tLXUH6&format=png&color=000000"

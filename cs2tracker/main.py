@@ -2,10 +2,10 @@ import sys
 
 import urllib3
 
-from cs2tracker.application import Application
+from cs2tracker.app import Application
 from cs2tracker.constants import AUTHOR_STRING, BANNER, OS, OSType
-from cs2tracker.padded_console import PaddedConsole
 from cs2tracker.scraper import Scraper
+from cs2tracker.util import PaddedConsole
 
 
 def main():

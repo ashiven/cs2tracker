@@ -9,7 +9,7 @@ from cs2tracker.constants import (
     RUNNING_IN_EXE,
     OSType,
 )
-from cs2tracker.padded_console import PaddedConsole
+from cs2tracker.util import PaddedConsole
 
 WIN_BACKGROUND_TASK_NAME = "CS2Tracker Daily Calculation"
 WIN_BACKGROUND_TASK_SCHEDULE = "DAILY"
