@@ -47,9 +47,13 @@ class Scraper:
         self.session.mount("http://", HTTPAdapter(max_retries=retries))
         self.session.mount("https://", HTTPAdapter(max_retries=retries))
 
-    def scrape_prices(self):
-        """Scrape prices for capsules and cases, calculate totals in USD and EUR, and
+    def scrape_prices(self, update_sheet_callback=None):
+        """
+        Scrape prices for capsules and cases, calculate totals in USD and EUR, and
         print/save the results.
+
+        :param update_sheet_callback: Optional callback function to update a tksheet
+            that is displayed in the GUI with the latest scraper price calculation.
         """
         if not self.config.valid:
             console.print(
@@ -57,9 +61,9 @@ class Scraper:
             )
             return
 
-        capsule_usd_total = self._scrape_capsule_section_prices()
-        case_usd_total = self._scrape_case_prices()
-        custom_item_usd_total = self._scrape_custom_item_prices()
+        capsule_usd_total = self._scrape_capsule_section_prices(update_sheet_callback)
+        case_usd_total = self._scrape_case_prices(update_sheet_callback)
+        custom_item_usd_total = self._scrape_custom_item_prices(update_sheet_callback)
 
         self.usd_total += capsule_usd_total
         self.usd_total += case_usd_total
@@ -156,11 +160,7 @@ class Scraper:
 
         return price
 
-    def _scrape_capsule_prices(
-        self,
-        capsule_section,
-        capsule_info,
-    ):
+    def _scrape_capsule_prices(self, capsule_section, capsule_info, update_sheet_callback=None):
         """
         Scrape prices for a specific capsule section, printing the details to the
         console.
@@ -168,6 +168,8 @@ class Scraper:
         :param capsule_section: The section name in the config for the capsule.
         :param capsule_info: A dictionary containing information about the capsule page,
             hrefs, and names.
+        :param update_sheet_callback: Optional callback function to update a tksheet
+            that is displayed in the GUI with the latest scraper price calculation.
         """
         capsule_title = capsule_section.center(MAX_LINE_LEN, SEPARATOR)
         console.print(f"[bold magenta]{capsule_title}\n")
@@ -176,7 +178,7 @@ class Scraper:
         try:
             capsule_page = self._get_page(capsule_info["page"])
             for capsule_name, capsule_href in zip(capsule_info["names"], capsule_info["items"]):
-                config_capsule_name = capsule_name.replace(" ", "_")
+                config_capsule_name = capsule_name.replace(" ", "_").lower()
                 owned = self.config.getint(capsule_section, config_capsule_name, fallback=0)
                 if owned == 0:
                     continue
@@ -186,6 +188,8 @@ class Scraper:
 
                 console.print(f"[bold deep_sky_blue4]{capsule_name}")
                 console.print(PRICE_INFO.format(owned, price_usd, price_usd_owned))
+                if update_sheet_callback:
+                    update_sheet_callback([capsule_name, owned, price_usd, price_usd_owned])
                 capsule_usd_total += price_usd_owned
         except (RetryError, ValueError):
             console.print(
@@ -196,13 +200,20 @@ class Scraper:
 
         return capsule_usd_total
 
-    def _scrape_capsule_section_prices(self):
-        """Scrape prices for all capsule sections defined in the configuration."""
+    def _scrape_capsule_section_prices(self, update_sheet_callback=None):
+        """
+        Scrape prices for all capsule sections defined in the configuration.
+
+        :param update_sheet_callback: Optional callback function to update a tksheet
+            that is displayed in the GUI with the latest scraper price calculation.
+        """
         capsule_usd_total = 0
         for capsule_section, capsule_info in CAPSULE_INFO.items():
             # Only scrape capsule sections where the user owns at least one item
             if any(int(owned) > 0 for _, owned in self.config.items(capsule_section)):
-                capsule_usd_total += self._scrape_capsule_prices(capsule_section, capsule_info)
+                capsule_usd_total += self._scrape_capsule_prices(
+                    capsule_section, capsule_info, update_sheet_callback
+                )
 
         return capsule_usd_total
 
@@ -219,12 +230,15 @@ class Scraper:
 
         return page_url
 
-    def _scrape_case_prices(self):
+    def _scrape_case_prices(self, update_sheet_callback=None):
         """
         Scrape prices for all cases defined in the configuration.
 
         For each case, it prints the case name, owned count, price per item, and total
         price for owned items.
+
+        :param update_sheet_callback: Optional callback function to update a tksheet
+            that is displayed in the GUI with the latest scraper price calculation.
         """
         case_usd_total = 0
         for case_index, (config_case_name, owned) in enumerate(self.config.items("Cases")):
@@ -242,6 +256,8 @@ class Scraper:
                 price_usd_owned = round(float(int(owned) * price_usd), 2)
 
                 console.print(PRICE_INFO.format(owned, price_usd, price_usd_owned))
+                if update_sheet_callback:
+                    update_sheet_callback([case_name, owned, price_usd, price_usd_owned])
                 case_usd_total += price_usd_owned
 
                 if not self.config.getboolean("App Settings", "use_proxy", fallback=False):
@@ -255,12 +271,15 @@ class Scraper:
 
         return case_usd_total
 
-    def _scrape_custom_item_prices(self):
+    def _scrape_custom_item_prices(self, update_sheet_callback=None):
         """
         Scrape prices for custom items defined in the configuration.
 
         For each custom item, it prints the item name, owned count, price per item, and
         total price for owned items.
+
+        :param update_sheet_callback: Optional callback function to update a tksheet
+            that is displayed in the GUI with the latest scraper price calculation.
         """
         custom_item_usd_total = 0
         for custom_item_href, owned in self.config.items("Custom Items"):
@@ -278,6 +297,8 @@ class Scraper:
                 price_usd_owned = round(float(int(owned) * price_usd), 2)
 
                 console.print(PRICE_INFO.format(owned, price_usd, price_usd_owned))
+                if update_sheet_callback:
+                    update_sheet_callback([custom_item_name, owned, price_usd, price_usd_owned])
                 custom_item_usd_total += price_usd_owned
 
                 if not self.config.getboolean("App Settings", "use_proxy", fallback=False):

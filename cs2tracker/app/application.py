@@ -1,7 +1,6 @@
 import ctypes
 import tkinter as tk
 from shutil import copy
-from subprocess import Popen
 from tkinter import messagebox, ttk
 from tkinter.filedialog import askopenfilename, asksaveasfile
 from typing import cast
@@ -12,29 +11,20 @@ from matplotlib.axes import Axes
 from matplotlib.dates import DateFormatter
 
 from cs2tracker.app.editor_frame import ConfigEditorFrame
-from cs2tracker.constants import (
-    CONFIG_FILE,
-    CONFIG_FILE_BACKUP,
-    ICON_FILE,
-    OS,
-    OUTPUT_FILE,
-    POWERSHELL_COLORIZE_OUTPUT,
-    PYTHON_EXECUTABLE,
-    RUNNING_IN_EXE,
-    OSType,
-)
+from cs2tracker.app.scraper_frame import ScraperFrame
+from cs2tracker.constants import ICON_FILE, OS, OUTPUT_FILE, OSType
 from cs2tracker.scraper import BackgroundTask, Scraper
 from cs2tracker.util import PriceLogs
 
 APPLICATION_NAME = "CS2Tracker"
-WINDOW_SIZE = "630x380"
+WINDOW_SIZE = "630x335"
+DARK_THEME = True
+
+SCRAPER_WINDOW_TITLE = "CS2Tracker Scraper"
+SCRAPER_WINDOW_SIZE = "800x750"
 
 CONFIG_EDITOR_TITLE = "Config Editor"
 CONFIG_EDITOR_SIZE = "800x750"
-
-SCRAPER_WINDOW_HEIGHT = 40
-SCRAPER_WINDOW_WIDTH = 120
-SCRAPER_WINDOW_BACKGROUND_COLOR = "Black"
 
 
 class Application:
@@ -48,7 +38,10 @@ class Application:
         """
         self.application_window = self._configure_window()
 
-        sv_ttk.use_dark_theme()
+        if DARK_THEME:
+            sv_ttk.use_dark_theme()
+        else:
+            sv_ttk.use_light_theme()
 
         self.application_window.mainloop()
 
@@ -66,10 +59,9 @@ class Application:
 
         self._add_button(button_frame, "Run!", self.scrape_prices, 0)
         self._add_button(button_frame, "Edit Config", self._edit_config, 1)
-        self._add_button(button_frame, "Reset Config", self._reset_config, 2)
-        self._add_button(button_frame, "Show History", self._draw_plot, 3)
-        self._add_button(button_frame, "Export History", self._export_log_file, 4)
-        self._add_button(button_frame, "Import History", self._import_log_file, 5)
+        self._add_button(button_frame, "Show History", self._draw_plot, 2)
+        self._add_button(button_frame, "Export History", self._export_log_file, 3)
+        self._add_button(button_frame, "Import History", self._import_log_file, 4)
 
     def _add_checkbox(
         self, frame, text, variable, command, row
@@ -127,10 +119,8 @@ class Application:
             2,
         )
 
-        dark_theme_checkbox_value = tk.BooleanVar(value=True)
-        self._add_checkbox(
-            checkbox_frame, "Dark Theme", dark_theme_checkbox_value, sv_ttk.toggle_theme, 3
-        )
+        self.dark_theme = tk.BooleanVar(value=DARK_THEME)
+        self._add_checkbox(checkbox_frame, "Dark Theme", self.dark_theme, sv_ttk.toggle_theme, 3)
 
     def _configure_main_frame(self, window):
         """Configure the main frame of the application window with buttons and
@@ -165,58 +155,22 @@ class Application:
 
         return window
 
-    def _construct_scraper_command_windows(self):
-        """Construct the command to run the scraper in a new window for Windows."""
-        get_size = "$size = $Host.UI.RawUI.WindowSize;"
-        set_size = "$Host.UI.RawUI.WindowSize = $size;"
-        set_window_title = f"$Host.UI.RawUI.WindowTitle = '{APPLICATION_NAME}';"
-        set_window_width = (
-            f"$size.Width = [Math]::Min({SCRAPER_WINDOW_WIDTH}, $Host.UI.RawUI.BufferSize.Width);"
-        )
-        set_window_height = f"$size.Height = {SCRAPER_WINDOW_HEIGHT};"
-        set_background_color = (
-            f"$Host.UI.RawUI.BackgroundColor = '{SCRAPER_WINDOW_BACKGROUND_COLOR}';"
-        )
-        clear = "Clear-Host;"
-
-        if RUNNING_IN_EXE:
-            # The python executable is set as the executable itself in PyInstaller
-            scraper_cmd = f"{PYTHON_EXECUTABLE} --only-scrape | {POWERSHELL_COLORIZE_OUTPUT}"
-        else:
-            scraper_cmd = f"{PYTHON_EXECUTABLE} -m cs2tracker --only-scrape"
-
-        cmd = (
-            'start powershell -NoExit -Command "& {'
-            + set_window_title
-            + get_size
-            + set_window_width
-            + set_window_height
-            + set_size
-            + set_background_color
-            + clear
-            + scraper_cmd
-            + '}"'
-        )
-        return cmd
-
-    def _construct_scraper_command(self):
-        """Construct the command to run the scraper in a new window."""
-        if OS == OSType.WINDOWS:
-            return self._construct_scraper_command_windows()
-        else:
-            # TODO: Implement for Linux
-            return ""
-
     def scrape_prices(self):
         """Scrape prices from the configured sources, print the total, and save the
         results to a file.
         """
-        if OS == OSType.WINDOWS:
-            scraper_cmd = self._construct_scraper_command()
-            Popen(scraper_cmd, shell=True)
-        else:
-            # TODO: implement external window for Linux
-            self.scraper.scrape_prices()
+        scraper_window = tk.Toplevel(self.application_window)
+        scraper_window.geometry(SCRAPER_WINDOW_SIZE)
+        scraper_window.title(SCRAPER_WINDOW_TITLE)
+
+        run_frame = ScraperFrame(
+            scraper_window,
+            self.scraper,
+            sheet_size=SCRAPER_WINDOW_SIZE,
+            dark_theme=self.dark_theme.get(),
+        )
+        run_frame.pack(expand=True, fill="both")
+        run_frame.start()
 
     def _edit_config(self):
         """Open a new window with a config editor GUI."""
@@ -224,17 +178,8 @@ class Application:
         config_editor_window.geometry(CONFIG_EDITOR_SIZE)
         config_editor_window.title(CONFIG_EDITOR_TITLE)
 
-        editor_frame = ConfigEditorFrame(config_editor_window, self.scraper.config)
+        editor_frame = ConfigEditorFrame(config_editor_window, self.scraper)
         editor_frame.pack(expand=True, fill="both")
-
-    def _reset_config(self):
-        """Reset the configuration file to its default state."""
-        confirm = messagebox.askokcancel(
-            "Reset Config", "Are you sure you want to reset the configuration?"
-        )
-        if confirm:
-            copy(CONFIG_FILE_BACKUP, CONFIG_FILE)
-            self.scraper.load_config()
 
     def _draw_plot(self):
         """Draw a plot of the scraped prices over time."""
