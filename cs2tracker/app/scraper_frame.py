@@ -25,7 +25,7 @@ class ScraperFrame(ttk.Frame):
 
     def _configure_sheet(self):
         """Configure the sheet widget with initial data and settings."""
-        self.sheet = Sheet(
+        self.sheet = Sheet(  # pylint: disable=attribute-defined-outside-init
             self,
             data=[],
             theme="light" if self.dark_theme else "dark",
