@@ -36,6 +36,10 @@ class ConfigEditorFrame(ttk.Frame):
         """
 
         def set_cell_value(event):
+            """Set the value of a cell in the treeview to be editable when double-
+            clicked.
+            """
+
             def save_edit(event):
                 tree.set(row, column=column, value=event.widget.get())
                 event.widget.destroy()
@@ -138,6 +142,7 @@ class ConfigEditorButtonFrame(ttk.Frame):
         """
 
         def save_config():
+            """Save the current configuration from the treeview to the config file."""
             for child in self.tree.get_children():
                 for item in self.tree.get_children(child):
                     title_option = self.tree.item(item, "text")
@@ -188,6 +193,7 @@ class ConfigEditorButtonFrame(ttk.Frame):
                 self.tree.insert("Custom Items", "end", text=item_url, values=(item_owned,))
                 if self.custom_item_dialog:
                     self.custom_item_dialog.destroy()
+                    self.custom_item_dialog = None
             else:
                 self.scraper_config.remove_option("Custom Items", item_url)
                 messagebox.showerror(

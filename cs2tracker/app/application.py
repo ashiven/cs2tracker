@@ -284,7 +284,7 @@ class Application:
         if not proxy_api_key and enabled:
             messagebox.showerror(
                 "Config Error",
-                "You need to enter a valid crawlbase API key into the configuration  to use this feature.",
+                "You need to enter a valid crawlbase API key into the configuration to use this feature.",
             )
             return False
 
@@ -299,7 +299,7 @@ class Application:
         if not discord_webhook_url and enabled:
             messagebox.showerror(
                 "Config Error",
-                "You need to enter a valid Discord webhook URL into the configuration  to use this feature.",
+                "You need to enter a valid Discord webhook URL into the configuration to use this feature.",
             )
             return False
 
