@@ -119,8 +119,11 @@ class Application:
             2,
         )
 
-        self.dark_theme = tk.BooleanVar(value=DARK_THEME)
-        self._add_checkbox(checkbox_frame, "Dark Theme", self.dark_theme, sv_ttk.toggle_theme, 3)
+        # pylint: disable=attribute-defined-outside-init
+        self.dark_theme_checkbox_value = tk.BooleanVar(value=DARK_THEME)
+        self._add_checkbox(
+            checkbox_frame, "Dark Theme", self.dark_theme_checkbox_value, sv_ttk.toggle_theme, 3
+        )
 
     def _configure_main_frame(self, window):
         """Configure the main frame of the application window with buttons and
@@ -167,7 +170,7 @@ class Application:
             scraper_window,
             self.scraper,
             sheet_size=SCRAPER_WINDOW_SIZE,
-            dark_theme=self.dark_theme.get(),
+            dark_theme=self.dark_theme_checkbox_value.get(),
         )
         run_frame.pack(expand=True, fill="both")
         run_frame.start()
