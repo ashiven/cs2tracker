@@ -43,9 +43,8 @@
 
 ### Options
 
-- `Run!` to gather the current market prices of your items and calculate the total amount in USD and EUR.
+- `Run!` to gather the current market prices of your items and calculate the total amount in USD and EUR. The generated Excel sheet can be saved by right-clicking and then selecting `Save Sheet`.
 - `Edit Config` to specify the numbers of items owned in the configuration. You can also add items other than cases and sticker capsules via `Add Custom Item`
-- `Reset Config` to reset the configuration to its original state. This will remove any custom items you have added and reset the number of items owned for all items.
 - `Show History` to see a price chart consisting of past calculations. A new data point is generated once a day upon running the program.
 - `Export / Import History` to export the price history to a CSV file or import it from a CSV file. This may be used to back up your history data or perform further analysis on it.
 - `Daily Background Calculations` to automatically run a daily calculation of your investment in the background and save the results such that they can later be viewed via `Show History`.
