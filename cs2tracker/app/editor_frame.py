@@ -11,7 +11,7 @@ class ConfigEditorFrame(ttk.Frame):
         the configuration options.
         """
 
-        super().__init__(parent, padding=30)
+        super().__init__(parent, style="Card.TFrame", padding=15)
 
         self.parent = parent
         self.scraper_config = scraper_config
