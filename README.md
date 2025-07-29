@@ -9,9 +9,30 @@
 
 </div>
 
+## Table of Contents
+- [About](#about)
+- [Features](#features)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+- [Usage](#usage)
+- [Configuration](#configuration)
+- [Advanced Features](#advanced-features)
+- [Contributing](#contributing)
+- [License](#license)
+
 ## About
 
-**CS2Tracker** is a tool that can be used to keep track of the steam market prices of your CS2 investment.
+**CS2Tracker** is a simple program that can be used to keep track of the steam market prices of your CS2 investment.
+
+## Features
+
+- 🔍 Track CS2 Steam Market prices
+- 📈 View investment price history
+- 🧾 Export/Import price data
+- 📤 Discord notifications on updates
+- 📅 Daily background calculations
+- 🛡️ Proxy support to avoid rate limits
 
 ## Getting Started
 
@@ -21,13 +42,13 @@
 - Register for the [Crawlbase Smart Proxy API](https://crawlbase.com/) and retrieve your API key. (Optional)
 - Create a [Discord Webhook](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks) to be notified about recent price updates. (Optional)
 
-### Setup
+### Installation
 
-#### Windows Executable
+#### Option 1: Windows Executable
 
 - Simply [download the latest executable](https://github.com/ashiven/cs2tracker/releases/latest/download/cs2tracker-windows.zip) and run it.
 
-#### Install via Pip
+#### Option 2: Install via Pip
 
 1. Install the program:
 
@@ -41,15 +62,42 @@
    cs2tracker
    ```
 
-### Options
+## Usage
 
-- `Run!` to gather the current market prices of your items and calculate the total amount in USD and EUR. The generated Excel sheet can be saved by right-clicking and then selecting `Save Sheet`.
-- `Edit Config` to specify the numbers of items owned in the configuration. You can also add items other than cases and sticker capsules via `Add Custom Item`
-- `Show History` to see a price chart consisting of past calculations. A new data point is generated once a day upon running the program.
-- `Export / Import History` to export the price history to a CSV file or import it from a CSV file. This may be used to back up your history data or perform further analysis on it.
-- `Daily Background Calculations` to automatically run a daily calculation of your investment in the background and save the results such that they can later be viewed via `Show History`.
-- `Receive Discord Notifications` to receive a notification on your Discord server when the program has finished calculating your investment. You need to set up a [webhook](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks) in your Discord server and enter the webhook url into the `discord_webhook_url` field in the config file.
-- `Proxy Requests` to prevent your requests from being rate limited by the steamcommunity server. You need to register for a free API key on [Crawlbase](crawlbase.com) and enter it into the `proxy_api_key` field in the `User Settings` configuration section.
+- Click **Run!** to gather the current market prices of your items and calculate the total amount in USD and EUR.
+- The generated Excel sheet can be saved by right-clicking and then selecting **Save Sheet**.
+- Use **Edit Config** to specify the numbers of items owned in the configuration.
+- Click **Show History** to see a price chart consisting of past calculations.
+- Use **Export / Import History** to export or import the price history to or from a CSV file.
+
+## Configuration
+
+You can configure the app settings via the **Edit Config** option.
+This will open the config editor where you can change any setting by simply double clicking on it. The config editor allows you to:
+
+- Specify the number of items you own
+- Add custom items
+- Enter Discord webhook and Crawlbase proxy API keys
+
+## Advanced Features
+
+- Enable **Daily Background Calculations** to automatically run a daily calculation of your investment in the background.
+- Use **Receive Discord Notifications** to receive a notification on your Discord server whenever the program has finished calculating your investment.
+- You need to set up a [webhook](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks) in your Discord server and enter the webhook url into the `discord_webhook_url` field in the config `User Settings`.
+- Enable **Proxy Requests** to prevent your requests from being rate limited by the steamcommunity server. You need to register for a free API key on [Crawlbase](crawlbase.com) and enter it into the `proxy_api_key` field in the config `User Settings`.
+
+## Contributing
+
+Please feel free to submit a pull request or open an issue. See [issues](https://github.com/ashiven/cs2tracker/issues) and [pull requests](https://github.com/ashiven/cs2tracker/pulls) for current work.
+
+1. Fork the repository
+2. Create a new branch
+3. Make your changes
+4. Submit a PR
+
+## License
+
+This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
 
 ---
 
