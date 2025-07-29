@@ -9,10 +9,8 @@ from requests.adapters import HTTPAdapter, Retry
 from tenacity import RetryError, retry, stop_after_attempt
 
 from cs2tracker.constants import AUTHOR_STRING, BANNER, CAPSULE_INFO, CASE_HREFS
-from cs2tracker.discord_notifier import DiscordNotifier
-from cs2tracker.padded_console import PaddedConsole
-from cs2tracker.price_logs import PriceLogs
-from cs2tracker.validated_config import ValidatedConfig
+from cs2tracker.scraper.discord_notifier import DiscordNotifier
+from cs2tracker.util import PaddedConsole, PriceLogs, ValidatedConfig
 
 MAX_LINE_LEN = 72
 SEPARATOR = "-"
