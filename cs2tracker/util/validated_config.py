@@ -2,12 +2,11 @@ import re
 from configparser import ConfigParser
 
 from cs2tracker.constants import CAPSULE_INFO, CONFIG_FILE
-from cs2tracker.util.padded_console import PaddedConsole
-
-console = PaddedConsole()
-
+from cs2tracker.util.padded_console import get_console
 
 STEAM_MARKET_LISTING_REGEX = r"^https://steamcommunity.com/market/listings/\d+/.+$"
+
+console = get_console()
 
 
 class ValidatedConfig(ConfigParser):
@@ -15,10 +14,15 @@ class ValidatedConfig(ConfigParser):
         """Initialize the ValidatedConfig class."""
         super().__init__(delimiters=("~"), interpolation=None)
         self.optionxform = str  # type: ignore
-        super().read(CONFIG_FILE)
 
         self.valid = False
         self.last_error = None
+        self.load()
+
+    def load(self):
+        """Load the configuration file and validate it."""
+        self.clear()
+        self.read(CONFIG_FILE)
         self._validate_config()
 
     def _validate_config_sections(self):
@@ -77,7 +81,7 @@ class ValidatedConfig(ConfigParser):
             self._validate_config_values()
             self.valid = True
         except ValueError as error:
-            console.print(f"[bold red][!] Config error: {error}")
+            console.error(f"Config error: {error}")
             self.valid = False
             self.last_error = error
 
@@ -115,3 +119,11 @@ class ValidatedConfig(ConfigParser):
         console.print(
             f"[bold green]{'[+] Enabled' if enabled else '[-] Disabled'} Discord webhook notifications."
         )
+
+
+config = ValidatedConfig()
+
+
+def get_config():
+    """Accessor function to retrieve the current configuration."""
+    return config

@@ -3,15 +3,16 @@ from shutil import copy
 from tkinter import messagebox, ttk
 
 from cs2tracker.constants import CONFIG_FILE, CONFIG_FILE_BACKUP
-
-# from tksheet import Sheet
+from cs2tracker.util import get_config
 
 NEW_CUSTOM_ITEM_TITLE = "Add Custom Item"
 NEW_CUSTOM_ITEM_SIZE = "500x200"
 
+config = get_config()
+
 
 class ConfigEditorFrame(ttk.Frame):
-    def __init__(self, parent, scraper):
+    def __init__(self, parent):
         """Initialize the configuration editor frame that allows users to view and edit
         the configuration options.
         """
@@ -19,23 +20,7 @@ class ConfigEditorFrame(ttk.Frame):
         super().__init__(parent, style="Card.TFrame", padding=15)
 
         self.parent = parent
-        self.scraper = scraper
         self._add_widgets()
-
-    def reload_config_into_tree(self):
-        """Reload the configuration options into the treeview for display and
-        editing.
-        """
-        for item in self.tree.get_children():
-            self.tree.delete(item)
-
-        for section in self.scraper.config.sections():
-            if section == "App Settings":
-                continue
-            section_level = self.tree.insert("", "end", iid=section, text=section)
-            for config_option, value in self.scraper.config.items(section):
-                title_option = config_option.replace("_", " ").title()
-                self.tree.insert(section_level, "end", text=title_option, values=[value])
 
     def _add_widgets(self):
         """Configure the main editor frame which displays the configuration options in a
@@ -44,12 +29,14 @@ class ConfigEditorFrame(ttk.Frame):
         self._configure_treeview()
         self.tree.pack(expand=True, fill="both")
 
-        button_frame = ConfigEditorButtonFrame(self, self.scraper, self.tree)
+        button_frame = ConfigEditorButtonFrame(self, self.tree)
         button_frame.pack(side="bottom", padx=10, pady=(0, 10))
 
     def _set_cell_value(self, event):
-        """Set the value of a cell in the treeview to be editable when double-
-        clicked.
+        """
+        Set the value of a cell in the treeview to be editable when double- clicked.
+
+        Source: https://stackoverflow.com/questions/75787251/create-an-editable-tkinter-treeview-with-keyword-connection
         """
 
         def save_edit(event):
@@ -63,7 +50,7 @@ class ConfigEditorFrame(ttk.Frame):
             if item_text.strip() == "":
                 left_item_text = self.tree.item(row, "text")
                 # Don't allow editing of section headers
-                if any(left_item_text == section for section in self.scraper.config.sections()):
+                if any(left_item_text == section for section in config.sections()):
                     return
             x, y, w, h = self.tree.bbox(row, column)
             entryedit = ttk.Entry(self)
@@ -89,11 +76,8 @@ class ConfigEditorFrame(ttk.Frame):
             event.widget.destroy()
 
     def _make_tree_editable(self):
-        """
-        Add a binding to the treeview that allows double-clicking on a cell to edit its
-        value.
-
-        Source: https://stackoverflow.com/questions/75787251/create-an-editable-tkinter-treeview-with-keyword-connection
+        """Add a binding to the treeview that allows double-clicking on a cell to edit
+        its value.
         """
         self.tree.bind("<Double-1>", self._set_cell_value)
         self.parent.bind("<MouseWheel>", self._destroy_entries)  # type: ignore
@@ -101,11 +85,11 @@ class ConfigEditorFrame(ttk.Frame):
 
     def _load_config_into_tree(self):
         """Load the configuration options into the treeview for display and editing."""
-        for section in self.scraper.config.sections():
+        for section in config.sections():
             if section == "App Settings":
                 continue
             section_level = self.tree.insert("", "end", iid=section, text=section)
-            for config_option, value in self.scraper.config.items(section):
+            for config_option, value in config.items(section):
                 title_option = config_option.replace("_", " ").title()
                 self.tree.insert(section_level, "end", text=title_option, values=[value])
 
@@ -133,7 +117,7 @@ class ConfigEditorFrame(ttk.Frame):
 
 
 class ConfigEditorButtonFrame(ttk.Frame):
-    def __init__(self, parent, scraper, tree):
+    def __init__(self, parent, tree):
         """Initialize the button frame that contains buttons for saving the updated
         configuration and adding custom items.
         """
@@ -141,7 +125,6 @@ class ConfigEditorButtonFrame(ttk.Frame):
         super().__init__(parent, padding=10)
 
         self.parent = parent
-        self.scraper = scraper
         self.tree = tree
         self.custom_item_dialog = None
 
@@ -162,6 +145,21 @@ class ConfigEditorButtonFrame(ttk.Frame):
         )
         custom_item_button.pack(side="left", expand=True, padx=5)
 
+    def _reload_config_into_tree(self):
+        """Reload the configuration options into the treeview for display and
+        editing.
+        """
+        for item in self.tree.get_children():
+            self.tree.delete(item)
+
+        for section in config.sections():
+            if section == "App Settings":
+                continue
+            section_level = self.tree.insert("", "end", iid=section, text=section)
+            for config_option, value in config.items(section):
+                title_option = config_option.replace("_", " ").title()
+                self.tree.insert(section_level, "end", text=title_option, values=[value])
+
     def _save_config(self):
         """Save the current configuration from the treeview to the config file."""
         for child in self.tree.get_children():
@@ -174,15 +172,17 @@ class ConfigEditorButtonFrame(ttk.Frame):
                 if section_name == "Custom Items":
                     # custom items are already saved upon creation (Saving them again would result in duplicates)
                     continue
-                self.scraper.config.set(section_name, config_option, value)
+                config.set(section_name, config_option, value)
 
-        self.scraper.config.write_to_file()
-        if self.scraper.config.valid:
+        config.write_to_file()
+        if config.valid:
             messagebox.showinfo("Config Saved", "The configuration has been saved successfully.")
         else:
+            config.load()
+            self._reload_config_into_tree()
             messagebox.showerror(
                 "Config Error",
-                f"The configuration is invalid. ({self.scraper.config.last_error})",
+                f"The configuration is invalid. ({config.last_error})",
             )
 
     def _reset_config(self):
@@ -192,8 +192,8 @@ class ConfigEditorButtonFrame(ttk.Frame):
         )
         if confirm:
             copy(CONFIG_FILE_BACKUP, CONFIG_FILE)
-            self.scraper.load_config()
-            self.parent.reload_config_into_tree()
+            config.load()
+            self._reload_config_into_tree()
 
     def _add_custom_item(self, item_url, item_owned):
         """Add a custom item to the configuration."""
@@ -208,18 +208,18 @@ class ConfigEditorButtonFrame(ttk.Frame):
             messagebox.showerror("Input Error", f"Invalid owned count: {error}")
             return
 
-        self.scraper.config.set("Custom Items", item_url, item_owned)
-        self.scraper.config.write_to_file()
-        if self.scraper.config.valid:
+        config.set("Custom Items", item_url, item_owned)
+        config.write_to_file()
+        if config.valid:
             self.tree.insert("Custom Items", "end", text=item_url, values=(item_owned,))
             if self.custom_item_dialog:
                 self.custom_item_dialog.destroy()
                 self.custom_item_dialog = None
         else:
-            self.scraper.config.remove_option("Custom Items", item_url)
+            config.remove_option("Custom Items", item_url)
             messagebox.showerror(
                 "Config Error",
-                f"The configuration is invalid. ({self.scraper.config.last_error})",
+                f"The configuration is invalid. ({config.last_error})",
             )
 
     def _open_custom_item_dialog(self):

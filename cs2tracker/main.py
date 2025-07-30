@@ -5,7 +5,7 @@ import urllib3
 from cs2tracker.app import Application
 from cs2tracker.constants import AUTHOR_STRING, BANNER, OS, OSType
 from cs2tracker.scraper import Scraper
-from cs2tracker.util import PaddedConsole
+from cs2tracker.util import get_console
 
 
 def main():
@@ -23,7 +23,7 @@ def main():
     if OS == OSType.WINDOWS and sys.stdout is not None:
         sys.stdout.reconfigure(encoding="utf-8-sig")  # type: ignore
 
-    console = PaddedConsole()
+    console = get_console()
     console.print(f"[bold yellow]{BANNER}\n{AUTHOR_STRING}\n")
 
     if "--only-scrape" in sys.argv:

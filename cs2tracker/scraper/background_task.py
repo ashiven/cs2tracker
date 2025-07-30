@@ -9,7 +9,7 @@ from cs2tracker.constants import (
     RUNNING_IN_EXE,
     OSType,
 )
-from cs2tracker.util import PaddedConsole
+from cs2tracker.util import get_console
 
 WIN_BACKGROUND_TASK_NAME = "CS2Tracker Daily Calculation"
 WIN_BACKGROUND_TASK_SCHEDULE = "DAILY"
@@ -18,7 +18,7 @@ WIN_BACKGROUND_TASK_CMD = (
     f"powershell -WindowStyle Hidden -Command \"Start-Process '{BATCH_FILE}' -WindowStyle Hidden\""
 )
 
-console = PaddedConsole()
+console = get_console()
 
 
 class BackgroundTask:
@@ -85,14 +85,14 @@ class BackgroundTask:
             if return_code == 0:
                 console.print("[bold green][+] Background task enabled.")
             else:
-                console.print("[bold red][!] Failed to enable background task.")
+                console.error("Failed to enable background task.")
         else:
             cmd = ["schtasks", "/delete", "/tn", WIN_BACKGROUND_TASK_NAME, "/f"]
             return_code = call(cmd, stdout=DEVNULL, stderr=DEVNULL)
             if return_code == 0:
                 console.print("[bold green][-] Background task disabled.")
             else:
-                console.print("[bold red][!] Failed to disable background task.")
+                console.error("Failed to disable background task.")
 
     @classmethod
     def toggle(cls, enabled: bool):
