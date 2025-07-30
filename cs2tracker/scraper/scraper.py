@@ -65,6 +65,7 @@ class Scraper:
         self.session.mount("https://", HTTPAdapter(max_retries=retries))
 
     def _print_error(self):
+        """Print the last error message from the error stack, if any."""
         last_error = self.error_stack[-1] if self.error_stack else None
         if last_error:
             console.error(f"{last_error.message}\n")
@@ -170,6 +171,23 @@ class Scraper:
 
         return page
 
+    def _print_item_title(self, raw_item_str, from_config=False, from_href=False):
+        """
+        Print the title for a case, capsule, or custom item.
+
+        :param item_name: The name of the item to print.
+        """
+        if from_config:
+            item_name = raw_item_str.replace("_", " ").title()
+        elif from_href:
+            item_name = unquote(raw_item_str.split("/")[-1])
+        else:
+            item_name = raw_item_str
+
+        item_title = item_name.center(MAX_LINE_LEN, SEPARATOR)
+        console.print(f"[bold magenta]{item_title}\n")
+        return item_name
+
     def _parse_item_price(self, item_page, item_href):
         """
         Parse the price of an item from the given steamcommunity market page and item
@@ -205,9 +223,7 @@ class Scraper:
         :param update_sheet_callback: Optional callback function to update a tksheet
             that is displayed in the GUI with the latest scraper price calculation.
         """
-        capsule_title = capsule_section.center(MAX_LINE_LEN, SEPARATOR)
-        console.print(f"[bold magenta]{capsule_title}\n")
-
+        self._print_item_title(capsule_section)
         capsule_usd_total = 0
         try:
             capsule_page = self._get_page(capsule_info["page"])
@@ -288,10 +304,7 @@ class Scraper:
             if int(owned) == 0:
                 continue
 
-            case_name = config_case_name.replace("_", " ").title()
-            case_title = case_name.center(MAX_LINE_LEN, SEPARATOR)
-            console.print(f"[bold magenta]{case_title}\n")
-
+            case_name = self._print_item_title(config_case_name, from_config=True)
             try:
                 case_page_url = self._market_page_from_href(CASE_HREFS[case_index])
                 case_page = self._get_page(case_page_url)
@@ -332,10 +345,7 @@ class Scraper:
             if int(owned) == 0:
                 continue
 
-            custom_item_name = unquote(custom_item_href.split("/")[-1])
-            custom_item_title = custom_item_name.center(MAX_LINE_LEN, SEPARATOR)
-            console.print(f"[bold magenta]{custom_item_title}\n")
-
+            custom_item_name = self._print_item_title(custom_item_href, from_href=True)
             try:
                 custom_item_page_url = self._market_page_from_href(custom_item_href)
                 custom_item_page = self._get_page(custom_item_page_url)
