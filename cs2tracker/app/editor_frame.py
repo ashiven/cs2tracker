@@ -6,7 +6,10 @@ from cs2tracker.constants import CONFIG_FILE, CONFIG_FILE_BACKUP
 from cs2tracker.util import get_config
 
 ADD_CUSTOM_ITEM_TITLE = "Add Custom Item"
-ADD_CUSTOM_ITEM_SIZE = "500x200"
+ADD_CUSTOM_ITEM_SIZE = "500x220"
+
+IMPORT_INVENTORY_TITLE = "Import Steam Inventory"
+IMPORT_INVENTORY_SIZE = "500x250"
 
 config = get_config()
 
@@ -16,8 +19,7 @@ class ConfigEditorFrame(ttk.Frame):
         """Initialize the configuration editor frame that allows users to view and edit
         the configuration options.
         """
-
-        super().__init__(parent, style="Card.TFrame", padding=15)
+        super().__init__(parent, padding=15)
 
         self.parent = parent
         self._add_widgets()
@@ -121,7 +123,6 @@ class ConfigEditorButtonFrame(ttk.Frame):
         """Initialize the button frame that contains buttons for saving the updated
         configuration and adding custom items.
         """
-
         super().__init__(parent, padding=10)
 
         self.parent = parent
@@ -199,16 +200,22 @@ class ConfigEditorButtonFrame(ttk.Frame):
             self._reload_config_into_tree()
 
     def _add_custom_item(self):
-        """Open a dialog to enter custom item details."""
-        self.custom_item_dialog = tk.Toplevel(self.parent)
-        self.custom_item_dialog.title(ADD_CUSTOM_ITEM_TITLE)
-        self.custom_item_dialog.geometry(ADD_CUSTOM_ITEM_SIZE)
+        """Open a window to add a new custom item."""
+        custom_item_window = tk.Toplevel(self.parent)
+        custom_item_window.title(ADD_CUSTOM_ITEM_TITLE)
+        custom_item_window.geometry(ADD_CUSTOM_ITEM_SIZE)
 
-        custom_item_frame = CustomItemFrame(self, self.tree)
-        custom_item_frame.pack(expand=True, fill="both")
+        custom_item_frame = CustomItemFrame(custom_item_window, self.tree)
+        custom_item_frame.pack(expand=True, fill="both", padx=15, pady=15)
 
     def _import_steam_inventory(self):
-        pass
+        """Open a window to import the user's Steam inventory."""
+        steam_inventory_window = tk.Toplevel(self.parent)
+        steam_inventory_window.title(IMPORT_INVENTORY_TITLE)
+        steam_inventory_window.geometry(IMPORT_INVENTORY_SIZE)
+
+        steam_inventory_frame = InventoryImportFrame(steam_inventory_window)
+        steam_inventory_frame.pack(expand=True, fill="both", padx=15, pady=15)
 
 
 class CustomItemFrame(ttk.Frame):
@@ -253,12 +260,62 @@ class CustomItemFrame(ttk.Frame):
         config.write_to_file()
         if config.valid:
             self.tree.insert("Custom Items", "end", text=item_url, values=(item_owned,))
-            if self.custom_item_dialog:
-                self.custom_item_dialog.destroy()
-                self.custom_item_dialog = None
+            self.parent.destroy()
         else:
             config.remove_option("Custom Items", item_url)
             messagebox.showerror(
                 "Config Error",
                 f"The configuration is invalid. ({config.last_error})",
             )
+
+
+class InventoryImportFrame(ttk.Frame):
+    def __init__(self, parent):
+        """Initialize the inventory import frame that allows users to import their Steam
+        inventory.
+        """
+        super().__init__(parent, style="Card.TFrame", padding=10)
+        self.parent = parent
+        self._add_widgets()
+
+    def _add_widgets(self):
+        """Add widgets to the inventory import frame."""
+        import_cases_checkbox = ttk.Checkbutton(
+            self, text="Import Cases", variable=tk.Variable(value=True), style="Switch.TCheckbutton"
+        )
+        import_cases_checkbox.pack(anchor="w", padx=10, pady=5)
+
+        import_sticker_capsules_checkbox = ttk.Checkbutton(
+            self,
+            text="Import Sticker Capsules",
+            variable=tk.Variable(value=True),
+            style="Switch.TCheckbutton",
+        )
+        import_sticker_capsules_checkbox.pack(anchor="w", padx=10, pady=5)
+
+        import_stickers_checkbox = ttk.Checkbutton(
+            self, text="Import Stickers", style="Switch.TCheckbutton"
+        )
+        import_stickers_checkbox.pack(anchor="w", padx=10, pady=5)
+
+        import_others_checkbox = ttk.Checkbutton(
+            self, text="Import Other Items", style="Switch.TCheckbutton"
+        )
+        import_others_checkbox.pack(anchor="w", padx=10, pady=5)
+
+        import_button = ttk.Button(
+            self,
+            text="Import",
+            command=lambda: self._import_inventory(
+                import_cases_checkbox.instate(["selected"]),
+                import_sticker_capsules_checkbox.instate(["selected"]),
+                import_stickers_checkbox.instate(["selected"]),
+                import_others_checkbox.instate(["selected"]),
+            ),
+        )
+        import_button.pack(pady=10)
+
+    def _import_inventory(
+        self, import_cases, import_sticker_capsules, import_stickers, import_others
+    ):
+        pass
