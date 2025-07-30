@@ -2,12 +2,11 @@ import re
 from configparser import ConfigParser
 
 from cs2tracker.constants import CAPSULE_INFO, CONFIG_FILE
-from cs2tracker.util.padded_console import PaddedConsole
-
-console = PaddedConsole()
-
+from cs2tracker.util.padded_console import get_console
 
 STEAM_MARKET_LISTING_REGEX = r"^https://steamcommunity.com/market/listings/\d+/.+$"
+
+console = get_console()
 
 
 class ValidatedConfig(ConfigParser):
@@ -115,3 +114,22 @@ class ValidatedConfig(ConfigParser):
         console.print(
             f"[bold green]{'[+] Enabled' if enabled else '[-] Disabled'} Discord webhook notifications."
         )
+
+
+config = ValidatedConfig()
+
+
+def get_config():
+    """Accessor function to retrieve the current configuration."""
+    return config
+
+
+def reload_config():
+    """
+    Reload the configuration file and validate it again.
+
+    :return: The reloaded ValidatedConfig instance.
+    """
+    global config  # pylint: disable=global-statement
+    config = ValidatedConfig()
+    return config

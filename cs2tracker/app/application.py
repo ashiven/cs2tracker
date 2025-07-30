@@ -15,6 +15,7 @@ from cs2tracker.app.scraper_frame import ScraperFrame
 from cs2tracker.constants import ICON_FILE, OS, OUTPUT_FILE, OSType
 from cs2tracker.scraper import BackgroundTask, Scraper
 from cs2tracker.util import PriceLogs
+from cs2tracker.util.validated_config import get_config
 
 APPLICATION_NAME = "CS2Tracker"
 WINDOW_SIZE = "630x335"
@@ -25,6 +26,9 @@ SCRAPER_WINDOW_SIZE = "900x750"
 
 CONFIG_EDITOR_TITLE = "Config Editor"
 CONFIG_EDITOR_SIZE = "800x750"
+
+
+config = get_config()
 
 
 class Application:
@@ -92,9 +96,7 @@ class Application:
         )
 
         discord_webhook_checkbox_value = tk.BooleanVar(
-            value=self.scraper.config.getboolean(
-                "App Settings", "discord_notifications", fallback=False
-            )
+            value=config.getboolean("App Settings", "discord_notifications", fallback=False)
         )
         self._add_checkbox(
             checkbox_frame,
@@ -107,7 +109,7 @@ class Application:
         )
 
         use_proxy_checkbox_value = tk.BooleanVar(
-            value=self.scraper.config.getboolean("App Settings", "use_proxy", fallback=False)
+            value=config.getboolean("App Settings", "use_proxy", fallback=False)
         )
         self._add_checkbox(
             checkbox_frame,
@@ -181,7 +183,7 @@ class Application:
         config_editor_window.geometry(CONFIG_EDITOR_SIZE)
         config_editor_window.title(CONFIG_EDITOR_TITLE)
 
-        editor_frame = ConfigEditorFrame(config_editor_window, self.scraper)
+        editor_frame = ConfigEditorFrame(config_editor_window)
         editor_frame.pack(expand=True, fill="both")
 
     def _draw_plot(self):
@@ -228,7 +230,7 @@ class Application:
 
     def _toggle_use_proxy(self, enabled: bool):
         """Toggle whether the scraper should use proxy servers for requests."""
-        proxy_api_key = self.scraper.config.get("User Settings", "proxy_api_key", fallback=None)
+        proxy_api_key = config.get("User Settings", "proxy_api_key", fallback=None)
         if not proxy_api_key and enabled:
             messagebox.showerror(
                 "Config Error",
@@ -236,14 +238,12 @@ class Application:
             )
             return False
 
-        self.scraper.toggle_use_proxy(enabled)
+        config.toggle_use_proxy(enabled)
         return True
 
     def _toggle_discord_webhook(self, enabled: bool):
         """Toggle whether the scraper should send notifications to a Discord webhook."""
-        discord_webhook_url = self.scraper.config.get(
-            "User Settings", "discord_webhook_url", fallback=None
-        )
+        discord_webhook_url = config.get("User Settings", "discord_webhook_url", fallback=None)
         if not discord_webhook_url and enabled:
             messagebox.showerror(
                 "Config Error",
@@ -251,5 +251,5 @@ class Application:
             )
             return False
 
-        self.scraper.toggle_discord_webhook(enabled)
+        config.toggle_discord_webhook(enabled)
         return True

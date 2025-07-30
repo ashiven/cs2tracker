@@ -11,7 +11,7 @@ from tenacity import RetryError, retry, stop_after_attempt
 
 from cs2tracker.constants import AUTHOR_STRING, BANNER, CAPSULE_INFO, CASE_HREFS
 from cs2tracker.scraper.discord_notifier import DiscordNotifier
-from cs2tracker.util import PaddedConsole, PriceLogs, ValidatedConfig
+from cs2tracker.util import PriceLogs, get_config, get_console
 
 MAX_LINE_LEN = 72
 SEPARATOR = "-"
@@ -20,21 +20,17 @@ PRICE_INFO = "Owned: {:<10}  Steam market price: ${:<10}  Total: ${:<10}\n"
 HTTP_PROXY_URL = "http://{}:@smartproxy.crawlbase.com:8012"
 HTTPS_PROXY_URL = "http://{}:@smartproxy.crawlbase.com:8012"
 
-console = PaddedConsole()
+console = get_console()
+config = get_config()
 
 
 class Scraper:
     def __init__(self):
         """Initialize the Scraper class."""
-        self.load_config()
         self._start_session()
 
         self.usd_total = 0
         self.eur_total = 0
-
-    def load_config(self):
-        """Load the configuration file and validate its contents."""
-        self.config = ValidatedConfig()
 
     def _start_session(self):
         """Start a requests session with custom headers and retry logic."""
@@ -56,11 +52,14 @@ class Scraper:
         :param update_sheet_callback: Optional callback function to update a tksheet
             that is displayed in the GUI with the latest scraper price calculation.
         """
-        if not self.config.valid:
+        if not config.valid:
             console.print(
                 "[bold red][!] Invalid configuration. Please fix the config file before running."
             )
             return
+
+        # Reset totals from the previous run
+        self.usd_total, self.eur_total = 0, 0
 
         capsule_usd_total = self._scrape_capsule_section_prices(update_sheet_callback)
         case_usd_total = self._scrape_case_prices(update_sheet_callback)
@@ -86,9 +85,6 @@ class Scraper:
         PriceLogs.save(self.usd_total, self.eur_total)
         self._send_discord_notification()
 
-        # Reset totals for next run
-        self.usd_total, self.eur_total = 0, 0
-
     def _print_total(self):
         """Print the total prices in USD and EUR, formatted with titles and
         separators.
@@ -108,10 +104,10 @@ class Scraper:
         """Send a message to a Discord webhook if notifications are enabled in the
         config file and a webhook URL is provided.
         """
-        discord_notifications = self.config.getboolean(
+        discord_notifications = config.getboolean(
             "App Settings", "discord_notifications", fallback=False
         )
-        webhook_url = self.config.get("User Settings", "discord_webhook_url", fallback=None)
+        webhook_url = config.get("User Settings", "discord_webhook_url", fallback=None)
 
         if discord_notifications and webhook_url:
             DiscordNotifier.notify(webhook_url)
@@ -127,8 +123,8 @@ class Scraper:
         :raises RequestException: If the request fails.
         :raises RetryError: If the retry limit is reached.
         """
-        use_proxy = self.config.getboolean("App Settings", "use_proxy", fallback=False)
-        proxy_api_key = self.config.get("User Settings", "proxy_api_key", fallback=None)
+        use_proxy = config.getboolean("App Settings", "use_proxy", fallback=False)
+        proxy_api_key = config.get("User Settings", "proxy_api_key", fallback=None)
 
         if use_proxy and proxy_api_key:
             page = self.session.get(
@@ -191,7 +187,7 @@ class Scraper:
             capsule_page = self._get_page(capsule_info["page"])
             for capsule_name, capsule_href in zip(capsule_info["names"], capsule_info["items"]):
                 config_capsule_name = capsule_name.replace(" ", "_").lower()
-                owned = self.config.getint(capsule_section, config_capsule_name, fallback=0)
+                owned = config.getint(capsule_section, config_capsule_name, fallback=0)
                 if owned == 0:
                     continue
 
@@ -222,7 +218,7 @@ class Scraper:
         capsule_usd_total = 0
         for capsule_section, capsule_info in CAPSULE_INFO.items():
             # Only scrape capsule sections where the user owns at least one item
-            if any(int(owned) > 0 for _, owned in self.config.items(capsule_section)):
+            if any(int(owned) > 0 for _, owned in config.items(capsule_section)):
                 capsule_usd_total += self._scrape_capsule_prices(
                     capsule_section, capsule_info, update_sheet_callback
                 )
@@ -253,7 +249,7 @@ class Scraper:
             that is displayed in the GUI with the latest scraper price calculation.
         """
         case_usd_total = 0
-        for case_index, (config_case_name, owned) in enumerate(self.config.items("Cases")):
+        for case_index, (config_case_name, owned) in enumerate(config.items("Cases")):
             if int(owned) == 0:
                 continue
 
@@ -272,7 +268,7 @@ class Scraper:
                     update_sheet_callback([case_name, owned, price_usd, price_usd_owned])
                 case_usd_total += price_usd_owned
 
-                if not self.config.getboolean("App Settings", "use_proxy", fallback=False):
+                if not config.getboolean("App Settings", "use_proxy", fallback=False):
                     time.sleep(1)
             except (RetryError, ValueError):
                 console.print(
@@ -294,7 +290,7 @@ class Scraper:
             that is displayed in the GUI with the latest scraper price calculation.
         """
         custom_item_usd_total = 0
-        for custom_item_href, owned in self.config.items("Custom Items"):
+        for custom_item_href, owned in config.items("Custom Items"):
             if int(owned) == 0:
                 continue
 
@@ -313,7 +309,7 @@ class Scraper:
                     update_sheet_callback([custom_item_name, owned, price_usd, price_usd_owned])
                 custom_item_usd_total += price_usd_owned
 
-                if not self.config.getboolean("App Settings", "use_proxy", fallback=False):
+                if not config.getboolean("App Settings", "use_proxy", fallback=False):
                     time.sleep(1)
             except (RetryError, ValueError):
                 console.print(
@@ -323,23 +319,6 @@ class Scraper:
                 console.print(f"[bold red][!] An unexpected error occurred: {error}\n")
 
         return custom_item_usd_total
-
-    def toggle_use_proxy(self, enabled: bool):
-        """
-        Toggle the use of proxies for requests. This will update the configuration file.
-
-        :param enabled: If True, proxies will be used; if False, they will not be used.
-        """
-        self.config.toggle_use_proxy(enabled)
-
-    def toggle_discord_webhook(self, enabled: bool):
-        """
-        Toggle the use of a Discord webhook to notify users of price calculations.
-
-        :param enabled: If True, the webhook will be used; if False, it will not be
-            used.
-        """
-        self.config.toggle_discord_webhook(enabled)
 
 
 if __name__ == "__main__":

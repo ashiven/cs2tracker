@@ -20,3 +20,11 @@ class PaddedConsole:
     def __getattr__(self, attr):
         """Ensure console methods can be called directly on PaddedConsole."""
         return getattr(self.console, attr)
+
+
+console = PaddedConsole()
+
+
+def get_console():
+    """Get the PaddedConsole instance."""
+    return console

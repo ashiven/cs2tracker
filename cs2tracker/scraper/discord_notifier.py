@@ -1,13 +1,13 @@
 import requests
 from requests.exceptions import RequestException
 
-from cs2tracker.util import PaddedConsole, PriceLogs
+from cs2tracker.util import PriceLogs, get_console
 
 DC_WEBHOOK_USERNAME = "CS2Tracker"
 DC_WEBHOOK_AVATAR_URL = "https://img.icons8.com/?size=100&id=uWQJp2tLXUH6&format=png&color=000000"
 DC_RECENT_HISTORY_LIMIT = 5
 
-console = PaddedConsole()
+console = get_console()
 
 
 class DiscordNotifier:
