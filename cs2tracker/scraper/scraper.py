@@ -222,9 +222,10 @@ class Scraper:
 
                 console.print(f"[bold deep_sky_blue4]{capsule_name}")
                 console.print(PRICE_INFO.format(owned, price_usd, price_usd_owned))
+                capsule_usd_total += price_usd_owned
+
                 if update_sheet_callback:
                     update_sheet_callback([capsule_name, owned, price_usd, price_usd_owned])
-                capsule_usd_total += price_usd_owned
         except (RetryError, ValueError):
             self.error_stack.append(RequestLimitExceededError())
             self._print_error()
@@ -243,11 +244,17 @@ class Scraper:
         """
         capsule_usd_total = 0
         for capsule_section, capsule_info in CAPSULE_INFO.items():
+            if self.error_stack:
+                break
+
             # Only scrape capsule sections where the user owns at least one item
             if any(int(owned) > 0 for _, owned in config.items(capsule_section)):
                 capsule_usd_total += self._scrape_capsule_prices(
                     capsule_section, capsule_info, update_sheet_callback
                 )
+
+                if not config.getboolean("App Settings", "use_proxy", fallback=False):
+                    time.sleep(1)
 
         return capsule_usd_total
 
@@ -276,6 +283,8 @@ class Scraper:
         """
         case_usd_total = 0
         for case_index, (config_case_name, owned) in enumerate(config.items("Cases")):
+            if self.error_stack:
+                break
             if int(owned) == 0:
                 continue
 
@@ -290,9 +299,10 @@ class Scraper:
                 price_usd_owned = round(float(int(owned) * price_usd), 2)
 
                 console.print(PRICE_INFO.format(owned, price_usd, price_usd_owned))
+                case_usd_total += price_usd_owned
+
                 if update_sheet_callback:
                     update_sheet_callback([case_name, owned, price_usd, price_usd_owned])
-                case_usd_total += price_usd_owned
 
                 if not config.getboolean("App Settings", "use_proxy", fallback=False):
                     time.sleep(1)
@@ -317,6 +327,8 @@ class Scraper:
         """
         custom_item_usd_total = 0
         for custom_item_href, owned in config.items("Custom Items"):
+            if self.error_stack:
+                break
             if int(owned) == 0:
                 continue
 
@@ -331,9 +343,10 @@ class Scraper:
                 price_usd_owned = round(float(int(owned) * price_usd), 2)
 
                 console.print(PRICE_INFO.format(owned, price_usd, price_usd_owned))
+                custom_item_usd_total += price_usd_owned
+
                 if update_sheet_callback:
                     update_sheet_callback([custom_item_name, owned, price_usd, price_usd_owned])
-                custom_item_usd_total += price_usd_owned
 
                 if not config.getboolean("App Settings", "use_proxy", fallback=False):
                     time.sleep(1)
