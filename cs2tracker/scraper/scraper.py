@@ -24,11 +24,31 @@ console = get_console()
 config = get_config()
 
 
+class ConfigError:
+    def __init__(self):
+        self.message = "Invalid configuration. Please fix the config file before running."
+
+
+class RequestLimitExceededError:
+    def __init__(self):
+        self.message = "Too many requests. Consider using proxies to prevent rate limiting."
+
+
+class PageLoadError:
+    def __init__(self, status_code):
+        self.message = f"Failed to load page: {status_code}. Retrying..."
+
+
+class UnexpectedError:
+    def __init__(self, error):
+        self.message = f"An unexpected error occurred: {error}"
+
+
 class Scraper:
     def __init__(self):
         """Initialize the Scraper class."""
         self._start_session()
-
+        self.error_stack = []
         self.usd_total = 0
         self.eur_total = 0
 
@@ -44,6 +64,11 @@ class Scraper:
         self.session.mount("http://", HTTPAdapter(max_retries=retries))
         self.session.mount("https://", HTTPAdapter(max_retries=retries))
 
+    def _print_error(self):
+        last_error = self.error_stack[-1] if self.error_stack else None
+        if last_error:
+            console.error(f"{last_error.message}\n")
+
     def scrape_prices(self, update_sheet_callback=None):
         """
         Scrape prices for capsules and cases, calculate totals in USD and EUR, and
@@ -53,11 +78,13 @@ class Scraper:
             that is displayed in the GUI with the latest scraper price calculation.
         """
         if not config.valid:
-            console.error("Invalid configuration. Please fix the config file before running.")
+            self.error_stack.append(ConfigError())
+            self._print_error()
             return
 
-        # Reset totals from the previous run
+        # Reset totals from the previous run and clear the error stack
         self.usd_total, self.eur_total = 0, 0
+        self.error_stack.clear()
 
         capsule_usd_total = self._scrape_capsule_section_prices(update_sheet_callback)
         case_usd_total = self._scrape_case_prices(update_sheet_callback)
@@ -137,7 +164,8 @@ class Scraper:
             page = self.session.get(url)
 
         if not page.ok or not page.content:
-            console.error(f"Failed to load page ({page.status_code}). Retrying...\n")
+            self.error_stack.append(PageLoadError(page.status_code))
+            self._print_error()
             raise RequestException(f"Failed to load page: {url}")
 
         return page
@@ -198,9 +226,11 @@ class Scraper:
                     update_sheet_callback([capsule_name, owned, price_usd, price_usd_owned])
                 capsule_usd_total += price_usd_owned
         except (RetryError, ValueError):
-            console.error("Too many requests. (Consider using proxies to prevent rate limiting)\n")
+            self.error_stack.append(RequestLimitExceededError())
+            self._print_error()
         except Exception as error:
-            console.error(f"An unexpected error occurred: {error}\n")
+            self.error_stack.append(UnexpectedError(error))
+            self._print_error()
 
         return capsule_usd_total
 
@@ -267,11 +297,11 @@ class Scraper:
                 if not config.getboolean("App Settings", "use_proxy", fallback=False):
                     time.sleep(1)
             except (RetryError, ValueError):
-                console.error(
-                    "Too many requests. (Consider using proxies to prevent rate limiting)\n"
-                )
+                self.error_stack.append(RequestLimitExceededError())
+                self._print_error()
             except Exception as error:
-                console.error(f"An unexpected error occurred: {error}\n")
+                self.error_stack.append(UnexpectedError(error))
+                self._print_error()
 
         return case_usd_total
 
@@ -308,11 +338,11 @@ class Scraper:
                 if not config.getboolean("App Settings", "use_proxy", fallback=False):
                     time.sleep(1)
             except (RetryError, ValueError):
-                console.error(
-                    "Too many requests. (Consider using proxies to prevent rate limiting)\n"
-                )
+                self.error_stack.append(RequestLimitExceededError())
+                self._print_error()
             except Exception as error:
-                console.error(f"An unexpected error occurred: {error}\n")
+                self.error_stack.append(UnexpectedError(error))
+                self._print_error()
 
         return custom_item_usd_total
 

@@ -1,5 +1,5 @@
 import csv
-from tkinter import ttk
+from tkinter import messagebox, ttk
 from tkinter.filedialog import asksaveasfilename
 
 from tksheet import Sheet
@@ -74,3 +74,7 @@ class ScraperFrame(ttk.Frame):
         row_heights = self.sheet.get_row_heights()
         last_row_index = len(row_heights) - 1
         self.sheet.align_rows(last_row_index, "c")
+
+        if self.scraper.error_stack:
+            last_error = self.scraper.error_stack[-1]
+            messagebox.showerror("An Error Occurred", f"{last_error.message}")
