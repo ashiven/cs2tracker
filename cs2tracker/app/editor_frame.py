@@ -3,7 +3,7 @@ from shutil import copy
 from tkinter import messagebox, ttk
 
 from cs2tracker.constants import CONFIG_FILE, CONFIG_FILE_BACKUP
-from cs2tracker.util import get_config, reload_config
+from cs2tracker.util import get_config
 
 NEW_CUSTOM_ITEM_TITLE = "Add Custom Item"
 NEW_CUSTOM_ITEM_SIZE = "500x200"
@@ -191,7 +191,7 @@ class ConfigEditorButtonFrame(ttk.Frame):
         )
         if confirm:
             copy(CONFIG_FILE_BACKUP, CONFIG_FILE)
-            reload_config()
+            config.load()
             self.parent.reload_config_into_tree()
 
     def _add_custom_item(self, item_url, item_owned):

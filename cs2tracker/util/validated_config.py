@@ -14,10 +14,15 @@ class ValidatedConfig(ConfigParser):
         """Initialize the ValidatedConfig class."""
         super().__init__(delimiters=("~"), interpolation=None)
         self.optionxform = str  # type: ignore
-        super().read(CONFIG_FILE)
 
         self.valid = False
         self.last_error = None
+        self.load()
+
+    def load(self):
+        """Load the configuration file and validate it."""
+        self.clear()
+        self.read(CONFIG_FILE)
         self._validate_config()
 
     def _validate_config_sections(self):
@@ -121,15 +126,4 @@ config = ValidatedConfig()
 
 def get_config():
     """Accessor function to retrieve the current configuration."""
-    return config
-
-
-def reload_config():
-    """
-    Reload the configuration file and validate it again.
-
-    :return: The reloaded ValidatedConfig instance.
-    """
-    global config  # pylint: disable=global-statement
-    config = ValidatedConfig()
     return config
