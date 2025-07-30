@@ -175,7 +175,10 @@ class Scraper:
         """
         Print the title for a case, capsule, or custom item.
 
-        :param item_name: The name of the item to print.
+        :param raw_item_str: The raw string to convert into an item name and title.
+        :param from_config: Whether the raw item string is from the config file.
+        :param from_href: Whether the raw item string is an href.
+        :return: The formatted item name.
         """
         if from_config:
             item_name = raw_item_str.replace("_", " ").title()
