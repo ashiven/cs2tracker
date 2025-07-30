@@ -63,6 +63,9 @@ else:
         copy(CONFIG_FILE, CONFIG_FILE_BACKUP)
 
 
+IMPORT_SCRIPT_PATH = os.path.join(MODULE_DIR, "data", "get_inventory.js")
+
+
 BANNER = """
     __   _____ _____  ______  ____    ____     __  __  _    ___  ____
    /  ] / ___/|     T|      T|    \\  /    T   /  ]|  l/ ]  /  _]|    \\

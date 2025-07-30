@@ -8,3 +8,4 @@ tenacity==8.2.2
 urllib3==2.1.0
 sv_ttk==2.6.1
 tksheet==7.5.12
+nodejs-bin==18.4.0a4

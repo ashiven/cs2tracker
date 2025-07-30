@@ -2,14 +2,16 @@ import tkinter as tk
 from shutil import copy
 from tkinter import messagebox, ttk
 
-from cs2tracker.constants import CONFIG_FILE, CONFIG_FILE_BACKUP
+from nodejs import node, npm
+
+from cs2tracker.constants import CONFIG_FILE, CONFIG_FILE_BACKUP, IMPORT_SCRIPT_PATH
 from cs2tracker.util import get_config
 
 ADD_CUSTOM_ITEM_TITLE = "Add Custom Item"
 ADD_CUSTOM_ITEM_SIZE = "500x220"
 
 IMPORT_INVENTORY_TITLE = "Import Steam Inventory"
-IMPORT_INVENTORY_SIZE = "500x250"
+IMPORT_INVENTORY_SIZE = "500x420"
 
 config = get_config()
 
@@ -280,42 +282,89 @@ class InventoryImportFrame(ttk.Frame):
 
     def _add_widgets(self):
         """Add widgets to the inventory import frame."""
-        import_cases_checkbox = ttk.Checkbutton(
+        self._configure_checkboxes()
+        self.import_cases_checkbox.pack(anchor="w", padx=10, pady=5)
+        self.import_sticker_capsules_checkbox.pack(anchor="w", padx=10, pady=5)
+        self.import_stickers_checkbox.pack(anchor="w", padx=10, pady=5)
+        self.import_others_checkbox.pack(anchor="w", padx=10, pady=5)
+
+        self._configure_entries()
+        self.user_name_label.pack(pady=5)
+        self.user_name_entry.pack(fill="x", padx=10)
+        self.password_label.pack(pady=5)
+        self.password_entry.pack(fill="x", padx=10)
+        self.two_factor_label.pack(pady=5)
+        self.two_factor_entry.pack(fill="x", padx=10)
+
+        self.import_button = ttk.Button(
+            self, text="Import", command=lambda: self._import_inventory()
+        )
+        self.import_button.pack(pady=10)
+
+    def _configure_checkboxes(self):
+        """Configure the checkboxes for selecting what to import from the Steam
+        inventory.
+        """
+        self.import_cases_checkbox = ttk.Checkbutton(
             self, text="Import Cases", variable=tk.Variable(value=True), style="Switch.TCheckbutton"
         )
-        import_cases_checkbox.pack(anchor="w", padx=10, pady=5)
 
-        import_sticker_capsules_checkbox = ttk.Checkbutton(
+        self.import_sticker_capsules_checkbox = ttk.Checkbutton(
             self,
             text="Import Sticker Capsules",
             variable=tk.Variable(value=True),
             style="Switch.TCheckbutton",
         )
-        import_sticker_capsules_checkbox.pack(anchor="w", padx=10, pady=5)
 
-        import_stickers_checkbox = ttk.Checkbutton(
+        self.import_stickers_checkbox = ttk.Checkbutton(
             self, text="Import Stickers", style="Switch.TCheckbutton"
         )
-        import_stickers_checkbox.pack(anchor="w", padx=10, pady=5)
 
-        import_others_checkbox = ttk.Checkbutton(
+        self.import_others_checkbox = ttk.Checkbutton(
             self, text="Import Other Items", style="Switch.TCheckbutton"
         )
-        import_others_checkbox.pack(anchor="w", padx=10, pady=5)
 
-        import_button = ttk.Button(
-            self,
-            text="Import",
-            command=lambda: self._import_inventory(
-                import_cases_checkbox.instate(["selected"]),
-                import_sticker_capsules_checkbox.instate(["selected"]),
-                import_stickers_checkbox.instate(["selected"]),
-                import_others_checkbox.instate(["selected"]),
-            ),
+    def _configure_entries(self):
+        """Configure the entry fields for Steam username, password, and two-factor
+        code.
+        """
+        self.user_name_label = ttk.Label(self, text="Steam Username:")
+        self.user_name_entry = ttk.Entry(self)
+
+        self.password_label = ttk.Label(self, text="Steam Password:")
+        self.password_entry = ttk.Entry(self, show="*")
+
+        self.two_factor_label = ttk.Label(self, text="Steam Guard Code (if enabled):")
+        self.two_factor_entry = ttk.Entry(self)
+
+    def _import_inventory(self):
+        """
+        Call the node.js script to import the user's Steam inventory.
+
+        This will also install the necessary npm packages if they are not already
+        installed.
+        """
+        npm.call(["install", "steam-user"])
+        npm.call(["install", "globaloffensive"])
+
+        import_cases = self.import_cases_checkbox.instate(["selected"])
+        import_sticker_capsules = self.import_sticker_capsules_checkbox.instate(["selected"])
+        import_stickers = self.import_stickers_checkbox.instate(["selected"])
+        import_others = self.import_others_checkbox.instate(["selected"])
+
+        username = self.user_name_entry.get().strip()
+        password = self.password_entry.get().strip()
+        two_factor_code = self.two_factor_entry.get().strip()
+
+        node.call(
+            [
+                IMPORT_SCRIPT_PATH,
+                str(import_cases),
+                str(import_sticker_capsules),
+                str(import_stickers),
+                str(import_others),
+                username,
+                password,
+                two_factor_code,
+            ]
         )
-        import_button.pack(pady=10)
-
-    def _import_inventory(
-        self, import_cases, import_sticker_capsules, import_stickers, import_others
-    ):
-        pass
