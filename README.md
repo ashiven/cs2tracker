@@ -7,6 +7,7 @@
 [![GitHub Issues or Pull Requests](https://img.shields.io/github/issues-pr/ashiven/cs2tracker)](https://github.com/ashiven/cs2tracker/pulls)
 ![GitHub Repo stars](https://img.shields.io/github/stars/ashiven/cs2tracker)
 
+<img src="https://github.com/user-attachments/assets/9585afb2-bf1a-473c-be5d-cccbb3349b9a"/>
 </div>
 
 ## Table of Contents
