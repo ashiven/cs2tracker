@@ -272,6 +272,7 @@ class CustomItemFrame(ttk.Frame):
 
 
 class InventoryImportFrame(ttk.Frame):
+    # pylint: disable=too-many-instance-attributes
     def __init__(self, parent):
         """Initialize the inventory import frame that allows users to import their Steam
         inventory.
@@ -296,12 +297,11 @@ class InventoryImportFrame(ttk.Frame):
         self.two_factor_label.pack(pady=5)
         self.two_factor_entry.pack(fill="x", padx=10)
 
-        self.import_button = ttk.Button(
-            self, text="Import", command=lambda: self._import_inventory()
-        )
+        self.import_button = ttk.Button(self, text="Import", command=self._import_inventory)
         self.import_button.pack(pady=10)
 
     def _configure_checkboxes(self):
+        # pylint: disable=attribute-defined-outside-init
         """Configure the checkboxes for selecting what to import from the Steam
         inventory.
         """
@@ -325,6 +325,7 @@ class InventoryImportFrame(ttk.Frame):
         )
 
     def _configure_entries(self):
+        # pylint: disable=attribute-defined-outside-init
         """Configure the entry fields for Steam username, password, and two-factor
         code.
         """
