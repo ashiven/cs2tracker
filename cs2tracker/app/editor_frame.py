@@ -349,8 +349,9 @@ class InventoryImportFrame(ttk.Frame):
         This will also install the necessary npm packages if they are not already
         installed.
         """
-        npm.call(["install", "steam-user"])
-        npm.call(["install", "globaloffensive"])
+        # this is problematic because it takes a while and then the two factor code will expire
+        # it might be better to do this on application startup
+        npm.call(["install", "steam-user", "globaloffensive", "@node-steam/vdf", "axios"])
 
         import_cases = self.import_cases_checkbox.instate(["selected"])
         import_sticker_capsules = self.import_sticker_capsules_checkbox.instate(["selected"])
