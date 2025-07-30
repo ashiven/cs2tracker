@@ -1,3 +1,11 @@
+<p align="center">
+  <h2 align="center">CS2Tracker</h2>
+</p>
+
+<p align="center">
+  A simple, elegant GUI tool to track CS2 item investments
+</p>
+
 <div align="center">
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -11,7 +19,6 @@
 </div>
 
 ## Table of Contents
-- [About](#about)
 - [Features](#features)
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
@@ -21,10 +28,6 @@
 - [Advanced Features](#advanced-features)
 - [Contributing](#contributing)
 - [License](#license)
-
-## About
-
-**CS2Tracker** is a simple program that can be used to keep track of the steam market prices of your CS2 investment.
 
 ## Features
 
