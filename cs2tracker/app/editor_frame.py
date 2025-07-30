@@ -5,8 +5,8 @@ from tkinter import messagebox, ttk
 from cs2tracker.constants import CONFIG_FILE, CONFIG_FILE_BACKUP
 from cs2tracker.util import get_config
 
-NEW_CUSTOM_ITEM_TITLE = "Add Custom Item"
-NEW_CUSTOM_ITEM_SIZE = "500x200"
+ADD_CUSTOM_ITEM_TITLE = "Add Custom Item"
+ADD_CUSTOM_ITEM_SIZE = "500x200"
 
 config = get_config()
 
@@ -140,10 +140,13 @@ class ConfigEditorButtonFrame(ttk.Frame):
         reset_button = ttk.Button(self, text="Reset", command=self._reset_config)
         reset_button.pack(side="left", expand=True, padx=5)
 
-        custom_item_button = ttk.Button(
-            self, text="Add Custom Item", command=self._open_custom_item_dialog
-        )
+        custom_item_button = ttk.Button(self, text="Add Custom Item", command=self._add_custom_item)
         custom_item_button.pack(side="left", expand=True, padx=5)
+
+        import_inventory_button = ttk.Button(
+            self, text="Import Steam Inventory", command=self._import_steam_inventory
+        )
+        import_inventory_button.pack(side="left", expand=True, padx=5)
 
     def _reload_config_into_tree(self):
         """Reload the configuration options into the treeview for display and
@@ -195,6 +198,44 @@ class ConfigEditorButtonFrame(ttk.Frame):
             config.load()
             self._reload_config_into_tree()
 
+    def _add_custom_item(self):
+        """Open a dialog to enter custom item details."""
+        self.custom_item_dialog = tk.Toplevel(self.parent)
+        self.custom_item_dialog.title(ADD_CUSTOM_ITEM_TITLE)
+        self.custom_item_dialog.geometry(ADD_CUSTOM_ITEM_SIZE)
+
+        custom_item_frame = CustomItemFrame(self, self.tree)
+        custom_item_frame.pack(expand=True, fill="both")
+
+    def _import_steam_inventory(self):
+        pass
+
+
+class CustomItemFrame(ttk.Frame):
+    def __init__(self, parent, tree):
+        """Initialize the custom item frame that allows users to add custom items."""
+        super().__init__(parent, style="Card.TFrame", padding=15)
+        self.parent = parent
+        self.tree = tree
+        self._add_widgets()
+
+    def _add_widgets(self):
+        """Add widgets to the custom item frame for entering item details."""
+        ttk.Label(self, text="Item URL:").pack(pady=5)
+        item_url_entry = ttk.Entry(self)
+        item_url_entry.pack(fill="x", padx=10)
+
+        ttk.Label(self, text="Owned Count:").pack(pady=5)
+        item_owned_entry = ttk.Entry(self)
+        item_owned_entry.pack(fill="x", padx=10)
+
+        add_button = ttk.Button(
+            self,
+            text="Add",
+            command=lambda: self._add_custom_item(item_url_entry.get(), item_owned_entry.get()),
+        )
+        add_button.pack(pady=10)
+
     def _add_custom_item(self, item_url, item_owned):
         """Add a custom item to the configuration."""
         if not item_url or not item_owned:
@@ -221,27 +262,3 @@ class ConfigEditorButtonFrame(ttk.Frame):
                 "Config Error",
                 f"The configuration is invalid. ({config.last_error})",
             )
-
-    def _open_custom_item_dialog(self):
-        """Open a dialog to enter custom item details."""
-        self.custom_item_dialog = tk.Toplevel(self.parent)
-        self.custom_item_dialog.title(NEW_CUSTOM_ITEM_TITLE)
-        self.custom_item_dialog.geometry(NEW_CUSTOM_ITEM_SIZE)
-
-        dialog_frame = ttk.Frame(self.custom_item_dialog, padding=10)
-        dialog_frame.pack(expand=True, fill="both")
-
-        ttk.Label(dialog_frame, text="Item URL:").pack(pady=5)
-        item_url_entry = ttk.Entry(dialog_frame)
-        item_url_entry.pack(fill="x", padx=10)
-
-        ttk.Label(dialog_frame, text="Owned Count:").pack(pady=5)
-        item_owned_entry = ttk.Entry(dialog_frame)
-        item_owned_entry.pack(fill="x", padx=10)
-
-        add_button = ttk.Button(
-            dialog_frame,
-            text="Add",
-            command=lambda: self._add_custom_item(item_url_entry.get(), item_owned_entry.get()),
-        )
-        add_button.pack(pady=10)
