@@ -63,7 +63,7 @@ else:
         copy(CONFIG_FILE, CONFIG_FILE_BACKUP)
 
 
-IMPORT_SCRIPT_PATH = os.path.join(MODULE_DIR, "data", "get_inventory.js")
+INVENTORY_IMPORT_SCRIPT = os.path.join(MODULE_DIR, "data", "get_inventory.js")
 
 
 BANNER = """

@@ -4,7 +4,11 @@ from tkinter import messagebox, ttk
 
 from nodejs import node, npm
 
-from cs2tracker.constants import CONFIG_FILE, CONFIG_FILE_BACKUP, IMPORT_SCRIPT_PATH
+from cs2tracker.constants import (
+    CONFIG_FILE,
+    CONFIG_FILE_BACKUP,
+    INVENTORY_IMPORT_SCRIPT,
+)
 from cs2tracker.util import get_config
 
 ADD_CUSTOM_ITEM_TITLE = "Add Custom Item"
@@ -359,7 +363,7 @@ class InventoryImportFrame(ttk.Frame):
 
         node.call(
             [
-                IMPORT_SCRIPT_PATH,
+                INVENTORY_IMPORT_SCRIPT,
                 str(import_cases),
                 str(import_sticker_capsules),
                 str(import_stickers),
