@@ -85,14 +85,14 @@ class BackgroundTask:
             if return_code == 0:
                 console.print("[bold green][+] Background task enabled.")
             else:
-                console.print("[bold red][!] Failed to enable background task.")
+                console.error("Failed to enable background task.")
         else:
             cmd = ["schtasks", "/delete", "/tn", WIN_BACKGROUND_TASK_NAME, "/f"]
             return_code = call(cmd, stdout=DEVNULL, stderr=DEVNULL)
             if return_code == 0:
                 console.print("[bold green][-] Background task disabled.")
             else:
-                console.print("[bold red][!] Failed to disable background task.")
+                console.error("Failed to disable background task.")
 
     @classmethod
     def toggle(cls, enabled: bool):

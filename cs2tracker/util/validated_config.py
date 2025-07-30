@@ -81,7 +81,7 @@ class ValidatedConfig(ConfigParser):
             self._validate_config_values()
             self.valid = True
         except ValueError as error:
-            console.print(f"[bold red][!] Config error: {error}")
+            console.error(f"Config error: {error}")
             self.valid = False
             self.last_error = error
 

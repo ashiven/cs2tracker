@@ -53,9 +53,7 @@ class Scraper:
             that is displayed in the GUI with the latest scraper price calculation.
         """
         if not config.valid:
-            console.print(
-                "[bold red][!] Invalid configuration. Please fix the config file before running."
-            )
+            console.error("Invalid configuration. Please fix the config file before running.")
             return
 
         # Reset totals from the previous run
@@ -139,7 +137,7 @@ class Scraper:
             page = self.session.get(url)
 
         if not page.ok or not page.content:
-            console.print(f"[bold red][!] Failed to load page ({page.status_code}). Retrying...\n")
+            console.error(f"Failed to load page ({page.status_code}). Retrying...\n")
             raise RequestException(f"Failed to load page: {url}")
 
         return page
@@ -200,11 +198,9 @@ class Scraper:
                     update_sheet_callback([capsule_name, owned, price_usd, price_usd_owned])
                 capsule_usd_total += price_usd_owned
         except (RetryError, ValueError):
-            console.print(
-                "[bold red][!] Too many requests. (Consider using proxies to prevent rate limiting)\n"
-            )
+            console.error("Too many requests. (Consider using proxies to prevent rate limiting)\n")
         except Exception as error:
-            console.print(f"[bold red][!] An unexpected error occurred: {error}\n")
+            console.error(f"An unexpected error occurred: {error}\n")
 
         return capsule_usd_total
 
@@ -271,11 +267,11 @@ class Scraper:
                 if not config.getboolean("App Settings", "use_proxy", fallback=False):
                     time.sleep(1)
             except (RetryError, ValueError):
-                console.print(
-                    "[bold red][!] Too many requests. (Consider using proxies to prevent rate limiting)\n"
+                console.error(
+                    "Too many requests. (Consider using proxies to prevent rate limiting)\n"
                 )
             except Exception as error:
-                console.print(f"[bold red][!] An unexpected error occurred: {error}\n")
+                console.error(f"An unexpected error occurred: {error}\n")
 
         return case_usd_total
 
@@ -312,11 +308,11 @@ class Scraper:
                 if not config.getboolean("App Settings", "use_proxy", fallback=False):
                     time.sleep(1)
             except (RetryError, ValueError):
-                console.print(
-                    "[bold red][!] Too many requests. (Consider using proxies to prevent rate limiting)\n"
+                console.error(
+                    "Too many requests. (Consider using proxies to prevent rate limiting)\n"
                 )
             except Exception as error:
-                console.print(f"[bold red][!] An unexpected error occurred: {error}\n")
+                console.error(f"An unexpected error occurred: {error}\n")
 
         return custom_item_usd_total
 

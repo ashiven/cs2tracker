@@ -17,6 +17,11 @@ class PaddedConsole:
         """Print text with padding to the console."""
         self.console.print(Padding(text, self.padding))
 
+    def error(self, text):
+        """Print error text with padding to the console."""
+        text = "[bold red][!] " + text
+        self.print(text)
+
     def __getattr__(self, attr):
         """Ensure console methods can be called directly on PaddedConsole."""
         return getattr(self.console, attr)

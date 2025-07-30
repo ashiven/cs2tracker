@@ -22,21 +22,6 @@ class ConfigEditorFrame(ttk.Frame):
         self.parent = parent
         self._add_widgets()
 
-    def reload_config_into_tree(self):
-        """Reload the configuration options into the treeview for display and
-        editing.
-        """
-        for item in self.tree.get_children():
-            self.tree.delete(item)
-
-        for section in config.sections():
-            if section == "App Settings":
-                continue
-            section_level = self.tree.insert("", "end", iid=section, text=section)
-            for config_option, value in config.items(section):
-                title_option = config_option.replace("_", " ").title()
-                self.tree.insert(section_level, "end", text=title_option, values=[value])
-
     def _add_widgets(self):
         """Configure the main editor frame which displays the configuration options in a
         structured way.
@@ -48,8 +33,10 @@ class ConfigEditorFrame(ttk.Frame):
         button_frame.pack(side="bottom", padx=10, pady=(0, 10))
 
     def _set_cell_value(self, event):
-        """Set the value of a cell in the treeview to be editable when double-
-        clicked.
+        """
+        Set the value of a cell in the treeview to be editable when double- clicked.
+
+        Source: https://stackoverflow.com/questions/75787251/create-an-editable-tkinter-treeview-with-keyword-connection
         """
 
         def save_edit(event):
@@ -89,11 +76,8 @@ class ConfigEditorFrame(ttk.Frame):
             event.widget.destroy()
 
     def _make_tree_editable(self):
-        """
-        Add a binding to the treeview that allows double-clicking on a cell to edit its
-        value.
-
-        Source: https://stackoverflow.com/questions/75787251/create-an-editable-tkinter-treeview-with-keyword-connection
+        """Add a binding to the treeview that allows double-clicking on a cell to edit
+        its value.
         """
         self.tree.bind("<Double-1>", self._set_cell_value)
         self.parent.bind("<MouseWheel>", self._destroy_entries)  # type: ignore
@@ -161,6 +145,21 @@ class ConfigEditorButtonFrame(ttk.Frame):
         )
         custom_item_button.pack(side="left", expand=True, padx=5)
 
+    def _reload_config_into_tree(self):
+        """Reload the configuration options into the treeview for display and
+        editing.
+        """
+        for item in self.tree.get_children():
+            self.tree.delete(item)
+
+        for section in config.sections():
+            if section == "App Settings":
+                continue
+            section_level = self.tree.insert("", "end", iid=section, text=section)
+            for config_option, value in config.items(section):
+                title_option = config_option.replace("_", " ").title()
+                self.tree.insert(section_level, "end", text=title_option, values=[value])
+
     def _save_config(self):
         """Save the current configuration from the treeview to the config file."""
         for child in self.tree.get_children():
@@ -179,6 +178,8 @@ class ConfigEditorButtonFrame(ttk.Frame):
         if config.valid:
             messagebox.showinfo("Config Saved", "The configuration has been saved successfully.")
         else:
+            config.load()
+            self._reload_config_into_tree()
             messagebox.showerror(
                 "Config Error",
                 f"The configuration is invalid. ({config.last_error})",
@@ -192,7 +193,7 @@ class ConfigEditorButtonFrame(ttk.Frame):
         if confirm:
             copy(CONFIG_FILE_BACKUP, CONFIG_FILE)
             config.load()
-            self.parent.reload_config_into_tree()
+            self._reload_config_into_tree()
 
     def _add_custom_item(self, item_url, item_owned):
         """Add a custom item to the configuration."""

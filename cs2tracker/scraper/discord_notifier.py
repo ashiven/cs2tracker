@@ -81,6 +81,6 @@ class DiscordNotifier:
             response.raise_for_status()
             console.print("[bold steel_blue3][+] Discord notification sent.\n")
         except RequestException as error:
-            console.print(f"[bold red][!] Failed to send Discord notification: {error}\n")
+            console.error(f"Failed to send Discord notification: {error}\n")
         except Exception as error:
-            console.print(f"[bold red][!] An unexpected error occurred: {error}\n")
+            console.error(f"An unexpected error occurred: {error}\n")
