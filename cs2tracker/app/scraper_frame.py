@@ -23,12 +23,23 @@ class ScraperFrame(ttk.Frame):
         self._configure_sheet()
         self.sheet.pack()
 
+    def _readjust_sheet_size_with_window_size(self, event):
+        """Ensures that the sheet resizes with the window."""
+        if event.widget == self.parent:
+            width, height = event.width, event.height
+            if width != self.sheet_width or height != self.sheet_height:
+                self.sheet_width = width
+                self.sheet_height = height
+                self.sheet.height_and_width(height, width)
+                self.parent.update_idletasks()
+                self.parent.update()
+
     def _configure_sheet(self):
         """Configure the sheet widget with initial data and settings."""
         self.sheet = Sheet(  # pylint: disable=attribute-defined-outside-init
             self,
             data=[],
-            theme="light" if self.dark_theme else "dark",
+            theme="light" if self.dark_theme else "dark",  # This is on purpose to add contrast
             height=self.sheet_height,
             width=self.sheet_width,
             auto_resize_columns=150,
@@ -43,6 +54,8 @@ class ScraperFrame(ttk.Frame):
         self.sheet.align_rows([0], "c")
         self.sheet.align_columns([1, 2, 3], "c")
         self.sheet.popup_menu_add_command("Save Sheet", self._save_sheet)
+
+        self.parent.bind("<Configure>", self._readjust_sheet_size_with_window_size)
 
     def _save_sheet(self):
         """Export the current sheet data to a CSV file."""
