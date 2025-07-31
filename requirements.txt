@@ -9,3 +9,4 @@ urllib3==2.1.0
 sv_ttk==2.6.1
 tksheet==7.5.12
 nodejs-bin==18.4.0a4
+ttk-text=0.2.0

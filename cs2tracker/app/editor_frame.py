@@ -1,8 +1,12 @@
 import tkinter as tk
+from queue import Empty, Queue
 from shutil import copy
+from subprocess import PIPE
+from threading import Thread
 from tkinter import messagebox, ttk
 
 from nodejs import node, npm
+from ttk_text import ThemedText
 
 from cs2tracker.constants import (
     CONFIG_FILE,
@@ -16,6 +20,9 @@ ADD_CUSTOM_ITEM_SIZE = "500x220"
 
 IMPORT_INVENTORY_TITLE = "Import Steam Inventory"
 IMPORT_INVENTORY_SIZE = "500x420"
+
+IMPORT_INVENTORY_PROCESS_TITLE = "Importing Steam Inventory"
+IMPORT_INVENTORY_PROCESS_SIZE = "600x400"
 
 config = get_config()
 
@@ -349,7 +356,7 @@ class InventoryImportFrame(ttk.Frame):
         This will also install the necessary npm packages if they are not already
         installed.
         """
-        # this is problematic because it takes a while and then the two factor code will expire
+        # TODO: this is problematic because it takes a while and then the two factor code will expire
         # it might be better to do this on application startup
         npm.call(["install", "steam-user", "globaloffensive", "@node-steam/vdf", "axios"])
 
@@ -362,7 +369,7 @@ class InventoryImportFrame(ttk.Frame):
         password = self.password_entry.get().strip()
         two_factor_code = self.two_factor_entry.get().strip()
 
-        node.call(
+        self._display_node_subprocess(
             [
                 INVENTORY_IMPORT_SCRIPT,
                 str(import_cases),
@@ -374,3 +381,59 @@ class InventoryImportFrame(ttk.Frame):
                 two_factor_code,
             ]
         )
+
+    def _display_node_subprocess(self, node_cmd):
+        text_window = tk.Toplevel(self.parent)
+        text_window.title(IMPORT_INVENTORY_PROCESS_TITLE)
+        text_window.geometry(IMPORT_INVENTORY_PROCESS_SIZE)
+
+        process_frame = InventoryImportProcessFrame(text_window)
+        process_frame.pack(expand=True, fill="both", padx=15, pady=15)
+        process_frame.start(node_cmd)
+
+
+class InventoryImportProcessFrame(ttk.Frame):
+    # pylint: disable=attribute-defined-outside-init
+    # Source: https://stackoverflow.com/questions/27327886/issues-intercepting-subprocess-output-in-real-time
+    def __init__(self, parent):
+        """Initialize the frame that displays the output of the subprocess."""
+        super().__init__(parent)
+        self._add_widgets()
+
+    def _add_widgets(self):
+        """Add a text widget to display the output of the subprocess."""
+        self.console = ThemedText(self)
+        self.console.config(state="disabled")
+        self.console.pack()
+
+    def _read_lines(self, process, queue):
+        """Read lines from the subprocess output and put them in a queue."""
+        while process.poll() is None:
+            queue.put(process.stdout.readline())
+
+    def start(self, cmd):
+        """Start the NodeJS subprocess with the given command and read its output."""
+        self.process = node.Popen(
+            cmd,
+            stdout=PIPE,
+            stdin=PIPE,
+            stderr=PIPE,
+        )
+        self.queue = Queue()
+        self.thread = Thread(target=self._read_lines, args=(self.process, self.queue), daemon=True)
+        self.thread.start()
+
+        self.after(100, self._update_lines)
+
+    def _update_lines(self):
+        """Update the text widget with lines from the subprocess output."""
+        try:
+            line = self.queue.get(block=False)
+            self.console.config(state="normal")
+            self.console.insert("end", line)
+            self.console.config(state="disabled")
+        except Empty:
+            pass
+
+        if self.process.poll() is None:
+            self.after(100, self._update_lines)
