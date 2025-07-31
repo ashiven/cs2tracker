@@ -369,7 +369,7 @@ class InventoryImportFrame(ttk.Frame):
         password = self.password_entry.get().strip()
         two_factor_code = self.two_factor_entry.get().strip()
 
-        self._display_node_subprocess(
+        node.Popen(
             [
                 INVENTORY_IMPORT_SCRIPT,
                 str(import_cases),
