@@ -22,43 +22,56 @@ const twoFactorCode = args[6];
     twoFactorCode: twoFactorCode,
   });
 
+  user.on("error", (err) => {
+    console.error("Error: " + err);
+    user.logOff();
+    process.exit(1);
+  });
+
   user.on("loggedOn", (details, _parental) => {
-    console.log("Logged into Steam as " + details.accountName);
+    console.log("[+] Logged into Steam.. Starting CS2..");
     user.gamesPlayed([730]);
   });
 
-  user.on("error", (err) => {
-    console.error("Login Error: " + err);
-  });
-
   let cs2 = new CS2(user);
-  let nameConverter = new ItemNameConverter();
-  await nameConverter.initialize();
-
-  cs2.on("connectedToGC", () => {
-    console.log("Connected to CS2 Game Coordinator");
-    let storageUnitIds = getStorageUnitIds();
-    let firstUnitId = storageUnitIds[0];
-
-    cs2.getCasketContents(firstUnitId, (err, items) => {
-      if (err) {
-        console.error("Error retrieving storage unit contents: " + err);
-      } else {
-        console.log(`${items.length} items found in storage unit.`);
-        let convertedItems = nameConverter.convertInventory(items, false);
-        let filteredItems = filterItems(convertedItems);
-        let itemCounts = countItems(filteredItems);
-        console.log(itemCounts);
-      }
-    });
-    console.log("Logging off and quitting...");
-    //user.logOff();
-    //process.exit(0);
-  });
 
   cs2.on("error", (err) => {
     console.error("CS2 Error: " + err);
+    user.logOff();
+    process.exit(1);
   });
+
+  let nameConverter = new ItemNameConverter();
+  await nameConverter.initialize();
+
+  cs2.on("connectedToGC", async () => {
+    console.log("[+] Connected to CS2 Game Coordinator");
+    await processInventory();
+  });
+
+  async function processInventory() {
+    try {
+      const storageUnitIds = getStorageUnitIds();
+      for (const [unitIndex, unitId] of storageUnitIds.entries()) {
+        const items = await getCasketContentsAsync(cs2, unitId);
+        console.log(
+          `[+] ${items.length} items found in unit: ${unitIndex}/${storageUnitIds.length}`,
+        );
+
+        const convertedItems = nameConverter.convertInventory(items, false);
+        const filteredItems = filterItems(convertedItems);
+        const itemCounts = countItems(filteredItems);
+        console.log(itemCounts);
+      }
+      console.log("Processing complete.");
+    } catch (err) {
+      console.error("An error occurred during processing:", err);
+    } finally {
+      console.log("Logging off and quitting...");
+      user.logOff();
+      process.exit(0);
+    }
+  }
 
   function getStorageUnitIds() {
     let storageUnitIds = [];
@@ -68,6 +81,15 @@ const twoFactorCode = args[6];
       }
     }
     return storageUnitIds;
+  }
+
+  function getCasketContentsAsync(cs2, unitId) {
+    return new Promise((resolve, reject) => {
+      cs2.getCasketContents(unitId, (err, items) => {
+        if (err) return reject(err);
+        resolve(items);
+      });
+    });
   }
 
   function filterItems(items) {

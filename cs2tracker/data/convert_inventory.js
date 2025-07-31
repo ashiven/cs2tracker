@@ -156,7 +156,10 @@ class ItemNameConverter {
     if (def.item_name) {
       let translatedName =
         def.item_name.replace("#", "").toLowerCase() || def.item_name;
-      if (translatedName.includes("crate_sticker_pack")) {
+      if (
+        translatedName.includes("crate_sticker_pack") ||
+        translatedName.includes("crate_signature_pack")
+      ) {
         return "sticker capsule";
       } else if (translatedName.includes("crate_community")) {
         return "case";
