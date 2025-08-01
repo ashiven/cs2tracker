@@ -22,8 +22,10 @@ const twoFactorCode = args[7];
 const paddedLog = (...args) => {
   console.log(" [+] ", ...args);
 };
+
+const originalConsoleError = console.error;
 console.error = (...args) => {
-  originalConsole("    [!] " + args.join(" "));
+  originalConsoleError("    [!] " + args.join(" "));
 };
 
 (async () => {

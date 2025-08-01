@@ -104,24 +104,29 @@ class ValidatedConfig(ConfigParser):
 
         This file is generated after a user automatically imports their inventory.
         """
-        with open(INVENTORY_IMPORT_FILE, "r", encoding="utf-8") as inventory_file:
-            inventory_data = json.load(inventory_file)
+        try:
+            with open(INVENTORY_IMPORT_FILE, "r", encoding="utf-8") as inventory_file:
+                inventory_data = json.load(inventory_file)
 
-            added_to_config = set()
-            for item_name, item_owned in inventory_data.items():
-                config_item_name = item_name.replace(" ", "_").lower()
-                for section in self.sections():
-                    if config_item_name in self.options(section):
-                        self.set(section, config_item_name, str(item_owned))
-                        added_to_config.add(item_name)
+                added_to_config = set()
+                for item_name, item_owned in inventory_data.items():
+                    config_item_name = item_name.replace(" ", "_").lower()
+                    for section in self.sections():
+                        if config_item_name in self.options(section):
+                            self.set(section, config_item_name, str(item_owned))
+                            added_to_config.add(item_name)
 
-            for item_name, item_owned in inventory_data.items():
-                if item_name not in added_to_config:
-                    url_encoded_item_name = quote(item_name)
-                    listing_url = f"{STEAM_MARKET_LISTING_BASEURL_CS2}{url_encoded_item_name}"
-                    self.set("Custom Items", listing_url, str(item_owned))
+                for item_name, item_owned in inventory_data.items():
+                    if item_name not in added_to_config:
+                        url_encoded_item_name = quote(item_name)
+                        listing_url = f"{STEAM_MARKET_LISTING_BASEURL_CS2}{url_encoded_item_name}"
+                        self.set("Custom Items", listing_url, str(item_owned))
 
-        self.write_to_file()
+            self.write_to_file()
+        except (FileNotFoundError, json.JSONDecodeError) as error:
+            console.error(f"Error reading inventory file: {error}")
+            self.last_error = error
+            self.valid = False
 
     def toggle_use_proxy(self, enabled: bool):
         """
