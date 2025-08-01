@@ -9,8 +9,8 @@ const importCases = args[0] === "True" ? true : false;
 const importStickerCapsules = args[1] === "True" ? true : false;
 const importStickers = args[2] === "True" ? true : false;
 const importOthers = args[3] === "True" ? true : false;
-const userName = args[4] || "";
-const password = args[5] || "";
+const userName = args[4];
+const password = args[5];
 const twoFactorCode = args[6];
 
 (async () => {
@@ -28,7 +28,7 @@ const twoFactorCode = args[6];
     process.exit(1);
   });
 
-  user.on("loggedOn", (details, _parental) => {
+  user.on("loggedOn", (_details, _parental) => {
     console.log("[+] Logged into Steam.. Starting CS2..");
     user.gamesPlayed([730]);
   });
@@ -59,6 +59,8 @@ const twoFactorCode = args[6];
         );
 
         const convertedItems = nameConverter.convertInventory(items, false);
+
+        console.log("[+] Importing the following items:");
         const filteredItems = filterItems(convertedItems);
         const itemCounts = countItems(filteredItems);
         console.log(itemCounts);

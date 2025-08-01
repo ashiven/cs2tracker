@@ -88,7 +88,7 @@ class ItemNameConverter {
     }
 
     let stickerName = "";
-    if (item.stickers && item.stickers.length > 0) {
+    if (baseName === "Sticker" && item.stickers && item.stickers.length === 1) {
       stickerName = this.translate(
         this.stickerKits[String(item.stickers[0].sticker_id)].item_name,
       );
@@ -118,12 +118,14 @@ class ItemNameConverter {
       )) {
         switch (attributeValue.def_index) {
           case 80:
-            baseName = "StatTrak™ " + baseName;
+            baseName = baseName.includes("StatTrak™")
+              ? baseName
+              : "StatTrak™ " + baseName;
             break;
           case 140:
             baseName = baseName.includes("Souvenir")
               ? baseName
-              : "Souvenir" + baseName;
+              : "Souvenir " + baseName;
             break;
         }
       }
@@ -165,11 +167,9 @@ class ItemNameConverter {
         return "case";
       } else if (translatedName.includes("csgo_tool_spray")) {
         return "graffiti kit";
+      } else if (translatedName.includes("csgo_tool_sticker")) {
+        return "sticker";
       }
-    }
-
-    if (item.stickers && item.stickers.length == 1) {
-      return "sticker";
     }
 
     return "other";
