@@ -81,7 +81,7 @@ console.error = (...args) => {
           finalItemCounts[itemName] = (finalItemCounts[itemName] || 0) + count;
         }
         paddedLog(
-          `${filteredItems.length} items found in storage unit: ${unitIndex}/${storageUnitIds.length}`,
+          `${filteredItems.length} items found in storage unit: ${unitIndex + 1}/${storageUnitIds.length}`,
         );
         console.log(itemCounts);
       }

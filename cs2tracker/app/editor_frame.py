@@ -31,7 +31,6 @@ config = get_config()
 
 
 class ConfigEditorFrame(ttk.Frame):
-    # pylint: disable=attribute-defined-outside-init
     def __init__(self, parent):
         """Initialize the configuration editor frame that allows users to view and edit
         the configuration options.
@@ -39,7 +38,9 @@ class ConfigEditorFrame(ttk.Frame):
         super().__init__(parent, padding=15)
 
         self.parent = parent
+        self.edit_entry = None
         self._add_widgets()
+
         self.tree.focus_set()
 
     def _add_widgets(self):
