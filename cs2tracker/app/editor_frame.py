@@ -317,23 +317,33 @@ class InventoryImportFrame(ttk.Frame):
         """Configure the checkboxes for selecting what to import from the Steam
         inventory.
         """
+        self.import_cases_value = tk.BooleanVar(value=True)
         self.import_cases_checkbox = ttk.Checkbutton(
-            self, text="Import Cases", variable=tk.Variable(value=True), style="Switch.TCheckbutton"
+            self, text="Import Cases", variable=self.import_cases_value, style="Switch.TCheckbutton"
         )
 
+        self.import_sticker_capsules_value = tk.BooleanVar(value=True)
         self.import_sticker_capsules_checkbox = ttk.Checkbutton(
             self,
             text="Import Sticker Capsules",
-            variable=tk.Variable(value=True),
+            variable=self.import_sticker_capsules_value,
             style="Switch.TCheckbutton",
         )
 
+        self.import_stickers_value = tk.BooleanVar(value=True)
         self.import_stickers_checkbox = ttk.Checkbutton(
-            self, text="Import Stickers", style="Switch.TCheckbutton"
+            self,
+            text="Import Stickers",
+            variable=self.import_stickers_value,
+            style="Switch.TCheckbutton",
         )
 
+        self.import_others_value = tk.BooleanVar(value=True)
         self.import_others_checkbox = ttk.Checkbutton(
-            self, text="Import Other Items", style="Switch.TCheckbutton"
+            self,
+            text="Import Other Items",
+            variable=self.import_others_value,
+            style="Switch.TCheckbutton",
         )
 
     def _configure_entries(self):
@@ -357,10 +367,10 @@ class InventoryImportFrame(ttk.Frame):
         This will also install the necessary npm packages if they are not already
         installed.
         """
-        import_cases = self.import_cases_checkbox.instate(["selected"])
-        import_sticker_capsules = self.import_sticker_capsules_checkbox.instate(["selected"])
-        import_stickers = self.import_stickers_checkbox.instate(["selected"])
-        import_others = self.import_others_checkbox.instate(["selected"])
+        import_cases = self.import_cases_value.get()
+        import_sticker_capsules = self.import_sticker_capsules_value.get()
+        import_stickers = self.import_stickers_value.get()
+        import_others = self.import_others_value.get()
 
         username = self.user_name_entry.get().strip()
         password = self.password_entry.get().strip()
