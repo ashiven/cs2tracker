@@ -330,7 +330,7 @@ class InventoryImportFrame(ttk.Frame):
             style="Switch.TCheckbutton",
         )
 
-        self.import_stickers_value = tk.BooleanVar(value=True)
+        self.import_stickers_value = tk.BooleanVar(value=False)
         self.import_stickers_checkbox = ttk.Checkbutton(
             self,
             text="Import Stickers",
@@ -338,7 +338,7 @@ class InventoryImportFrame(ttk.Frame):
             style="Switch.TCheckbutton",
         )
 
-        self.import_others_value = tk.BooleanVar(value=True)
+        self.import_others_value = tk.BooleanVar(value=False)
         self.import_others_checkbox = ttk.Checkbutton(
             self,
             text="Import Other Items",
