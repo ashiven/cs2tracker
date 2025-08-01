@@ -39,6 +39,7 @@ if RUNNING_IN_EXE:
     CONFIG_FILE_BACKUP = os.path.join(DATA_DIR, "config.ini.bak")
     OUTPUT_FILE = os.path.join(DATA_DIR, "output.csv")
     BATCH_FILE = os.path.join(DATA_DIR, "cs2tracker_scraper.bat")
+    INVENTORY_IMPORT_FILE = os.path.join(DATA_DIR, "inventory.json")
 
     # Always copy the source config into the user data directory as a backup
     # and overwrite the existing backup if it exists
@@ -58,6 +59,7 @@ else:
     CONFIG_FILE_BACKUP = os.path.join(MODULE_DIR, "data", "config.ini.bak")
     OUTPUT_FILE = os.path.join(MODULE_DIR, "data", "output.csv")
     BATCH_FILE = os.path.join(MODULE_DIR, "data", "cs2tracker_scraper.bat")
+    INVENTORY_IMPORT_FILE = os.path.join(MODULE_DIR, "data", "inventory.json")
 
     if not os.path.exists(CONFIG_FILE_BACKUP):
         copy(CONFIG_FILE, CONFIG_FILE_BACKUP)

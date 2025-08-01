@@ -2,7 +2,6 @@ const SteamUser = require("steam-user");
 const CS2 = require("globaloffensive");
 const { argv } = require("process");
 const fs = require("fs");
-const path = require("path");
 
 const ItemNameConverter = require("./convert_inventory.js");
 
@@ -11,13 +10,14 @@ process.stdout.setEncoding("utf-8");
 process.stderr.setEncoding("utf-8");
 
 args = argv.slice(2);
-const importCases = args[0] === "True" ? true : false;
-const importStickerCapsules = args[1] === "True" ? true : false;
-const importStickers = args[2] === "True" ? true : false;
-const importOthers = args[3] === "True" ? true : false;
-const userName = args[4];
-const password = args[5];
-const twoFactorCode = args[6];
+const processedInventoryPath = args[0];
+const importCases = args[1] === "True" ? true : false;
+const importStickerCapsules = args[2] === "True" ? true : false;
+const importStickers = args[3] === "True" ? true : false;
+const importOthers = args[4] === "True" ? true : false;
+const userName = args[5];
+const password = args[6];
+const twoFactorCode = args[7];
 
 const paddedLog = (...args) => {
   console.log(" [+] ", ...args);
@@ -25,8 +25,6 @@ const paddedLog = (...args) => {
 console.error = (...args) => {
   originalConsole("    [!] " + args.join(" "));
 };
-
-const processedInventoryPath = path.join(__dirname, "inventory.json");
 
 (async () => {
   let user = new SteamUser();
@@ -91,6 +89,7 @@ const processedInventoryPath = path.join(__dirname, "inventory.json");
         JSON.stringify(finalItemCounts, null, 2),
       );
       paddedLog("Processing complete.");
+      paddedLog("You may close this window now.");
     } catch (err) {
       console.error("An error occurred during processing:", err);
     } finally {

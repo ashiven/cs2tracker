@@ -19,6 +19,7 @@
 </div>
 
 ## Table of Contents
+
 - [Features](#features)
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
@@ -31,6 +32,7 @@
 
 ## Features
 
+- ⚡ Rapidly import your Storage Units
 - 🔍 Track CS2 Steam Market prices
 - 📈 View investment price history
 - 🧾 Export/Import price data
@@ -77,10 +79,11 @@
 ## Configuration
 
 You can configure the app settings via the **Edit Config** option.
-This will open the config editor where you can change any setting by simply double clicking on it. The config editor allows you to:
+This will open the config editor where you can change any setting by simply double clicking on it. On top of that, the config editor allows you to:
 
-- Specify the number of items you own
-- Add custom items
+- Automatically import items from your Storage Units
+- Manually Specify the number of items you own
+- Add custom items that are not listed in the config
 - Enter Discord webhook and Crawlbase proxy API keys
 
 ## Advanced Features

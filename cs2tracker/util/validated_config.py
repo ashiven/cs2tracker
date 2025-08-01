@@ -1,9 +1,12 @@
+import json
 import re
 from configparser import ConfigParser
+from urllib.parse import quote
 
-from cs2tracker.constants import CAPSULE_INFO, CONFIG_FILE
+from cs2tracker.constants import CAPSULE_INFO, CONFIG_FILE, INVENTORY_IMPORT_FILE
 from cs2tracker.util.padded_console import get_console
 
+STEAM_MARKET_LISTING_BASEURL_CS2 = "https://steamcommunity.com/market/listings/730/"
 STEAM_MARKET_LISTING_REGEX = r"^https://steamcommunity.com/market/listings/\d+/.+$"
 
 console = get_console()
@@ -18,6 +21,12 @@ class ValidatedConfig(ConfigParser):
         self.valid = False
         self.last_error = None
         self.load()
+
+        # remove after debugging
+        self.read_from_inventory_file()
+        for section in self.sections():
+            for option in self.options(section):
+                console.print(option.replace("_", " ").title())
 
     def load(self):
         """Load the configuration file and validate it."""
@@ -92,6 +101,31 @@ class ValidatedConfig(ConfigParser):
         if self.valid:
             with open(CONFIG_FILE, "w", encoding="utf-8") as config_file:
                 self.write(config_file)
+
+    def read_from_inventory_file(self):
+        """
+        Read an inventory file into the configuration.
+
+        This file is generated after a user automatically imports their inventory.
+        """
+        with open(INVENTORY_IMPORT_FILE, "r", encoding="utf-8") as inventory_file:
+            inventory_data = json.load(inventory_file)
+
+            added_to_config = set()
+            for item_name, item_owned in inventory_data.items():
+                config_item_name = item_name.replace(" ", "_").lower()
+                for section in self.sections():
+                    if config_item_name in self.options(section):
+                        self.set(section, config_item_name, str(item_owned))
+                        added_to_config.add(item_name)
+
+            for item_name, item_owned in inventory_data.items():
+                if item_name not in added_to_config:
+                    url_encoded_item_name = quote(item_name)
+                    listing_url = f"{STEAM_MARKET_LISTING_BASEURL_CS2}{url_encoded_item_name}"
+                    self.set("Custom Items", listing_url, str(item_owned))
+
+        self.write_to_file()
 
     def toggle_use_proxy(self, enabled: bool):
         """

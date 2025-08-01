@@ -11,6 +11,7 @@ from ttk_text import ThemedText
 from cs2tracker.constants import (
     CONFIG_FILE,
     CONFIG_FILE_BACKUP,
+    INVENTORY_IMPORT_FILE,
     INVENTORY_IMPORT_SCRIPT,
 )
 from cs2tracker.util import get_config
@@ -369,6 +370,7 @@ class InventoryImportFrame(ttk.Frame):
         self._display_node_subprocess(
             [
                 INVENTORY_IMPORT_SCRIPT,
+                INVENTORY_IMPORT_FILE,
                 str(import_cases),
                 str(import_sticker_capsules),
                 str(import_stickers),
@@ -453,6 +455,9 @@ class InventoryImportProcessFrame(ttk.Frame):
             self._cleanup()
 
     def _cleanup(self):
-        """Clean up the process and thread after completion."""
+        """Clean up the process and thread after completion and trigger a config update
+        from the newly written inventory file.
+        """
+        config.read_from_inventory_file()
         self.process.wait()
         self.thread.join()
