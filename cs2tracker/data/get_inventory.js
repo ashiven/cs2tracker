@@ -1,6 +1,8 @@
 const SteamUser = require("steam-user");
 const CS2 = require("globaloffensive");
 const { argv } = require("process");
+const fs = require("fs");
+const path = require("path");
 
 const ItemNameConverter = require("./convert_inventory.js");
 
@@ -24,8 +26,12 @@ console.error = (...args) => {
   originalConsole("    [!] " + args.join(" "));
 };
 
+const processedInventoryPath = path.join(__dirname, "inventory.json");
+
 (async () => {
   let user = new SteamUser();
+
+  paddedLog("Logging into Steam...");
 
   user.logOn({
     accountName: userName,
@@ -40,11 +46,13 @@ console.error = (...args) => {
   });
 
   user.on("loggedOn", (_details, _parental) => {
-    paddedLog("Logged into Steam.. Starting CS2..");
+    paddedLog("Logged into Steam.");
     user.gamesPlayed([730]);
   });
 
   let cs2 = new CS2(user);
+
+  paddedLog("Connecting to CS2 Game Coordinator...");
 
   cs2.on("error", (err) => {
     console.error("CS2 Error: " + err);
@@ -56,11 +64,12 @@ console.error = (...args) => {
   await nameConverter.initialize();
 
   cs2.on("connectedToGC", async () => {
-    paddedLog("Connected to CS2 Game Coordinator");
+    paddedLog("Connected to CS2 Game Coordinator.");
     await processInventory();
   });
 
   async function processInventory() {
+    let finalItemCounts = {};
     try {
       const storageUnitIds = getStorageUnitIds();
       for (const [unitIndex, unitId] of storageUnitIds.entries()) {
@@ -68,11 +77,19 @@ console.error = (...args) => {
         const convertedItems = nameConverter.convertInventory(items, false);
         const filteredItems = filterItems(convertedItems);
         const itemCounts = countItems(filteredItems);
+        for (const [itemName, count] of Object.entries(itemCounts)) {
+          finalItemCounts[itemName] = (finalItemCounts[itemName] || 0) + count;
+        }
         paddedLog(
           `${filteredItems.length} items found in storage unit: ${unitIndex}/${storageUnitIds.length}`,
         );
         console.log(itemCounts);
       }
+      paddedLog("Saving config...");
+      fs.writeFileSync(
+        processedInventoryPath,
+        JSON.stringify(finalItemCounts, null, 2),
+      );
       paddedLog("Processing complete.");
     } catch (err) {
       console.error("An error occurred during processing:", err);

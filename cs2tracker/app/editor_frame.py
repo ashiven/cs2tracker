@@ -21,8 +21,8 @@ ADD_CUSTOM_ITEM_SIZE = "500x220"
 IMPORT_INVENTORY_TITLE = "Import Steam Inventory"
 IMPORT_INVENTORY_SIZE = "500x450"
 
-IMPORT_INVENTORY_PROCESS_TITLE = "Importing Steam Inventory"
-IMPORT_INVENTORY_PROCESS_SIZE = "600x400"
+IMPORT_INVENTORY_PROCESS_TITLE = "Importing Steam Inventory..."
+IMPORT_INVENTORY_PROCESS_SIZE = "700x500"
 
 config = get_config()
 
@@ -408,7 +408,7 @@ class InventoryImportProcessFrame(ttk.Frame):
 
         self.console = ThemedText(self, wrap="word", yscrollcommand=self.scrollbar.set)
         self.console.config(state="disabled")
-        self.console.pack()
+        self.console.pack(expand=True, fill="both", padx=10, pady=10)
 
         self.scrollbar.config(command=self.console.yview)
 
