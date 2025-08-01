@@ -9,7 +9,7 @@ process.stdin.setEncoding("utf-8");
 process.stdout.setEncoding("utf-8");
 process.stderr.setEncoding("utf-8");
 
-args = argv.slice(2);
+const args = argv.slice(2);
 const processedInventoryPath = args[0];
 const importCases = args[1] === "True" ? true : false;
 const importStickerCapsules = args[2] === "True" ? true : false;
