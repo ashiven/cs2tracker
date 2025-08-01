@@ -12,6 +12,7 @@ from ttk_text import ThemedText
 from cs2tracker.constants import (
     CONFIG_FILE,
     CONFIG_FILE_BACKUP,
+    DATA_DIR,
     INVENTORY_IMPORT_FILE,
     INVENTORY_IMPORT_SCRIPT,
 )
@@ -30,6 +31,7 @@ config = get_config()
 
 
 class ConfigEditorFrame(ttk.Frame):
+    # pylint: disable=attribute-defined-outside-init
     def __init__(self, parent):
         """Initialize the configuration editor frame that allows users to view and edit
         the configuration options.
@@ -38,6 +40,8 @@ class ConfigEditorFrame(ttk.Frame):
 
         self.parent = parent
         self._add_widgets()
+
+        self.edit_active = False
 
     def _add_widgets(self):
         """Configure the main editor frame which displays the configuration options in a
@@ -59,6 +63,7 @@ class ConfigEditorFrame(ttk.Frame):
         def save_edit(event):
             self.tree.set(row, column=column, value=event.widget.get())
             event.widget.destroy()
+            self.tree.focus_set()
 
         try:
             row = self.tree.identify_row(event.y)
@@ -66,39 +71,35 @@ class ConfigEditorFrame(ttk.Frame):
             item_text = self.tree.set(row, column)
             if item_text.strip() == "":
                 left_item_text = self.tree.item(row, "text")
-                # Don't allow editing of section headers
                 if any(left_item_text == section for section in config.sections()):
                     return
             x, y, w, h = self.tree.bbox(row, column)
-            entryedit = ttk.Entry(self)
-            entryedit.place(x=x, y=y, width=w, height=h + 3)  # type: ignore
-            entryedit.insert("end", item_text)
-            entryedit.bind("<Return>", save_edit)
-            entryedit.focus_set()
-            entryedit.grab_set()
+            self.edit_entry = ttk.Entry(self, justify="center", font=("Helvetica", 11))
+            self.edit_entry.place(x=x, y=y, width=w, height=h + 3)  # type: ignore
+            self.edit_entry.insert("end", item_text)
+            self.edit_entry.bind("<Return>", save_edit)
+            self.edit_entry.focus_set()
+            self.edit_entry.grab_set()
         except Exception:
-            pass
+            return
 
-    def _destroy_entries(self, _):
+    def _destroy_entry(self, _):
         """Destroy any entry widgets in the treeview on an event, such as a mouse wheel
         movement.
         """
-        for widget in self.winfo_children():
-            if isinstance(widget, ttk.Entry):
-                widget.destroy()
-
-    def _destroy_entry(self, event):
-        """Destroy the entry widget on an even targeting it."""
-        if isinstance(event.widget, ttk.Entry):
-            event.widget.destroy()
+        if self.edit_entry:
+            self.edit_entry.destroy()
+            self.edit_entry = None
+            self.tree.focus_set()
 
     def _make_tree_editable(self):
         """Add a binding to the treeview that allows double-clicking on a cell to edit
         its value.
         """
         self.tree.bind("<Double-1>", self._set_cell_value)
-        self.parent.bind("<MouseWheel>", self._destroy_entries)  # type: ignore
-        self.parent.bind("<Button-1>", self._destroy_entry)  # type: ignore
+        self.tree.bind("<Return>", self._set_cell_value)
+        self.parent.bind("<MouseWheel>", self._destroy_entry)  # type: ignore
+        self.parent.bind("<Escape>", self._destroy_entry)  # type: ignore
 
     def _load_config_into_tree(self):
         """Load the configuration options into the treeview for display and editing."""
@@ -438,8 +439,9 @@ class InventoryImportProcessFrame(ttk.Frame):
             stdin=PIPE,
             stderr=STDOUT,
             text=True,
-            bufsize=1,
             encoding="utf-8",
+            shell=True,
+            cwd=DATA_DIR,
         )
         self.queue = Queue()
         self.thread = Thread(target=self._read_lines, args=(self.process, self.queue), daemon=True)

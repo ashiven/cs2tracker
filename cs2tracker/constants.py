@@ -27,16 +27,15 @@ if RUNNING_IN_EXE:
     MEIPASS_DIR = sys._MEIPASS  # type: ignore  pylint: disable=protected-access
     MODULE_DIR = MEIPASS_DIR
     PROJECT_DIR = MEIPASS_DIR
-    ICON_FILE = os.path.join(PROJECT_DIR, "assets", "icon.png")
-    CONFIG_FILE_SOURCE = os.path.join(MODULE_DIR, "data", "config.ini")
-    OUTPUT_FILE_SOURCE = os.path.join(MODULE_DIR, "data", "output.csv")
-
     APP_DATA_DIR = os.path.join(os.path.expanduser("~"), "AppData", "Local")
     DATA_DIR = os.path.join(APP_DATA_DIR, "cs2tracker", "data")
     os.makedirs(DATA_DIR, exist_ok=True)
 
+    ICON_FILE = os.path.join(PROJECT_DIR, "assets", "icon.png")
+    CONFIG_FILE_SOURCE = os.path.join(MODULE_DIR, "data", "config.ini")
     CONFIG_FILE = os.path.join(DATA_DIR, "config.ini")
     CONFIG_FILE_BACKUP = os.path.join(DATA_DIR, "config.ini.bak")
+    OUTPUT_FILE_SOURCE = os.path.join(MODULE_DIR, "data", "output.csv")
     OUTPUT_FILE = os.path.join(DATA_DIR, "output.csv")
     BATCH_FILE = os.path.join(DATA_DIR, "cs2tracker_scraper.bat")
     INVENTORY_IMPORT_FILE = os.path.join(DATA_DIR, "inventory.json")
@@ -54,12 +53,14 @@ if RUNNING_IN_EXE:
 else:
     MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
     PROJECT_DIR = os.path.dirname(MODULE_DIR)
+    DATA_DIR = os.path.join(MODULE_DIR, "data")
+
     ICON_FILE = os.path.join(PROJECT_DIR, "assets", "icon.png")
-    CONFIG_FILE = os.path.join(MODULE_DIR, "data", "config.ini")
-    CONFIG_FILE_BACKUP = os.path.join(MODULE_DIR, "data", "config.ini.bak")
-    OUTPUT_FILE = os.path.join(MODULE_DIR, "data", "output.csv")
-    BATCH_FILE = os.path.join(MODULE_DIR, "data", "cs2tracker_scraper.bat")
-    INVENTORY_IMPORT_FILE = os.path.join(MODULE_DIR, "data", "inventory.json")
+    CONFIG_FILE = os.path.join(DATA_DIR, "config.ini")
+    CONFIG_FILE_BACKUP = os.path.join(DATA_DIR, "config.ini.bak")
+    OUTPUT_FILE = os.path.join(DATA_DIR, "output.csv")
+    BATCH_FILE = os.path.join(DATA_DIR, "cs2tracker_scraper.bat")
+    INVENTORY_IMPORT_FILE = os.path.join(DATA_DIR, "inventory.json")
 
     if not os.path.exists(CONFIG_FILE_BACKUP):
         copy(CONFIG_FILE, CONFIG_FILE_BACKUP)

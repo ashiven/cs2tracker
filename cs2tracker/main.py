@@ -8,6 +8,7 @@ from cs2tracker.app import Application
 from cs2tracker.constants import (
     AUTHOR_STRING,
     BANNER,
+    DATA_DIR,
     INVENTORY_IMPORT_SCRIPT_DEPENDENCIES,
     OS,
     OSType,
@@ -40,9 +41,12 @@ def main():
     else:
         # Ensures that the necessary node modules are installed if a user wants
         # to import their steam inventory via the cs2tracker/data/get_inventory.js Node.js script.
-        # This can be done in a daemon thread on application startup because it is not a very costly operation.
         npm.Popen(
-            ["install"] + INVENTORY_IMPORT_SCRIPT_DEPENDENCIES, stdout=DEVNULL, stderr=DEVNULL
+            ["install"] + INVENTORY_IMPORT_SCRIPT_DEPENDENCIES,
+            stdout=DEVNULL,
+            stderr=DEVNULL,
+            shell=True,
+            cwd=DATA_DIR,
         )
 
         application = Application()
