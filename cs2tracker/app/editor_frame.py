@@ -206,12 +206,14 @@ class ConfigEditorButtonFrame(ttk.Frame):
         if config.valid:
             messagebox.showinfo("Config Saved", "The configuration has been saved successfully.")
         else:
-            config.load()
+            config.load_from_file()
             self.parent.reload_config_into_tree()
             messagebox.showerror(
                 "Config Error",
                 f"The configuration is invalid. ({config.last_error})",
             )
+        self.parent.focus_set()
+        self.parent.tree.focus_set()
 
     def _reset_config(self):
         """Reset the configuration file to its default state."""
@@ -220,14 +222,17 @@ class ConfigEditorButtonFrame(ttk.Frame):
         )
         if confirm:
             copy(CONFIG_FILE_BACKUP, CONFIG_FILE)
-            config.load()
+            config.load_from_file()
             self.parent.reload_config_into_tree()
+        self.parent.focus_set()
+        self.parent.tree.focus_set()
 
     def _add_custom_item(self):
         """Open a window to add a new custom item."""
         custom_item_window = tk.Toplevel(self.parent)
         custom_item_window.title(ADD_CUSTOM_ITEM_TITLE)
         custom_item_window.geometry(ADD_CUSTOM_ITEM_SIZE)
+        custom_item_window.focus_set()
 
         custom_item_frame = CustomItemFrame(custom_item_window, self.parent, self.tree)
         custom_item_frame.pack(expand=True, fill="both", padx=15, pady=15)
@@ -237,6 +242,7 @@ class ConfigEditorButtonFrame(ttk.Frame):
         steam_inventory_window = tk.Toplevel(self.parent)
         steam_inventory_window.title(IMPORT_INVENTORY_TITLE)
         steam_inventory_window.geometry(IMPORT_INVENTORY_SIZE)
+        steam_inventory_window.focus_set()
 
         steam_inventory_frame = InventoryImportFrame(steam_inventory_window, self)
         steam_inventory_frame.pack(expand=True, fill="both", padx=15, pady=15)
@@ -267,15 +273,18 @@ class CustomItemFrame(ttk.Frame):
             command=lambda: self._add_custom_item(item_url_entry.get(), item_owned_entry.get()),
         )
         add_button.pack(pady=10)
+        self.parent.bind("<Return>", lambda _: add_button.invoke())
 
     def _add_custom_item(self, item_url, item_owned):
         """Add a custom item to the configuration."""
+        self.parent.destroy()
+
         if not item_url or not item_owned:
             messagebox.showerror("Input Error", "All fields must be filled out.")
             return
         try:
             if int(item_owned) < 0:
-                raise ValueError("Owned count must be a non-negative integer.")
+                raise ValueError("Owned count must be a non-negative number.")
         except ValueError as error:
             messagebox.showerror("Input Error", f"Invalid owned count: {error}")
             return
@@ -283,9 +292,8 @@ class CustomItemFrame(ttk.Frame):
         config.set("Custom Items", item_url, item_owned)
         config.write_to_file()
         if config.valid:
-            config.load()
+            config.load_from_file()
             self.grandparent.reload_config_into_tree()
-            self.parent.destroy()
         else:
             config.remove_option("Custom Items", item_url)
             messagebox.showerror(
@@ -323,6 +331,7 @@ class InventoryImportFrame(ttk.Frame):
 
         self.import_button = ttk.Button(self, text="Import", command=self._import_inventory)
         self.import_button.pack(pady=10)
+        self.parent.bind("<Return>", lambda _: self.import_button.invoke())
 
     def _configure_checkboxes(self):
         # pylint: disable=attribute-defined-outside-init

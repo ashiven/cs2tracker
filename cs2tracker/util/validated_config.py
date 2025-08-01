@@ -20,9 +20,9 @@ class ValidatedConfig(ConfigParser):
 
         self.valid = False
         self.last_error = None
-        self.load()
+        self.load_from_file()
 
-    def load(self):
+    def load_from_file(self):
         """Load the configuration file and validate it."""
         self.clear()
         self.read(CONFIG_FILE)
