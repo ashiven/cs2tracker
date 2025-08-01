@@ -49,14 +49,14 @@ jobs:
 
       - name: Build executable
         run: |
-          pyinstaller --noconfirm --onefile --windowed --name "cs2tracker" --icon ${{ env.ICON }} \
-            --add-data ${{ env.CONFIG_DATA }} \
-            --add-data ${{ env.OUTPUT_DATA }} \
-            --add-data ${{ env.ICON_DATA }} \
-            --add-data ${{ env.GET_INV_DATA }} \
-            --add-data ${{ env.CONVERT_INV_DATA }} \
-            --add-data ${{ env.CURRENCY_DATA }} \
-            --add-data ${{ env.NODE_BIN_DATA }} \
+          pyinstaller --noconfirm --onefile --windowed --name "cs2tracker" --icon ${{ env.ICON }} `
+            --add-data ${{ env.CONFIG_DATA }} `
+            --add-data ${{ env.OUTPUT_DATA }} `
+            --add-data ${{ env.ICON_DATA }} `
+            --add-data ${{ env.GET_INV_DATA }} `
+            --add-data ${{ env.CONVERT_INV_DATA }} `
+            --add-data ${{ env.CURRENCY_DATA }} `
+            --add-data ${{ env.NODE_BIN_DATA }} `
             ${{ env.MAIN_FILE }}
 
       - name: List files in dist folder
