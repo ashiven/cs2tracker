@@ -374,13 +374,13 @@ class InventoryImportFrame(ttk.Frame):
         code.
         """
         self.user_name_label = ttk.Label(self, text="Steam Username:")
-        self.user_name_entry = ttk.Entry(self)
+        self.user_name_entry = ttk.Entry(self, justify="center", font=("Helvetica", 11))
 
         self.password_label = ttk.Label(self, text="Steam Password:")
-        self.password_entry = ttk.Entry(self, show="*")
+        self.password_entry = ttk.Entry(self, show="*", justify="center", font=("Helvetica", 11))
 
         self.two_factor_label = ttk.Label(self, text="Steam Guard Code (if enabled):")
-        self.two_factor_entry = ttk.Entry(self)
+        self.two_factor_entry = ttk.Entry(self, justify="center", font=("Helvetica", 11))
 
     def _import_inventory(self):
         """

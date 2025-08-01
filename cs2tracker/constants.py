@@ -31,14 +31,11 @@ if RUNNING_IN_EXE:
     DATA_DIR = os.path.join(APP_DATA_DIR, "cs2tracker", "data")
     os.makedirs(DATA_DIR, exist_ok=True)
 
-    ICON_FILE = os.path.join(PROJECT_DIR, "assets", "icon.png")
     CONFIG_FILE_SOURCE = os.path.join(MODULE_DIR, "data", "config.ini")
     CONFIG_FILE = os.path.join(DATA_DIR, "config.ini")
     CONFIG_FILE_BACKUP = os.path.join(DATA_DIR, "config.ini.bak")
     OUTPUT_FILE_SOURCE = os.path.join(MODULE_DIR, "data", "output.csv")
     OUTPUT_FILE = os.path.join(DATA_DIR, "output.csv")
-    BATCH_FILE = os.path.join(DATA_DIR, "cs2tracker_scraper.bat")
-    INVENTORY_IMPORT_FILE = os.path.join(DATA_DIR, "inventory.json")
 
     # Always copy the source config into the user data directory as a backup
     # and overwrite the existing backup if it exists
@@ -55,18 +52,20 @@ else:
     PROJECT_DIR = os.path.dirname(MODULE_DIR)
     DATA_DIR = os.path.join(MODULE_DIR, "data")
 
-    ICON_FILE = os.path.join(PROJECT_DIR, "assets", "icon.png")
     CONFIG_FILE = os.path.join(DATA_DIR, "config.ini")
     CONFIG_FILE_BACKUP = os.path.join(DATA_DIR, "config.ini.bak")
     OUTPUT_FILE = os.path.join(DATA_DIR, "output.csv")
-    BATCH_FILE = os.path.join(DATA_DIR, "cs2tracker_scraper.bat")
-    INVENTORY_IMPORT_FILE = os.path.join(DATA_DIR, "inventory.json")
 
     if not os.path.exists(CONFIG_FILE_BACKUP):
         copy(CONFIG_FILE, CONFIG_FILE_BACKUP)
 
 
-INVENTORY_IMPORT_SCRIPT = os.path.join(MODULE_DIR, "data", "get_inventory.js")
+ICON_FILE = os.path.join(PROJECT_DIR, "assets", "icon.png")
+BATCH_FILE = os.path.join(DATA_DIR, "cs2tracker_scraper.bat")
+
+
+INVENTORY_IMPORT_FILE = os.path.join(DATA_DIR, "inventory.json")
+INVENTORY_IMPORT_SCRIPT = os.path.join(DATA_DIR, "get_inventory.js")
 INVENTORY_IMPORT_SCRIPT_DEPENDENCIES = [
     "steam-user",
     "globaloffensive",

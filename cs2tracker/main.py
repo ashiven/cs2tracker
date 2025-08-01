@@ -42,7 +42,7 @@ def main():
         # Ensures that the necessary node modules are installed if a user wants
         # to import their steam inventory via the cs2tracker/data/get_inventory.js Node.js script.
         npm.Popen(
-            ["install"] + INVENTORY_IMPORT_SCRIPT_DEPENDENCIES,
+            ["install", "-g", "--prefix", DATA_DIR] + INVENTORY_IMPORT_SCRIPT_DEPENDENCIES,
             stdout=DEVNULL,
             stderr=DEVNULL,
             shell=True,
