@@ -64,6 +64,12 @@ else:
 
 
 INVENTORY_IMPORT_SCRIPT = os.path.join(MODULE_DIR, "data", "get_inventory.js")
+INVENTORY_IMPORT_SCRIPT_DEPENDENCIES = [
+    "steam-user",
+    "globaloffensive",
+    "@node-steam/vdf",
+    "axios",
+]
 
 
 BANNER = """

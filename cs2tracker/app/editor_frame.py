@@ -5,7 +5,7 @@ from subprocess import PIPE
 from threading import Thread
 from tkinter import messagebox, ttk
 
-from nodejs import node, npm
+from nodejs import node
 from ttk_text import ThemedText
 
 from cs2tracker.constants import (
@@ -19,7 +19,7 @@ ADD_CUSTOM_ITEM_TITLE = "Add Custom Item"
 ADD_CUSTOM_ITEM_SIZE = "500x220"
 
 IMPORT_INVENTORY_TITLE = "Import Steam Inventory"
-IMPORT_INVENTORY_SIZE = "500x420"
+IMPORT_INVENTORY_SIZE = "500x450"
 
 IMPORT_INVENTORY_PROCESS_TITLE = "Importing Steam Inventory"
 IMPORT_INVENTORY_PROCESS_SIZE = "600x400"
@@ -227,7 +227,7 @@ class ConfigEditorButtonFrame(ttk.Frame):
         steam_inventory_window.title(IMPORT_INVENTORY_TITLE)
         steam_inventory_window.geometry(IMPORT_INVENTORY_SIZE)
 
-        steam_inventory_frame = InventoryImportFrame(steam_inventory_window)
+        steam_inventory_frame = InventoryImportFrame(steam_inventory_window, self)
         steam_inventory_frame.pack(expand=True, fill="both", padx=15, pady=15)
 
 
@@ -284,12 +284,13 @@ class CustomItemFrame(ttk.Frame):
 
 class InventoryImportFrame(ttk.Frame):
     # pylint: disable=too-many-instance-attributes
-    def __init__(self, parent):
+    def __init__(self, parent, grandparent):
         """Initialize the inventory import frame that allows users to import their Steam
         inventory.
         """
         super().__init__(parent, style="Card.TFrame", padding=10)
         self.parent = parent
+        self.grandparent = grandparent
         self._add_widgets()
 
     def _add_widgets(self):
@@ -301,12 +302,12 @@ class InventoryImportFrame(ttk.Frame):
         self.import_others_checkbox.pack(anchor="w", padx=10, pady=5)
 
         self._configure_entries()
-        self.user_name_label.pack(pady=5)
-        self.user_name_entry.pack(fill="x", padx=10)
-        self.password_label.pack(pady=5)
-        self.password_entry.pack(fill="x", padx=10)
-        self.two_factor_label.pack(pady=5)
-        self.two_factor_entry.pack(fill="x", padx=10)
+        self.user_name_label.pack(pady=10)
+        self.user_name_entry.pack(fill="x", padx=50)
+        self.password_label.pack(pady=10)
+        self.password_entry.pack(fill="x", padx=50)
+        self.two_factor_label.pack(pady=10)
+        self.two_factor_entry.pack(fill="x", padx=50)
 
         self.import_button = ttk.Button(self, text="Import", command=self._import_inventory)
         self.import_button.pack(pady=10)
@@ -356,10 +357,6 @@ class InventoryImportFrame(ttk.Frame):
         This will also install the necessary npm packages if they are not already
         installed.
         """
-        # TODO: this is problematic because it takes a while and then the two factor code will expire
-        # it might be better to do this on application startup
-        npm.call(["install", "steam-user", "globaloffensive", "@node-steam/vdf", "axios"])
-
         import_cases = self.import_cases_checkbox.instate(["selected"])
         import_sticker_capsules = self.import_sticker_capsules_checkbox.instate(["selected"])
         import_stickers = self.import_stickers_checkbox.instate(["selected"])
@@ -369,7 +366,7 @@ class InventoryImportFrame(ttk.Frame):
         password = self.password_entry.get().strip()
         two_factor_code = self.two_factor_entry.get().strip()
 
-        node.Popen(
+        self._display_node_subprocess(
             [
                 INVENTORY_IMPORT_SCRIPT,
                 str(import_cases),
@@ -382,8 +379,10 @@ class InventoryImportFrame(ttk.Frame):
             ]
         )
 
+        self.parent.destroy()
+
     def _display_node_subprocess(self, node_cmd):
-        text_window = tk.Toplevel(self.parent)
+        text_window = tk.Toplevel(self.grandparent)
         text_window.title(IMPORT_INVENTORY_PROCESS_TITLE)
         text_window.geometry(IMPORT_INVENTORY_PROCESS_SIZE)
 
@@ -398,6 +397,7 @@ class InventoryImportProcessFrame(ttk.Frame):
     def __init__(self, parent):
         """Initialize the frame that displays the output of the subprocess."""
         super().__init__(parent)
+        self.parent = parent
         self._add_widgets()
 
     def _add_widgets(self):
@@ -431,7 +431,10 @@ class InventoryImportProcessFrame(ttk.Frame):
             line = self.queue.get(block=False)
             self.console.config(state="normal")
             self.console.insert("end", line)
+            self.console.see("end")
             self.console.config(state="disabled")
+            self.parent.update()
+            self.parent.update_idletasks()
         except Empty:
             pass
 
