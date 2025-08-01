@@ -1,6 +1,6 @@
 import json
 import re
-from configparser import ConfigParser
+from configparser import ConfigParser, ParsingError
 from urllib.parse import quote
 
 from cs2tracker.constants import CAPSULE_INFO, CONFIG_FILE, INVENTORY_IMPORT_FILE
@@ -20,7 +20,11 @@ class ValidatedConfig(ConfigParser):
 
         self.valid = False
         self.last_error = None
-        self.load_from_file()
+        try:
+            self.load_from_file()
+        except (FileNotFoundError, ParsingError) as error:
+            console.error(f"Config error: {error}")
+            self.last_error = error
 
     def load_from_file(self):
         """Load the configuration file and validate it."""

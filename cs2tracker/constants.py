@@ -64,8 +64,8 @@ else:
     CONFIG_FILE = os.path.join(DATA_DIR, "config.ini")
     CONFIG_FILE_BACKUP = os.path.join(DATA_DIR, "config.ini.bak")
     OUTPUT_FILE = os.path.join(DATA_DIR, "output.csv")
-    IVENTORY_CONVERT_SCRIPT = os.path.join(DATA_DIR, "convert_inventory.js")
-    IVENTORY_IMPORT_SCRIPT = os.path.join(DATA_DIR, "get_inventory.js")
+    INVENTORY_CONVERT_SCRIPT = os.path.join(DATA_DIR, "convert_inventory.js")
+    INVENTORY_IMPORT_SCRIPT = os.path.join(DATA_DIR, "get_inventory.js")
 
     if not os.path.exists(CONFIG_FILE_BACKUP):
         copy(CONFIG_FILE, CONFIG_FILE_BACKUP)
