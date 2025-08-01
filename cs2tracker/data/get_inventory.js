@@ -4,6 +4,10 @@ const { argv } = require("process");
 
 const ItemNameConverter = require("./convert_inventory.js");
 
+process.stdin.setEncoding("utf-8");
+process.stdout.setEncoding("utf-8");
+process.stderr.setEncoding("utf-8");
+
 args = argv.slice(2);
 const importCases = args[0] === "True" ? true : false;
 const importStickerCapsules = args[1] === "True" ? true : false;
@@ -73,7 +77,6 @@ console.error = (...args) => {
     } catch (err) {
       console.error("An error occurred during processing:", err);
     } finally {
-      paddedLog("Logging off and quitting...");
       user.logOff();
       process.exit(0);
     }
