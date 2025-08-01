@@ -19,6 +19,8 @@ jobs:
       CONFIG_DATA: '"./cs2tracker/data/config.ini;./data"'
       OUTPUT_DATA: '"./cs2tracker/data/output.csv;./data"'
       ICON_DATA: '"./assets/icon.png;./assets"'
+      GET_INV_DATA: '"./cs2tracker/data/get_inventory.js;./data"'
+      CONVERT_INV_DATA: '"./cs2tracker/data/convert_inventory.js;./data"'
 
     steps:
       - name: Checkout code
@@ -41,7 +43,7 @@ jobs:
           echo "CURRENCY_DATA='$ZIP_PATH;./currency_converter'" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Build executable
-        run: pyinstaller --noconfirm --onefile --windowed --name "cs2tracker" --icon ${{ env.ICON }} --add-data ${{ env.ICON_DATA }} --add-data ${{ env.CONFIG_DATA }} --add-data ${{ env.OUTPUT_DATA }} --add-data ${{ env.CURRENCY_DATA }} ${{ env.MAIN_FILE }}
+        run: pyinstaller --noconfirm --onefile --windowed --name "cs2tracker" --icon ${{ env.ICON }} --add-data ${{ env.ICON_DATA }} --add-data ${{ env.CONFIG_DATA }} --add-data ${{ env.OUTPUT_DATA }} --add-data ${{ env.CURRENCY_DATA }} --add-data ${{ env.GET_INV_DATA }} --add-data ${{ env.CONVERT_INV_DATA }} ${{ env.MAIN_FILE }}
 
       - name: List files in dist folder
         run: ls -R dist/

@@ -1,12 +1,30 @@
 import tkinter as tk
+from queue import Empty, Queue
 from shutil import copy
+from subprocess import PIPE, STDOUT
+from threading import Thread
 from tkinter import messagebox, ttk
+from urllib.parse import unquote
 
-from cs2tracker.constants import CONFIG_FILE, CONFIG_FILE_BACKUP
+from nodejs import node
+from ttk_text import ThemedText
+
+from cs2tracker.constants import (
+    CONFIG_FILE,
+    CONFIG_FILE_BACKUP,
+    INVENTORY_IMPORT_FILE,
+    INVENTORY_IMPORT_SCRIPT,
+)
 from cs2tracker.util import get_config
 
-NEW_CUSTOM_ITEM_TITLE = "Add Custom Item"
-NEW_CUSTOM_ITEM_SIZE = "500x200"
+ADD_CUSTOM_ITEM_TITLE = "Add Custom Item"
+ADD_CUSTOM_ITEM_SIZE = "500x220"
+
+IMPORT_INVENTORY_TITLE = "Import Steam Inventory"
+IMPORT_INVENTORY_SIZE = "500x450"
+
+IMPORT_INVENTORY_PROCESS_TITLE = "Importing Steam Inventory..."
+IMPORT_INVENTORY_PROCESS_SIZE = "700x500"
 
 config = get_config()
 
@@ -16,8 +34,7 @@ class ConfigEditorFrame(ttk.Frame):
         """Initialize the configuration editor frame that allows users to view and edit
         the configuration options.
         """
-
-        super().__init__(parent, style="Card.TFrame", padding=15)
+        super().__init__(parent, padding=15)
 
         self.parent = parent
         self._add_widgets()
@@ -90,8 +107,20 @@ class ConfigEditorFrame(ttk.Frame):
                 continue
             section_level = self.tree.insert("", "end", iid=section, text=section)
             for config_option, value in config.items(section):
-                title_option = config_option.replace("_", " ").title()
-                self.tree.insert(section_level, "end", text=title_option, values=[value])
+                if section == "Custom Items":
+                    custom_item_name = unquote(config_option.split("/")[-1])
+                    self.tree.insert(section_level, "end", text=custom_item_name, values=[value])
+                else:
+                    option_name = config_option.replace("_", " ").title()
+                    self.tree.insert(section_level, "end", text=option_name, values=[value])
+
+    def reload_config_into_tree(self):
+        """Reload the configuration options into the treeview for display and
+        editing.
+        """
+        for item in self.tree.get_children():
+            self.tree.delete(item)
+        self._load_config_into_tree()
 
     def _configure_treeview(self):
         """Configure a treeview to display and edit configuration options."""
@@ -108,7 +137,7 @@ class ConfigEditorFrame(ttk.Frame):
         scrollbar.config(command=self.tree.yview)
 
         self.tree.column("#0", anchor="w", width=200)
-        self.tree.column(1, anchor="w", width=25)
+        self.tree.column(1, anchor="center", width=25)
         self.tree.heading("#0", text="Option")
         self.tree.heading(1, text="Value")
 
@@ -121,7 +150,6 @@ class ConfigEditorButtonFrame(ttk.Frame):
         """Initialize the button frame that contains buttons for saving the updated
         configuration and adding custom items.
         """
-
         super().__init__(parent, padding=10)
 
         self.parent = parent
@@ -140,25 +168,13 @@ class ConfigEditorButtonFrame(ttk.Frame):
         reset_button = ttk.Button(self, text="Reset", command=self._reset_config)
         reset_button.pack(side="left", expand=True, padx=5)
 
-        custom_item_button = ttk.Button(
-            self, text="Add Custom Item", command=self._open_custom_item_dialog
-        )
+        custom_item_button = ttk.Button(self, text="Add Custom Item", command=self._add_custom_item)
         custom_item_button.pack(side="left", expand=True, padx=5)
 
-    def _reload_config_into_tree(self):
-        """Reload the configuration options into the treeview for display and
-        editing.
-        """
-        for item in self.tree.get_children():
-            self.tree.delete(item)
-
-        for section in config.sections():
-            if section == "App Settings":
-                continue
-            section_level = self.tree.insert("", "end", iid=section, text=section)
-            for config_option, value in config.items(section):
-                title_option = config_option.replace("_", " ").title()
-                self.tree.insert(section_level, "end", text=title_option, values=[value])
+        import_inventory_button = ttk.Button(
+            self, text="Import Steam Inventory", command=self._import_steam_inventory
+        )
+        import_inventory_button.pack(side="left", expand=True, padx=5)
 
     def _save_config(self):
         """Save the current configuration from the treeview to the config file."""
@@ -179,7 +195,7 @@ class ConfigEditorButtonFrame(ttk.Frame):
             messagebox.showinfo("Config Saved", "The configuration has been saved successfully.")
         else:
             config.load()
-            self._reload_config_into_tree()
+            self.parent.reload_config_into_tree()
             messagebox.showerror(
                 "Config Error",
                 f"The configuration is invalid. ({config.last_error})",
@@ -193,14 +209,58 @@ class ConfigEditorButtonFrame(ttk.Frame):
         if confirm:
             copy(CONFIG_FILE_BACKUP, CONFIG_FILE)
             config.load()
-            self._reload_config_into_tree()
+            self.parent.reload_config_into_tree()
+
+    def _add_custom_item(self):
+        """Open a window to add a new custom item."""
+        custom_item_window = tk.Toplevel(self.parent)
+        custom_item_window.title(ADD_CUSTOM_ITEM_TITLE)
+        custom_item_window.geometry(ADD_CUSTOM_ITEM_SIZE)
+
+        custom_item_frame = CustomItemFrame(custom_item_window, self.parent, self.tree)
+        custom_item_frame.pack(expand=True, fill="both", padx=15, pady=15)
+
+    def _import_steam_inventory(self):
+        """Open a window to import the user's Steam inventory."""
+        steam_inventory_window = tk.Toplevel(self.parent)
+        steam_inventory_window.title(IMPORT_INVENTORY_TITLE)
+        steam_inventory_window.geometry(IMPORT_INVENTORY_SIZE)
+
+        steam_inventory_frame = InventoryImportFrame(steam_inventory_window, self)
+        steam_inventory_frame.pack(expand=True, fill="both", padx=15, pady=15)
+
+
+class CustomItemFrame(ttk.Frame):
+    def __init__(self, parent, grandparent, tree):
+        """Initialize the custom item frame that allows users to add custom items."""
+        super().__init__(parent, style="Card.TFrame", padding=15)
+        self.parent = parent
+        self.grandparent = grandparent
+        self.tree = tree
+        self._add_widgets()
+
+    def _add_widgets(self):
+        """Add widgets to the custom item frame for entering item details."""
+        ttk.Label(self, text="Item URL:").pack(pady=5)
+        item_url_entry = ttk.Entry(self)
+        item_url_entry.pack(fill="x", padx=10)
+
+        ttk.Label(self, text="Owned Count:").pack(pady=5)
+        item_owned_entry = ttk.Entry(self)
+        item_owned_entry.pack(fill="x", padx=10)
+
+        add_button = ttk.Button(
+            self,
+            text="Add",
+            command=lambda: self._add_custom_item(item_url_entry.get(), item_owned_entry.get()),
+        )
+        add_button.pack(pady=10)
 
     def _add_custom_item(self, item_url, item_owned):
         """Add a custom item to the configuration."""
         if not item_url or not item_owned:
             messagebox.showerror("Input Error", "All fields must be filled out.")
             return
-
         try:
             if int(item_owned) < 0:
                 raise ValueError("Owned count must be a non-negative integer.")
@@ -211,10 +271,9 @@ class ConfigEditorButtonFrame(ttk.Frame):
         config.set("Custom Items", item_url, item_owned)
         config.write_to_file()
         if config.valid:
-            self.tree.insert("Custom Items", "end", text=item_url, values=(item_owned,))
-            if self.custom_item_dialog:
-                self.custom_item_dialog.destroy()
-                self.custom_item_dialog = None
+            config.load()
+            self.grandparent.reload_config_into_tree()
+            self.parent.destroy()
         else:
             config.remove_option("Custom Items", item_url)
             messagebox.showerror(
@@ -222,26 +281,194 @@ class ConfigEditorButtonFrame(ttk.Frame):
                 f"The configuration is invalid. ({config.last_error})",
             )
 
-    def _open_custom_item_dialog(self):
-        """Open a dialog to enter custom item details."""
-        self.custom_item_dialog = tk.Toplevel(self.parent)
-        self.custom_item_dialog.title(NEW_CUSTOM_ITEM_TITLE)
-        self.custom_item_dialog.geometry(NEW_CUSTOM_ITEM_SIZE)
 
-        dialog_frame = ttk.Frame(self.custom_item_dialog, padding=10)
-        dialog_frame.pack(expand=True, fill="both")
+class InventoryImportFrame(ttk.Frame):
+    # pylint: disable=too-many-instance-attributes
+    def __init__(self, parent, grandparent):
+        """Initialize the inventory import frame that allows users to import their Steam
+        inventory.
+        """
+        super().__init__(parent, style="Card.TFrame", padding=10)
+        self.parent = parent
+        self.grandparent = grandparent
+        self._add_widgets()
 
-        ttk.Label(dialog_frame, text="Item URL:").pack(pady=5)
-        item_url_entry = ttk.Entry(dialog_frame)
-        item_url_entry.pack(fill="x", padx=10)
+    def _add_widgets(self):
+        """Add widgets to the inventory import frame."""
+        self._configure_checkboxes()
+        self.import_cases_checkbox.pack(anchor="w", padx=10, pady=5)
+        self.import_sticker_capsules_checkbox.pack(anchor="w", padx=10, pady=5)
+        self.import_stickers_checkbox.pack(anchor="w", padx=10, pady=5)
+        self.import_others_checkbox.pack(anchor="w", padx=10, pady=5)
 
-        ttk.Label(dialog_frame, text="Owned Count:").pack(pady=5)
-        item_owned_entry = ttk.Entry(dialog_frame)
-        item_owned_entry.pack(fill="x", padx=10)
+        self._configure_entries()
+        self.user_name_label.pack(pady=10)
+        self.user_name_entry.pack(fill="x", padx=50)
+        self.password_label.pack(pady=10)
+        self.password_entry.pack(fill="x", padx=50)
+        self.two_factor_label.pack(pady=10)
+        self.two_factor_entry.pack(fill="x", padx=50)
 
-        add_button = ttk.Button(
-            dialog_frame,
-            text="Add",
-            command=lambda: self._add_custom_item(item_url_entry.get(), item_owned_entry.get()),
+        self.import_button = ttk.Button(self, text="Import", command=self._import_inventory)
+        self.import_button.pack(pady=10)
+
+    def _configure_checkboxes(self):
+        # pylint: disable=attribute-defined-outside-init
+        """Configure the checkboxes for selecting what to import from the Steam
+        inventory.
+        """
+        self.import_cases_value = tk.BooleanVar(value=True)
+        self.import_cases_checkbox = ttk.Checkbutton(
+            self, text="Import Cases", variable=self.import_cases_value, style="Switch.TCheckbutton"
         )
-        add_button.pack(pady=10)
+
+        self.import_sticker_capsules_value = tk.BooleanVar(value=True)
+        self.import_sticker_capsules_checkbox = ttk.Checkbutton(
+            self,
+            text="Import Sticker Capsules",
+            variable=self.import_sticker_capsules_value,
+            style="Switch.TCheckbutton",
+        )
+
+        self.import_stickers_value = tk.BooleanVar(value=True)
+        self.import_stickers_checkbox = ttk.Checkbutton(
+            self,
+            text="Import Stickers",
+            variable=self.import_stickers_value,
+            style="Switch.TCheckbutton",
+        )
+
+        self.import_others_value = tk.BooleanVar(value=True)
+        self.import_others_checkbox = ttk.Checkbutton(
+            self,
+            text="Import Other Items",
+            variable=self.import_others_value,
+            style="Switch.TCheckbutton",
+        )
+
+    def _configure_entries(self):
+        # pylint: disable=attribute-defined-outside-init
+        """Configure the entry fields for Steam username, password, and two-factor
+        code.
+        """
+        self.user_name_label = ttk.Label(self, text="Steam Username:")
+        self.user_name_entry = ttk.Entry(self)
+
+        self.password_label = ttk.Label(self, text="Steam Password:")
+        self.password_entry = ttk.Entry(self, show="*")
+
+        self.two_factor_label = ttk.Label(self, text="Steam Guard Code (if enabled):")
+        self.two_factor_entry = ttk.Entry(self)
+
+    def _import_inventory(self):
+        """
+        Call the node.js script to import the user's Steam inventory.
+
+        This will also install the necessary npm packages if they are not already
+        installed.
+        """
+        import_cases = self.import_cases_value.get()
+        import_sticker_capsules = self.import_sticker_capsules_value.get()
+        import_stickers = self.import_stickers_value.get()
+        import_others = self.import_others_value.get()
+
+        username = self.user_name_entry.get().strip()
+        password = self.password_entry.get().strip()
+        two_factor_code = self.two_factor_entry.get().strip()
+
+        self._display_node_subprocess(
+            [
+                INVENTORY_IMPORT_SCRIPT,
+                INVENTORY_IMPORT_FILE,
+                str(import_cases),
+                str(import_sticker_capsules),
+                str(import_stickers),
+                str(import_others),
+                username,
+                password,
+                two_factor_code,
+            ]
+        )
+
+        self.parent.destroy()
+
+    def _display_node_subprocess(self, node_cmd):
+        text_window = tk.Toplevel(self.grandparent)
+        text_window.title(IMPORT_INVENTORY_PROCESS_TITLE)
+        text_window.geometry(IMPORT_INVENTORY_PROCESS_SIZE)
+
+        process_frame = InventoryImportProcessFrame(text_window)
+        process_frame.pack(expand=True, fill="both", padx=15, pady=15)
+        process_frame.start(node_cmd)
+        process_frame.console.focus_set()
+
+
+class InventoryImportProcessFrame(ttk.Frame):
+    # pylint: disable=attribute-defined-outside-init
+    # Source: https://stackoverflow.com/questions/27327886/issues-intercepting-subprocess-output-in-real-time
+    def __init__(self, parent):
+        """Initialize the frame that displays the output of the subprocess."""
+        super().__init__(parent)
+        self.parent = parent
+        self._add_widgets()
+
+    def _add_widgets(self):
+        """Add a text widget to display the output of the subprocess."""
+        self.scrollbar = ttk.Scrollbar(self)
+        self.scrollbar.pack(side="right", fill="y", padx=(5, 0))
+
+        self.console = ThemedText(self, wrap="word", yscrollcommand=self.scrollbar.set)
+        self.console.config(state="disabled")
+        self.console.pack(expand=True, fill="both", padx=10, pady=10)
+
+        self.scrollbar.config(command=self.console.yview)
+
+    def _read_lines(self, process, queue):
+        """Read lines from the subprocess output and put them in a queue."""
+        while process.poll() is None:
+            line = process.stdout.readline()
+            if line:
+                queue.put(line)
+
+    def start(self, cmd):
+        """Start the NodeJS subprocess with the given command and read its output."""
+        self.process = node.Popen(
+            cmd,
+            stdout=PIPE,
+            stdin=PIPE,
+            stderr=STDOUT,
+            text=True,
+            bufsize=1,
+            encoding="utf-8",
+        )
+        self.queue = Queue()
+        self.thread = Thread(target=self._read_lines, args=(self.process, self.queue), daemon=True)
+        self.thread.start()
+
+        self.after(100, self._update_lines)
+
+    def _update_lines(self):
+        """Update the text widget with lines from the subprocess output."""
+        try:
+            line = self.queue.get(block=False)
+            self.console.config(state="normal")
+            self.console.insert("end", line)
+            self.console.config(state="disabled")
+            self.console.yview("end")
+        except Empty:
+            pass
+
+        if self.process.poll() is None or not self.queue.empty():
+            self.after(100, self._update_lines)
+        else:
+            self._cleanup()
+
+    def _cleanup(self):
+        """Clean up the process and thread after completion and trigger a config update
+        from the newly written inventory file.
+        """
+        config.read_from_inventory_file()
+        self.parent.master.master.reload_config_into_tree()
+
+        self.process.wait()
+        self.thread.join()

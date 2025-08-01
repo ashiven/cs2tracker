@@ -31,8 +31,8 @@ class ScraperFrame(ttk.Frame):
                 self.sheet_width = width
                 self.sheet_height = height
                 self.sheet.height_and_width(height, width)
-                self.parent.update_idletasks()
                 self.parent.update()
+                self.parent.update_idletasks()
 
     def _configure_sheet(self):
         """Configure the sheet widget with initial data and settings."""
