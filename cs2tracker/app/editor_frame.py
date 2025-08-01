@@ -123,6 +123,9 @@ class ConfigEditorFrame(ttk.Frame):
                     option_name = config_option.replace("_", " ").title()
                     self.tree.insert(section_level, "end", text=option_name, values=[value])
 
+        self.tree.focus("User Settings")
+        self.tree.selection_set("User Settings")
+
     def reload_config_into_tree(self):
         """Reload the configuration options into the treeview for display and
         editing.
