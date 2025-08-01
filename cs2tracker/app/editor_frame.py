@@ -1,3 +1,4 @@
+import time
 import tkinter as tk
 from queue import Empty, Queue
 from shutil import copy
@@ -389,6 +390,7 @@ class InventoryImportFrame(ttk.Frame):
         process_frame = InventoryImportProcessFrame(text_window)
         process_frame.pack(expand=True, fill="both", padx=15, pady=15)
         process_frame.start(node_cmd)
+        process_frame.console.focus_set()
 
 
 class InventoryImportProcessFrame(ttk.Frame):
@@ -454,3 +456,5 @@ class InventoryImportProcessFrame(ttk.Frame):
         """Clean up the process and thread after completion."""
         self.process.wait()
         self.thread.join()
+        time.sleep(5)
+        self.parent.destroy()
