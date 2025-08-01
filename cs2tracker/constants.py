@@ -140,7 +140,6 @@ KATOWICE_2014_CAPSULES = {
         "https://steamcommunity.com/market/listings/730/EMS%20Katowice%202014%20Legends",
         "https://steamcommunity.com/market/listings/730/EMS%20Katowice%202014%20Challengers",
     ],
-    "names": ["Katowice 2014 Legends", "Katowice 2014 Challengers"],
 }
 
 COLOGNE_2014_CAPSULES = {
@@ -149,7 +148,6 @@ COLOGNE_2014_CAPSULES = {
         "https://steamcommunity.com/market/listings/730/ESL%20One%20Cologne%202014%20Legends",
         "https://steamcommunity.com/market/listings/730/ESL%20One%20Cologne%202014%20Challengers",
     ],
-    "names": ["Cologne 2014 Legends", "Cologne 2014 Challengers"],
 }
 
 DREAMHACK_2014_CAPSULES = {
@@ -157,7 +155,6 @@ DREAMHACK_2014_CAPSULES = {
     "items": [
         "https://steamcommunity.com/market/listings/730/DreamHack%202014%20Legends%20%28Holo-Foil%29"
     ],
-    "names": ["DreamHack 2014 Legends"],
 }
 
 KATOWICE_2015_CAPSULES = {
@@ -166,7 +163,6 @@ KATOWICE_2015_CAPSULES = {
         "https://steamcommunity.com/market/listings/730/ESL%20One%20Katowice%202015%20Legends%20%28Holo-Foil%29",
         "https://steamcommunity.com/market/listings/730/ESL%20One%20Katowice%202015%20Challengers%20%28Holo-Foil%29",
     ],
-    "names": ["Katowice 2015 Legends", "Katowice 2015 Challengers"],
 }
 
 COLOGNE_2015_CAPSULES = {
@@ -175,7 +171,6 @@ COLOGNE_2015_CAPSULES = {
         "https://steamcommunity.com/market/listings/730/ESL%20One%20Cologne%202015%20Legends%20%28Foil%29",
         "https://steamcommunity.com/market/listings/730/ESL%20One%20Cologne%202015%20Challengers%20%28Foil%29",
     ],
-    "names": ["Cologne 2015 Legends", "Cologne 2015 Challengers"],
 }
 
 CLUJ_NAPOCA_2015_CAPSULES = {
@@ -185,12 +180,6 @@ CLUJ_NAPOCA_2015_CAPSULES = {
         "https://steamcommunity.com/market/listings/730/DreamHack%20Cluj-Napoca%202015%20Challengers%20%28Foil%29",
         "https://steamcommunity.com/market/listings/730/Autograph%20Capsule%20%7C%20Legends%20%28Foil%29%20%7C%20Cluj-Napoca%202015",
         "https://steamcommunity.com/market/listings/730/Autograph%20Capsule%20%7C%20Challengers%20%28Foil%29%20%7C%20Cluj-Napoca%202015",
-    ],
-    "names": [
-        "Cluj Napoca 2015 Legends",
-        "Cluj Napoca 2015 Challengers",
-        "Cluj Napoca 2015 Legends Autographs",
-        "Cluj Napoca 2015 Challengers Autographs",
     ],
 }
 
@@ -202,12 +191,6 @@ COLUMBUS_2016_CAPSULES = {
         "https://steamcommunity.com/market/listings/730/Autograph%20Capsule%20%7C%20Legends%20%28Foil%29%20%7C%20MLG%20Columbus%202016",
         "https://steamcommunity.com/market/listings/730/Autograph%20Capsule%20%7C%20Challengers%20%28Foil%29%20%7C%20MLG%20Columbus%202016",
     ],
-    "names": [
-        "Columbus 2016 Legends",
-        "Columbus 2016 Challengers",
-        "Columbus 2016 Legends Autographs",
-        "Columbus 2016 Challengers Autographs",
-    ],
 }
 
 COLOGNE_2016_CAPSULES = {
@@ -217,12 +200,6 @@ COLOGNE_2016_CAPSULES = {
         "https://steamcommunity.com/market/listings/730/Cologne%202016%20Challengers%20%28Holo-Foil%29",
         "https://steamcommunity.com/market/listings/730/Autograph%20Capsule%20%7C%20Legends%20%28Foil%29%20%7C%20Cologne%202016",
         "https://steamcommunity.com/market/listings/730/Autograph%20Capsule%20%7C%20Challengers%20%28Foil%29%20%7C%20Cologne%202016",
-    ],
-    "names": [
-        "Cologne 2016 Legends",
-        "Cologne 2016 Challengers",
-        "Cologne 2016 Legends Autographs",
-        "Cologne 2016 Challengers Autographs",
     ],
 }
 
@@ -234,12 +211,6 @@ ATLANTA_2017_CAPSULES = {
         "https://steamcommunity.com/market/listings/730/Autograph%20Capsule%20%7C%20Legends%20%28Foil%29%20%7C%20Atlanta%202017",
         "https://steamcommunity.com/market/listings/730/Autograph%20Capsule%20%7C%20Challengers%20%28Foil%29%20%7C%20Atlanta%202017",
     ],
-    "names": [
-        "Atlanta 2017 Legends",
-        "Atlanta 2017 Challengers",
-        "Atlanta 2017 Legends Autographs",
-        "Atlanta 2017 Challengers Autographs",
-    ],
 }
 
 KRAKOW_2017_CAPSULES = {
@@ -249,12 +220,6 @@ KRAKOW_2017_CAPSULES = {
         "https://steamcommunity.com/market/listings/730/Krakow%202017%20Challengers%20%28Holo-Foil%29",
         "https://steamcommunity.com/market/listings/730/Krakow%202017%20Legends%20Autograph%20Capsule",
         "https://steamcommunity.com/market/listings/730/Krakow%202017%20Challengers%20Autograph%20Capsule",
-    ],
-    "names": [
-        "Krakow 2017 Legends",
-        "Krakow 2017 Challengers",
-        "Krakow 2017 Legends Autographs",
-        "Krakow 2017 Challengers Autographs",
     ],
 }
 
@@ -272,18 +237,6 @@ BOSTON_2018_CAPSULES = {
         "https://steamcommunity.com/market/listings/730/Boston%202018%20Attending%20Legends%20Autograph%20Capsule",
         "https://steamcommunity.com/market/listings/730/Boston%202018%20Minor%20Challengers%20with%20Flash%20Gaming%20Autograph%20Capsule",
     ],
-    "names": [
-        "Boston 2018 Legends",
-        "Boston 2018 Minor Challengers",
-        "Boston 2018 Returning Challengers",
-        "Boston 2018 Attending Legends",
-        "Boston 2018 Minor Challengers with Flash Gaming",
-        "Boston 2018 Legends Autographs",
-        "Boston 2018 Minor Challengers Autographs",
-        "Boston 2018 Returning Challengers Autographs",
-        "Boston 2018 Attending Legends Autographs",
-        "Boston 2018 Minor Challengers with Flash Gaming Autographs",
-    ],
 }
 
 LONDON_2018_CAPSULES = {
@@ -295,14 +248,6 @@ LONDON_2018_CAPSULES = {
         "https://steamcommunity.com/market/listings/730/London%202018%20Legends%20Autograph%20Capsule",
         "https://steamcommunity.com/market/listings/730/London%202018%20Minor%20Challengers%20Autograph%20Capsule",
         "https://steamcommunity.com/market/listings/730/London%202018%20Returning%20Challengers%20Autograph%20Capsule",
-    ],
-    "names": [
-        "London 2018 Legends",
-        "London 2018 Minor Challengers",
-        "London 2018 Returning Challengers",
-        "London 2018 Legends Autographs",
-        "London 2018 Minor Challengers Autographs",
-        "London 2018 Returning Challengers Autographs",
     ],
 }
 
@@ -316,14 +261,6 @@ KATOWICE_2019_CAPSULES = {
         "https://steamcommunity.com/market/listings/730/Katowice%202019%20Minor%20Challengers%20Autograph%20Capsule",
         "https://steamcommunity.com/market/listings/730/Katowice%202019%20Returning%20Challengers%20Autograph%20Capsule",
     ],
-    "names": [
-        "Katowice 2019 Legends",
-        "Katowice 2019 Minor Challengers",
-        "Katowice 2019 Returning Challengers",
-        "Katowice 2019 Legends Autographs",
-        "Katowice 2019 Minor Challengers Autographs",
-        "Katowice 2019 Returning Challengers Autographs",
-    ],
 }
 
 BERLIN_2019_CAPSULES = {
@@ -336,14 +273,6 @@ BERLIN_2019_CAPSULES = {
         "https://steamcommunity.com/market/listings/730/Berlin%202019%20Minor%20Challengers%20Autograph%20Capsule",
         "https://steamcommunity.com/market/listings/730/Berlin%202019%20Returning%20Challengers%20Autograph%20Capsule",
     ],
-    "names": [
-        "Berlin 2019 Legends",
-        "Berlin 2019 Minor Challengers",
-        "Berlin 2019 Returning Challengers",
-        "Berlin 2019 Legends Autographs",
-        "Berlin 2019 Minor Challengers Autographs",
-        "Berlin 2019 Returning Challengers Autographs",
-    ],
 }
 
 RMR_2020_CAPSULES = {
@@ -353,7 +282,6 @@ RMR_2020_CAPSULES = {
         "https://steamcommunity.com/market/listings/730/2020%20RMR%20Challengers",
         "https://steamcommunity.com/market/listings/730/2020%20RMR%20Contenders",
     ],
-    "names": ["RMR 2020 Legends", "RMR 2020 Challengers", "RMR 2020 Contenders"],
 }
 
 STOCKHOLM_2021_CAPSULES = {
@@ -364,13 +292,6 @@ STOCKHOLM_2021_CAPSULES = {
         "https://steamcommunity.com/market/listings/730/Stockholm%202021%20Contenders%20Sticker%20Capsule",
         "https://steamcommunity.com/market/listings/730/Stockholm%202021%20Champions%20Autograph%20Capsule",
         "https://steamcommunity.com/market/listings/730/Stockholm%202021%20Finalists%20Autograph%20Capsule",
-    ],
-    "names": [
-        "Stockholm 2021 Legends",
-        "Stockholm 2021 Challengers",
-        "Stockholm 2021 Contenders",
-        "Stockholm 2021 Champions Autographs",
-        "Stockholm 2021 Finalists Autographs",
     ],
 }
 
@@ -385,15 +306,6 @@ ANTWERP_2022_CAPSULES = {
         "https://steamcommunity.com/market/listings/730/Antwerp%202022%20Legends%20Autograph%20Capsule",
         "https://steamcommunity.com/market/listings/730/Antwerp%202022%20Contenders%20Autograph%20Capsule",
     ],
-    "names": [
-        "Antwerp 2022 Legends",
-        "Antwerp 2022 Challengers",
-        "Antwerp 2022 Contenders",
-        "Antwerp 2022 Champions Autographs",
-        "Antwerp 2022 Challengers Autographs",
-        "Antwerp 2022 Legends Autographs",
-        "Antwerp 2022 Contenders Autographs",
-    ],
 }
 
 RIO_2022_CAPSULES = {
@@ -406,15 +318,6 @@ RIO_2022_CAPSULES = {
         "https://steamcommunity.com/market/listings/730/Rio%202022%20Challengers%20Autograph%20Capsule",
         "https://steamcommunity.com/market/listings/730/Rio%202022%20Legends%20Autograph%20Capsule",
         "https://steamcommunity.com/market/listings/730/Rio%202022%20Contenders%20Autograph%20Capsule",
-    ],
-    "names": [
-        "Rio 2022 Legends",
-        "Rio 2022 Challengers",
-        "Rio 2022 Contenders",
-        "Rio 2022 Champions Autographs",
-        "Rio 2022 Challengers Autographs",
-        "Rio 2022 Legends Autographs",
-        "Rio 2022 Contenders Autographs",
     ],
 }
 
@@ -429,15 +332,6 @@ PARIS_2023_CAPSULES = {
         "https://steamcommunity.com/market/listings/730/Paris%202023%20Legends%20Autograph%20Capsule",
         "https://steamcommunity.com/market/listings/730/Paris%202023%20Contenders%20Autograph%20Capsule",
     ],
-    "names": [
-        "Paris 2023 Legends",
-        "Paris 2023 Challengers",
-        "Paris 2023 Contenders",
-        "Paris 2023 Champions Autographs",
-        "Paris 2023 Challengers Autographs",
-        "Paris 2023 Legends Autographs",
-        "Paris 2023 Contenders Autographs",
-    ],
 }
 
 COPENHAGEN_2024_CAPSULES = {
@@ -450,15 +344,6 @@ COPENHAGEN_2024_CAPSULES = {
         "https://steamcommunity.com/market/listings/730/Copenhagen%202024%20Challengers%20Autograph%20Capsule",
         "https://steamcommunity.com/market/listings/730/Copenhagen%202024%20Legends%20Autograph%20Capsule",
         "https://steamcommunity.com/market/listings/730/Copenhagen%202024%20Contenders%20Autograph%20Capsule",
-    ],
-    "names": [
-        "Copenhagen 2024 Legends",
-        "Copenhagen 2024 Challengers",
-        "Copenhagen 2024 Contenders",
-        "Copenhagen 2024 Champions Autographs",
-        "Copenhagen 2024 Challengers Autographs",
-        "Copenhagen 2024 Legends Autographs",
-        "Copenhagen 2024 Contenders Autographs",
     ],
 }
 
@@ -473,15 +358,6 @@ SHANGHAI_2024_CAPSULES = {
         "https://steamcommunity.com/market/listings/730/Shanghai%202024%20Legends%20Autograph%20Capsule",
         "https://steamcommunity.com/market/listings/730/Shanghai%202024%20Contenders%20Autograph%20Capsule",
     ],
-    "names": [
-        "Shanghai 2024 Legends",
-        "Shanghai 2024 Challengers",
-        "Shanghai 2024 Contenders",
-        "Shanghai 2024 Champions Autographs",
-        "Shanghai 2024 Challengers Autographs",
-        "Shanghai 2024 Legends Autographs",
-        "Shanghai 2024 Contenders Autographs",
-    ],
 }
 
 AUSTIN_2025_CAPSULES = {
@@ -494,15 +370,6 @@ AUSTIN_2025_CAPSULES = {
         "https://steamcommunity.com/market/listings/730/Austin%202025%20Challengers%20Autograph%20Capsule",
         "https://steamcommunity.com/market/listings/730/Austin%202025%20Legends%20Autograph%20Capsule",
         "https://steamcommunity.com/market/listings/730/Austin%202025%20Contenders%20Autograph%20Capsule",
-    ],
-    "names": [
-        "Austin 2025 Legends",
-        "Austin 2025 Challengers",
-        "Austin 2025 Contenders",
-        "Austin 2025 Champions Autographs",
-        "Austin 2025 Challengers Autographs",
-        "Austin 2025 Legends Autographs",
-        "Austin 2025 Contenders Autographs",
     ],
 }
 

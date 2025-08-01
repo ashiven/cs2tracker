@@ -230,7 +230,8 @@ class Scraper:
         capsule_usd_total = 0
         try:
             capsule_page = self._get_page(capsule_info["page"])
-            for capsule_name, capsule_href in zip(capsule_info["names"], capsule_info["items"]):
+            for capsule_href in capsule_info["items"]:
+                capsule_name = unquote(capsule_href.split("/")[-1])
                 config_capsule_name = capsule_name.replace(" ", "_").lower()
                 owned = config.getint(capsule_section, config_capsule_name, fallback=0)
                 if owned == 0:
