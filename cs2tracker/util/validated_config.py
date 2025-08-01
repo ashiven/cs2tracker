@@ -22,12 +22,6 @@ class ValidatedConfig(ConfigParser):
         self.last_error = None
         self.load()
 
-        # remove after debugging
-        self.read_from_inventory_file()
-        for section in self.sections():
-            for option in self.options(section):
-                console.print(option.replace("_", " ").title())
-
     def load(self):
         """Load the configuration file and validate it."""
         self.clear()
@@ -95,7 +89,9 @@ class ValidatedConfig(ConfigParser):
             self.last_error = error
 
     def write_to_file(self):
-        """Write the current configuration to the configuration file."""
+        """Validate the current configuration and write it to the configuration file if
+        it is valid.
+        """
         self._validate_config()
 
         if self.valid:

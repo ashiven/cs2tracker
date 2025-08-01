@@ -4,6 +4,7 @@ from shutil import copy
 from subprocess import PIPE, STDOUT
 from threading import Thread
 from tkinter import messagebox, ttk
+from urllib.parse import unquote
 
 from nodejs import node
 from ttk_text import ThemedText
@@ -106,8 +107,20 @@ class ConfigEditorFrame(ttk.Frame):
                 continue
             section_level = self.tree.insert("", "end", iid=section, text=section)
             for config_option, value in config.items(section):
-                title_option = config_option.replace("_", " ").title()
-                self.tree.insert(section_level, "end", text=title_option, values=[value])
+                if section == "Custom Items":
+                    custom_item_name = unquote(config_option.split("/")[-1])
+                    self.tree.insert(section_level, "end", text=custom_item_name, values=[value])
+                else:
+                    option_name = config_option.replace("_", " ").title()
+                    self.tree.insert(section_level, "end", text=option_name, values=[value])
+
+    def reload_config_into_tree(self):
+        """Reload the configuration options into the treeview for display and
+        editing.
+        """
+        for item in self.tree.get_children():
+            self.tree.delete(item)
+        self._load_config_into_tree()
 
     def _configure_treeview(self):
         """Configure a treeview to display and edit configuration options."""
@@ -124,7 +137,7 @@ class ConfigEditorFrame(ttk.Frame):
         scrollbar.config(command=self.tree.yview)
 
         self.tree.column("#0", anchor="w", width=200)
-        self.tree.column(1, anchor="w", width=25)
+        self.tree.column(1, anchor="center", width=25)
         self.tree.heading("#0", text="Option")
         self.tree.heading(1, text="Value")
 
@@ -163,21 +176,6 @@ class ConfigEditorButtonFrame(ttk.Frame):
         )
         import_inventory_button.pack(side="left", expand=True, padx=5)
 
-    def _reload_config_into_tree(self):
-        """Reload the configuration options into the treeview for display and
-        editing.
-        """
-        for item in self.tree.get_children():
-            self.tree.delete(item)
-
-        for section in config.sections():
-            if section == "App Settings":
-                continue
-            section_level = self.tree.insert("", "end", iid=section, text=section)
-            for config_option, value in config.items(section):
-                title_option = config_option.replace("_", " ").title()
-                self.tree.insert(section_level, "end", text=title_option, values=[value])
-
     def _save_config(self):
         """Save the current configuration from the treeview to the config file."""
         for child in self.tree.get_children():
@@ -197,7 +195,7 @@ class ConfigEditorButtonFrame(ttk.Frame):
             messagebox.showinfo("Config Saved", "The configuration has been saved successfully.")
         else:
             config.load()
-            self._reload_config_into_tree()
+            self.parent.reload_config_into_tree()
             messagebox.showerror(
                 "Config Error",
                 f"The configuration is invalid. ({config.last_error})",
@@ -211,7 +209,7 @@ class ConfigEditorButtonFrame(ttk.Frame):
         if confirm:
             copy(CONFIG_FILE_BACKUP, CONFIG_FILE)
             config.load()
-            self._reload_config_into_tree()
+            self.parent.reload_config_into_tree()
 
     def _add_custom_item(self):
         """Open a window to add a new custom item."""
@@ -219,7 +217,7 @@ class ConfigEditorButtonFrame(ttk.Frame):
         custom_item_window.title(ADD_CUSTOM_ITEM_TITLE)
         custom_item_window.geometry(ADD_CUSTOM_ITEM_SIZE)
 
-        custom_item_frame = CustomItemFrame(custom_item_window, self.tree)
+        custom_item_frame = CustomItemFrame(custom_item_window, self.parent, self.tree)
         custom_item_frame.pack(expand=True, fill="both", padx=15, pady=15)
 
     def _import_steam_inventory(self):
@@ -233,10 +231,11 @@ class ConfigEditorButtonFrame(ttk.Frame):
 
 
 class CustomItemFrame(ttk.Frame):
-    def __init__(self, parent, tree):
+    def __init__(self, parent, grandparent, tree):
         """Initialize the custom item frame that allows users to add custom items."""
         super().__init__(parent, style="Card.TFrame", padding=15)
         self.parent = parent
+        self.grandparent = grandparent
         self.tree = tree
         self._add_widgets()
 
@@ -262,7 +261,6 @@ class CustomItemFrame(ttk.Frame):
         if not item_url or not item_owned:
             messagebox.showerror("Input Error", "All fields must be filled out.")
             return
-
         try:
             if int(item_owned) < 0:
                 raise ValueError("Owned count must be a non-negative integer.")
@@ -273,7 +271,8 @@ class CustomItemFrame(ttk.Frame):
         config.set("Custom Items", item_url, item_owned)
         config.write_to_file()
         if config.valid:
-            self.tree.insert("Custom Items", "end", text=item_url, values=(item_owned,))
+            config.load()
+            self.grandparent.reload_config_into_tree()
             self.parent.destroy()
         else:
             config.remove_option("Custom Items", item_url)
@@ -459,5 +458,7 @@ class InventoryImportProcessFrame(ttk.Frame):
         from the newly written inventory file.
         """
         config.read_from_inventory_file()
+        self.parent.master.master.reload_config_into_tree()
+
         self.process.wait()
         self.thread.join()
