@@ -32,10 +32,15 @@ if RUNNING_IN_EXE:
     os.makedirs(DATA_DIR, exist_ok=True)
 
     CONFIG_FILE_SOURCE = os.path.join(MODULE_DIR, "data", "config.ini")
+    OUTPUT_FILE_SOURCE = os.path.join(MODULE_DIR, "data", "output.csv")
+    IVENTORY_CONVERT_SCRIPT_SOURCE = os.path.join(MODULE_DIR, "data", "convert_inventory.js")
+    INVENTORY_IMPORT_SCRIPT_SOURCE = os.path.join(MODULE_DIR, "data", "get_inventory.js")
+
     CONFIG_FILE = os.path.join(DATA_DIR, "config.ini")
     CONFIG_FILE_BACKUP = os.path.join(DATA_DIR, "config.ini.bak")
-    OUTPUT_FILE_SOURCE = os.path.join(MODULE_DIR, "data", "output.csv")
     OUTPUT_FILE = os.path.join(DATA_DIR, "output.csv")
+    IVENTORY_CONVERT_SCRIPT = os.path.join(DATA_DIR, "convert_inventory.js")
+    INVENTORY_IMPORT_SCRIPT = os.path.join(DATA_DIR, "get_inventory.js")
 
     # Always copy the source config into the user data directory as a backup
     # and overwrite the existing backup if it exists
@@ -46,6 +51,10 @@ if RUNNING_IN_EXE:
         copy(OUTPUT_FILE_SOURCE, OUTPUT_FILE)
     if not os.path.exists(CONFIG_FILE):
         copy(CONFIG_FILE_SOURCE, CONFIG_FILE)
+    if not os.path.exists(IVENTORY_CONVERT_SCRIPT):
+        copy(IVENTORY_CONVERT_SCRIPT_SOURCE, IVENTORY_CONVERT_SCRIPT)
+    if not os.path.exists(INVENTORY_IMPORT_SCRIPT):
+        copy(INVENTORY_IMPORT_SCRIPT_SOURCE, INVENTORY_IMPORT_SCRIPT)
 
 else:
     MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -55,6 +64,8 @@ else:
     CONFIG_FILE = os.path.join(DATA_DIR, "config.ini")
     CONFIG_FILE_BACKUP = os.path.join(DATA_DIR, "config.ini.bak")
     OUTPUT_FILE = os.path.join(DATA_DIR, "output.csv")
+    IVENTORY_CONVERT_SCRIPT = os.path.join(DATA_DIR, "convert_inventory.js")
+    IVENTORY_IMPORT_SCRIPT = os.path.join(DATA_DIR, "get_inventory.js")
 
     if not os.path.exists(CONFIG_FILE_BACKUP):
         copy(CONFIG_FILE, CONFIG_FILE_BACKUP)
@@ -62,10 +73,7 @@ else:
 
 ICON_FILE = os.path.join(PROJECT_DIR, "assets", "icon.png")
 BATCH_FILE = os.path.join(DATA_DIR, "cs2tracker_scraper.bat")
-
-
 INVENTORY_IMPORT_FILE = os.path.join(DATA_DIR, "inventory.json")
-INVENTORY_IMPORT_SCRIPT = os.path.join(DATA_DIR, "get_inventory.js")
 INVENTORY_IMPORT_SCRIPT_DEPENDENCIES = [
     "steam-user",
     "globaloffensive",
