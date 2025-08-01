@@ -1,7 +1,7 @@
 import tkinter as tk
 from queue import Empty, Queue
 from shutil import copy
-from subprocess import PIPE
+from subprocess import PIPE, STDOUT
 from threading import Thread
 from tkinter import messagebox, ttk
 
@@ -402,14 +402,21 @@ class InventoryImportProcessFrame(ttk.Frame):
 
     def _add_widgets(self):
         """Add a text widget to display the output of the subprocess."""
-        self.console = ThemedText(self)
+        self.scrollbar = ttk.Scrollbar(self)
+        self.scrollbar.pack(side="right", fill="y", padx=(5, 0))
+
+        self.console = ThemedText(self, wrap="word", yscrollcommand=self.scrollbar.set)
         self.console.config(state="disabled")
         self.console.pack()
+
+        self.scrollbar.config(command=self.console.yview)
 
     def _read_lines(self, process, queue):
         """Read lines from the subprocess output and put them in a queue."""
         while process.poll() is None:
-            queue.put(process.stdout.readline())
+            line = process.stdout.readline()
+            if line:
+                queue.put(line)
 
     def start(self, cmd):
         """Start the NodeJS subprocess with the given command and read its output."""
@@ -417,7 +424,9 @@ class InventoryImportProcessFrame(ttk.Frame):
             cmd,
             stdout=PIPE,
             stdin=PIPE,
-            stderr=PIPE,
+            stderr=STDOUT,
+            text=True,
+            bufsize=1,
         )
         self.queue = Queue()
         self.thread = Thread(target=self._read_lines, args=(self.process, self.queue), daemon=True)
@@ -431,12 +440,17 @@ class InventoryImportProcessFrame(ttk.Frame):
             line = self.queue.get(block=False)
             self.console.config(state="normal")
             self.console.insert("end", line)
-            self.console.see("end")
             self.console.config(state="disabled")
-            self.parent.update()
-            self.parent.update_idletasks()
+            self.console.yview("end")
         except Empty:
             pass
 
-        if self.process.poll() is None:
+        if self.process.poll() is None or not self.queue.empty():
             self.after(100, self._update_lines)
+        else:
+            self._cleanup()
+
+    def _cleanup(self):
+        """Clean up the process and thread after completion."""
+        self.process.wait()
+        self.thread.join()

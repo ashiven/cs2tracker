@@ -13,6 +13,13 @@ const userName = args[4];
 const password = args[5];
 const twoFactorCode = args[6];
 
+const paddedLog = (...args) => {
+  console.log(" [+] ", ...args);
+};
+console.error = (...args) => {
+  originalConsole("    [!] " + args.join(" "));
+};
+
 (async () => {
   let user = new SteamUser();
 
@@ -23,13 +30,13 @@ const twoFactorCode = args[6];
   });
 
   user.on("error", (err) => {
-    console.error("Error: " + err);
+    console.error("Steam Error: " + err);
     user.logOff();
     process.exit(1);
   });
 
   user.on("loggedOn", (_details, _parental) => {
-    console.log("[+] Logged into Steam.. Starting CS2..");
+    paddedLog("Logged into Steam.. Starting CS2..");
     user.gamesPlayed([730]);
   });
 
@@ -45,7 +52,7 @@ const twoFactorCode = args[6];
   await nameConverter.initialize();
 
   cs2.on("connectedToGC", async () => {
-    console.log("[+] Connected to CS2 Game Coordinator");
+    paddedLog("Connected to CS2 Game Coordinator");
     await processInventory();
   });
 
@@ -54,22 +61,19 @@ const twoFactorCode = args[6];
       const storageUnitIds = getStorageUnitIds();
       for (const [unitIndex, unitId] of storageUnitIds.entries()) {
         const items = await getCasketContentsAsync(cs2, unitId);
-        console.log(
-          `[+] ${items.length} items found in unit: ${unitIndex}/${storageUnitIds.length}`,
-        );
-
         const convertedItems = nameConverter.convertInventory(items, false);
-
-        console.log("[+] Importing the following items:");
         const filteredItems = filterItems(convertedItems);
         const itemCounts = countItems(filteredItems);
+        paddedLog(
+          `${filteredItems.length} items found in storage unit: ${unitIndex}/${storageUnitIds.length}`,
+        );
         console.log(itemCounts);
       }
-      console.log("Processing complete.");
+      paddedLog("Processing complete.");
     } catch (err) {
       console.error("An error occurred during processing:", err);
     } finally {
-      console.log("Logging off and quitting...");
+      paddedLog("Logging off and quitting...");
       user.logOff();
       process.exit(0);
     }
