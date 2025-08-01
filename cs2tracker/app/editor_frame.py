@@ -40,8 +40,7 @@ class ConfigEditorFrame(ttk.Frame):
 
         self.parent = parent
         self._add_widgets()
-
-        self.edit_active = False
+        self.tree.focus_set()
 
     def _add_widgets(self):
         """Configure the main editor frame which displays the configuration options in a
@@ -53,35 +52,44 @@ class ConfigEditorFrame(ttk.Frame):
         button_frame = ConfigEditorButtonFrame(self, self.tree)
         button_frame.pack(side="bottom", padx=10, pady=(0, 10))
 
-    def _set_cell_value(self, event):
+    def _save_edit(self, event, row, column):
+        """Save the edited value in the treeview and destroy the entry widget."""
+        self.tree.set(row, column=column, value=event.widget.get())
+        event.widget.destroy()
+        self.tree.focus_set()
+
+    def _set_cell_value(self, event, row=None, column=None):
         """
         Set the value of a cell in the treeview to be editable when double- clicked.
 
         Source: https://stackoverflow.com/questions/75787251/create-an-editable-tkinter-treeview-with-keyword-connection
         """
-
-        def save_edit(event):
-            self.tree.set(row, column=column, value=event.widget.get())
-            event.widget.destroy()
-            self.tree.focus_set()
-
         try:
-            row = self.tree.identify_row(event.y)
-            column = self.tree.identify_column(event.x)
-            item_text = self.tree.set(row, column)
-            if item_text.strip() == "":
-                left_item_text = self.tree.item(row, "text")
-                if any(left_item_text == section for section in config.sections()):
-                    return
+            if not row or not column:
+                row = self.tree.identify_row(event.y)
+                column = self.tree.identify_column(event.x)
+
+            item_text = self.tree.item(row, "text")
+            if any(item_text == section for section in config.sections()):
+                return
+            item_value = self.tree.item(row, "values")[0]
+
             x, y, w, h = self.tree.bbox(row, column)
             self.edit_entry = ttk.Entry(self, justify="center", font=("Helvetica", 11))
             self.edit_entry.place(x=x, y=y, width=w, height=h + 3)  # type: ignore
-            self.edit_entry.insert("end", item_text)
-            self.edit_entry.bind("<Return>", save_edit)
+            self.edit_entry.insert("end", item_value)
+            self.edit_entry.bind("<Return>", lambda e: self._save_edit(e, row, column))
             self.edit_entry.focus_set()
             self.edit_entry.grab_set()
         except Exception:
             return
+
+    def _set_selection_value(self, _):
+        selected = self.tree.selection()
+        if selected:
+            row = selected[0]
+            column = "#1"
+            self._set_cell_value(None, row=row, column=column)
 
     def _destroy_entry(self, _):
         """Destroy any entry widgets in the treeview on an event, such as a mouse wheel
@@ -97,7 +105,7 @@ class ConfigEditorFrame(ttk.Frame):
         its value.
         """
         self.tree.bind("<Double-1>", self._set_cell_value)
-        self.tree.bind("<Return>", self._set_cell_value)
+        self.tree.bind("<Return>", self._set_selection_value)
         self.parent.bind("<MouseWheel>", self._destroy_entry)  # type: ignore
         self.parent.bind("<Escape>", self._destroy_entry)  # type: ignore
 
