@@ -11,13 +11,15 @@ process.stderr.setEncoding("utf-8");
 
 const args = argv.slice(2);
 const processedInventoryPath = args[0];
-const importCases = args[1] === "True" ? true : false;
-const importStickerCapsules = args[2] === "True" ? true : false;
-const importStickers = args[3] === "True" ? true : false;
-const importOthers = args[4] === "True" ? true : false;
-const userName = args[5];
-const password = args[6];
-const twoFactorCode = args[7];
+const importInventory = args[1] === "True" ? true : false;
+const importStorageUnits = args[2] === "True" ? true : false;
+const importCases = args[3] === "True" ? true : false;
+const importStickerCapsules = args[4] === "True" ? true : false;
+const importStickers = args[5] === "True" ? true : false;
+const importOthers = args[6] === "True" ? true : false;
+const userName = args[7];
+const password = args[8];
+const twoFactorCode = args[9];
 
 const paddedLog = (...args) => {
   console.log(" [+] ", ...args);
@@ -65,16 +67,65 @@ console.error = (...args) => {
 
   cs2.on("connectedToGC", async () => {
     paddedLog("Connected to CS2 Game Coordinator.");
-    await processInventory();
+    let finalItemCounts = {};
+
+    if (importInventory) {
+      const inventoryItemCounts = processInventory();
+      for (const [itemName, count] of Object.entries(inventoryItemCounts)) {
+        finalItemCounts[itemName] = (finalItemCounts[itemName] || 0) + count;
+      }
+    }
+
+    if (importStorageUnits) {
+      const storageUnitItemCounts = await processStorageUnits();
+      for (const [itemName, count] of Object.entries(storageUnitItemCounts)) {
+        finalItemCounts[itemName] = (finalItemCounts[itemName] || 0) + count;
+      }
+    }
+
+    paddedLog("Saving config...");
+    fs.writeFileSync(
+      processedInventoryPath,
+      JSON.stringify(finalItemCounts, null, 2),
+    );
+
+    paddedLog("Processing complete.");
+    paddedLog("This window will automatically close in 10 seconds.");
+    await new Promise((resolve) => setTimeout(resolve, 10000));
+    user.logOff();
+    process.exit(0);
   });
 
-  async function processInventory() {
+  // TODO: The inventory may contain items that are not marketable or tradable,
+  // so we have to make sure to process these items correctly in the main app.
+  function processInventory() {
+    try {
+      // filter out items that have the casket_id property set from the inventory
+      // because these are items that should be contained in storage units
+      const prefilteredInventory = cs2.inventory.filter((item) => {
+        return !item.casket_id;
+      });
+
+      const convertedItems =
+        nameConverter.convertInventory(prefilteredInventory);
+      const filteredItems = filterItems(convertedItems);
+      const itemCounts = countItems(filteredItems);
+      paddedLog(`${filteredItems.length} items found in inventory`);
+      console.log(itemCounts);
+      return itemCounts;
+    } catch (err) {
+      console.error("An error occurred while processing the inventory:", err);
+      return {};
+    }
+  }
+
+  async function processStorageUnits() {
     let finalItemCounts = {};
     try {
       const storageUnitIds = getStorageUnitIds();
       for (const [unitIndex, unitId] of storageUnitIds.entries()) {
         const items = await getCasketContentsAsync(cs2, unitId);
-        const convertedItems = nameConverter.convertInventory(items, false);
+        const convertedItems = nameConverter.convertInventory(items);
         const filteredItems = filterItems(convertedItems);
         const itemCounts = countItems(filteredItems);
         for (const [itemName, count] of Object.entries(itemCounts)) {
@@ -85,18 +136,10 @@ console.error = (...args) => {
         );
         console.log(itemCounts);
       }
-      paddedLog("Saving config...");
-      fs.writeFileSync(
-        processedInventoryPath,
-        JSON.stringify(finalItemCounts, null, 2),
-      );
-      paddedLog("Processing complete.");
-      paddedLog("This window will automatically close in 10 seconds.");
+      return finalItemCounts;
     } catch (err) {
-      console.error("An error occurred during processing:", err);
-    } finally {
-      user.logOff();
-      process.exit(0);
+      console.error("An error occurred while processing storage units:", err);
+      return {};
     }
   }
 
