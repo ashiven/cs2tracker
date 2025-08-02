@@ -513,8 +513,7 @@ class InventoryImportProcessFrame(ttk.Frame):
         self.queue = Queue()
         self.thread = Thread(target=self._read_lines, args=(self.process, self.queue), daemon=True)
         self.thread.start()
-
-        self.after(100, self._update_lines)
+        self._update_lines()
 
     def _update_lines(self):
         """Update the text widget with lines from the subprocess output."""
@@ -528,7 +527,7 @@ class InventoryImportProcessFrame(ttk.Frame):
             pass
 
         if self.process.poll() is None or not self.queue.empty():
-            self.after(100, self._update_lines)
+            self.after(50, self._update_lines)
         else:
             self._cleanup()
 
