@@ -1,4 +1,3 @@
-import time
 import tkinter as tk
 from queue import Empty, Queue
 from shutil import copy
@@ -22,7 +21,7 @@ ADD_CUSTOM_ITEM_TITLE = "Add Custom Item"
 ADD_CUSTOM_ITEM_SIZE = "500x220"
 
 IMPORT_INVENTORY_TITLE = "Import Steam Inventory"
-IMPORT_INVENTORY_SIZE = "500x450"
+IMPORT_INVENTORY_SIZE = "600x550"
 
 IMPORT_INVENTORY_PROCESS_TITLE = "Importing Steam Inventory..."
 IMPORT_INVENTORY_PROCESS_SIZE = "700x500"
@@ -324,16 +323,16 @@ class InventoryImportFrame(ttk.Frame):
     def _add_widgets(self):
         """Add widgets to the inventory import frame."""
         self._configure_checkboxes()
-        self.regular_inventory_checkbox.pack(anchor="e", padx=10, pady=5)
-        self.storage_units_checkbox.pack(anchor="e", padx=10, pady=5)
+        self.storage_units_checkbox.pack(anchor="w", padx=20, pady=(15, 5))
+        self.regular_inventory_checkbox.pack(anchor="w", padx=20, pady=5)
 
-        self.import_cases_checkbox.pack(anchor="w", padx=10, pady=5)
-        self.import_sticker_capsules_checkbox.pack(anchor="w", padx=10, pady=5)
-        self.import_stickers_checkbox.pack(anchor="w", padx=10, pady=5)
-        self.import_others_checkbox.pack(anchor="w", padx=10, pady=5)
+        self.import_cases_checkbox.pack(anchor="w", padx=20, pady=5)
+        self.import_sticker_capsules_checkbox.pack(anchor="w", padx=20, pady=5)
+        self.import_stickers_checkbox.pack(anchor="w", padx=20, pady=5)
+        self.import_others_checkbox.pack(anchor="w", padx=20, pady=5)
 
         self._configure_entries()
-        self.user_name_label.pack(pady=10)
+        self.user_name_label.pack(pady=(20, 10))
         self.user_name_entry.pack(fill="x", padx=50)
         self.password_label.pack(pady=10)
         self.password_entry.pack(fill="x", padx=50)
@@ -363,7 +362,7 @@ class InventoryImportFrame(ttk.Frame):
         """Configure the checkboxes for selecting what to import from the Steam
         inventory.
         """
-        self.regular_inventory_value = tk.BooleanVar(value=True)
+        self.regular_inventory_value = tk.BooleanVar(value=False)
         self.regular_inventory_checkbox = ttk.Checkbutton(
             self,
             text="Regular Inventory",
@@ -429,6 +428,9 @@ class InventoryImportFrame(ttk.Frame):
         This will also install the necessary npm packages if they are not already
         installed.
         """
+        regular_inventory = self.regular_inventory_value.get()
+        storage_units = self.storage_units_value.get()
+
         import_cases = self.import_cases_value.get()
         import_sticker_capsules = self.import_sticker_capsules_value.get()
         import_stickers = self.import_stickers_value.get()
@@ -442,6 +444,8 @@ class InventoryImportFrame(ttk.Frame):
             [
                 INVENTORY_IMPORT_SCRIPT,
                 INVENTORY_IMPORT_FILE,
+                str(regular_inventory),
+                str(storage_units),
                 str(import_cases),
                 str(import_sticker_capsules),
                 str(import_stickers),
@@ -458,11 +462,12 @@ class InventoryImportFrame(ttk.Frame):
         text_window = tk.Toplevel(self.editor_frame)
         text_window.title(IMPORT_INVENTORY_PROCESS_TITLE)
         text_window.geometry(IMPORT_INVENTORY_PROCESS_SIZE)
+        text_window.focus_set()
 
         process_frame = InventoryImportProcessFrame(text_window, self.editor_frame)
         process_frame.pack(expand=True, fill="both", padx=15, pady=15)
-        process_frame.start(node_cmd)
         process_frame.console.focus_set()
+        process_frame.start(node_cmd)
 
 
 class InventoryImportProcessFrame(ttk.Frame):
@@ -531,11 +536,10 @@ class InventoryImportProcessFrame(ttk.Frame):
         """Clean up the process and thread after completion and trigger a config update
         from the newly written inventory file.
         """
-        config.read_from_inventory_file()
-        self.editor_frame.reload_config_into_tree()
-        self.editor_frame.tree.focus_set()
         self.process.wait()
         self.thread.join()
 
-        time.sleep(10)
+        config.read_from_inventory_file()
+        self.editor_frame.reload_config_into_tree()
+        self.editor_frame.tree.focus_set()
         self.parent.destroy()
