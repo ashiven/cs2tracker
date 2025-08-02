@@ -7,6 +7,11 @@ PADDING_LEFT = 4
 PADDING_RIGHT = 0
 
 
+MAX_LINE_LEN = 72
+SEPARATOR = "-"
+STEAM_PRICE_INFO = "Owned: {:<10}  Steam market price: ${:<10}  Total: ${:<10}\n"
+
+
 class PaddedConsole:
     def __init__(self, padding=(PADDING_TOP, PADDING_RIGHT, PADDING_BOTTOM, PADDING_LEFT)):
         """Initialize a PaddedConsole with specified padding."""
@@ -21,6 +26,20 @@ class PaddedConsole:
         """Print error text with padding to the console."""
         text = "[bold red][!] " + text
         self.print(text)
+
+    def title(self, text, color):
+        """Print the given text as a title."""
+        title = text.center(MAX_LINE_LEN, SEPARATOR)
+        console.print(f"[bold {color}]{title}\n")
+
+    def separator(self, color):
+        """Print a separator line."""
+        separator = SEPARATOR * MAX_LINE_LEN
+        console.print(f"[bold {color}]{separator}")
+
+    def steam_price(self, owned, steam_market_price, total_owned):
+        """Print price information."""
+        console.print(STEAM_PRICE_INFO.format(owned, steam_market_price, total_owned))
 
     def __getattr__(self, attr):
         """Ensure console methods can be called directly on PaddedConsole."""

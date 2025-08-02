@@ -13,10 +13,6 @@ from cs2tracker.constants import AUTHOR_STRING, BANNER, CAPSULE_INFO, CASE_HREFS
 from cs2tracker.scraper.discord_notifier import DiscordNotifier
 from cs2tracker.util import PriceLogs, get_config, get_console
 
-MAX_LINE_LEN = 72
-SEPARATOR = "-"
-PRICE_INFO = "Owned: {:<10}  Steam market price: ${:<10}  Total: ${:<10}\n"
-
 HTTP_PROXY_URL = "http://{}:@smartproxy.crawlbase.com:8012"
 HTTPS_PROXY_URL = "http://{}:@smartproxy.crawlbase.com:8012"
 
@@ -49,6 +45,7 @@ class Scraper:
         """Initialize the Scraper class."""
         self._start_session()
         self.error_stack = []
+        self.parsers = []
         self.usd_total = 0
         self.eur_total = 0
 
@@ -108,23 +105,20 @@ class Scraper:
             )
 
         self._print_total()
-        PriceLogs.save(self.usd_total, self.eur_total)
         self._send_discord_notification()
+        PriceLogs.save(self.usd_total, self.eur_total)
 
     def _print_total(self):
         """Print the total prices in USD and EUR, formatted with titles and
         separators.
         """
-        usd_title = "USD Total".center(MAX_LINE_LEN, SEPARATOR)
-        console.print(f"[bold green]{usd_title}")
+        console.title("USD Total", "green")
         console.print(f"${self.usd_total:.2f}")
 
-        eur_title = "EUR Total".center(MAX_LINE_LEN, SEPARATOR)
-        console.print(f"[bold green]{eur_title}")
+        console.title("EUR Total", "green")
         console.print(f"€{self.eur_total:.2f}")
 
-        end_string = SEPARATOR * MAX_LINE_LEN
-        console.print(f"[bold green]{end_string}\n")
+        console.separator("green")
 
     def _send_discord_notification(self):
         """Send a message to a Discord webhook if notifications are enabled in the
@@ -171,26 +165,6 @@ class Scraper:
 
         return page
 
-    def _print_item_title(self, raw_item_str, from_config=False, from_href=False):
-        """
-        Print the title for a case, capsule, or custom item.
-
-        :param raw_item_str: The raw string to convert into an item name and title.
-        :param from_config: Whether the raw item string is from the config file.
-        :param from_href: Whether the raw item string is an href.
-        :return: The formatted item name.
-        """
-        if from_config:
-            item_name = raw_item_str.replace("_", " ").title()
-        elif from_href:
-            item_name = unquote(raw_item_str.split("/")[-1])
-        else:
-            item_name = raw_item_str
-
-        item_title = item_name.center(MAX_LINE_LEN, SEPARATOR)
-        console.print(f"[bold magenta]{item_title}\n")
-        return item_name
-
     def _parse_item_price(self, item_page, item_href):
         """
         Parse the price of an item from the given steamcommunity market page and item
@@ -226,7 +200,7 @@ class Scraper:
         :param update_sheet_callback: Optional callback function to update a tksheet
             that is displayed in the GUI with the latest scraper price calculation.
         """
-        self._print_item_title(capsule_section)
+        console.title(capsule_section, "magenta")
         capsule_usd_total = 0
         try:
             capsule_page = self._get_page(capsule_info["page"])
@@ -241,7 +215,7 @@ class Scraper:
                 price_usd_owned = round(float(owned * price_usd), 2)
 
                 console.print(f"[bold deep_sky_blue4]{capsule_name}")
-                console.print(PRICE_INFO.format(owned, price_usd, price_usd_owned))
+                console.steam_price(owned, price_usd, price_usd_owned)
                 capsule_usd_total += price_usd_owned
 
                 if update_sheet_callback:
@@ -308,14 +282,15 @@ class Scraper:
             if int(owned) == 0:
                 continue
 
-            case_name = self._print_item_title(config_case_name, from_config=True)
+            case_name = config.option_to_name(config_case_name)
+            console.title(case_name, "magenta")
             try:
                 case_page_url = self._market_page_from_href(CASE_HREFS[case_index])
                 case_page = self._get_page(case_page_url)
                 price_usd = self._parse_item_price(case_page, CASE_HREFS[case_index])
                 price_usd_owned = round(float(int(owned) * price_usd), 2)
 
-                console.print(PRICE_INFO.format(owned, price_usd, price_usd_owned))
+                console.steam_price(owned, price_usd, price_usd_owned)
                 case_usd_total += price_usd_owned
 
                 if update_sheet_callback:
@@ -349,14 +324,15 @@ class Scraper:
             if int(owned) == 0:
                 continue
 
-            custom_item_name = self._print_item_title(custom_item_href, from_href=True)
+            custom_item_name = config.option_to_name(custom_item_href, custom=True)
+            console.title(custom_item_name, "magenta")
             try:
                 custom_item_page_url = self._market_page_from_href(custom_item_href)
                 custom_item_page = self._get_page(custom_item_page_url)
                 price_usd = self._parse_item_price(custom_item_page, custom_item_href)
                 price_usd_owned = round(float(int(owned) * price_usd), 2)
 
-                console.print(PRICE_INFO.format(owned, price_usd, price_usd_owned))
+                console.steam_price(owned, price_usd, price_usd_owned)
                 custom_item_usd_total += price_usd_owned
 
                 if update_sheet_callback:
