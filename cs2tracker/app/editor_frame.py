@@ -161,9 +161,9 @@ class ConfigEditorFrame(ttk.Frame):
                 continue
             section_level = self.tree.insert("", "end", iid=section, text=section)
             for config_option, value in config.items(section):
-                if section == "Custom Items":
-                    custom_item_name = config.option_to_name(config_option, custom=True)
-                    self.tree.insert(section_level, "end", text=custom_item_name, values=[value])
+                if section == "Custom Items" or section == "Cases":
+                    option_name = config.option_to_name(config_option, href=True)
+                    self.tree.insert(section_level, "end", text=option_name, values=[value])
                 else:
                     option_name = config.option_to_name(config_option)
                     self.tree.insert(section_level, "end", text=option_name, values=[value])
@@ -290,18 +290,30 @@ class CustomItemFrame(ttk.Frame):
         add_button.pack(pady=10)
         self.parent.bind("<Return>", lambda _: add_button.invoke())
 
-    def _add_custom_item(self, item_url, item_owned):
+    def _add_custom_item(self, item_href, item_owned):
         """Add a custom item to the configuration."""
-        if not item_url or not item_owned:
+        if not item_href or not item_owned:
             messagebox.showerror("Input Error", "All fields must be filled out.", parent=self)
             self.editor_frame.focus_set()
             self.parent.focus_set()
             return
 
+        item_name = config.option_to_name(item_href, href=True)
+
+        # Make sure not to reinsert custom items that have already been added
+        for option in self.editor_frame.tree.get_children("Custom Items"):
+            option_name = self.editor_frame.tree.item(option, "text")
+            if option_name == item_name:
+                self.editor_frame.tree.set(option, column="#1", value=item_owned)
+                self.editor_frame.focus_set()
+                self.editor_frame.save_config()
+                self.parent.destroy()
+                return
+
         self.editor_frame.tree.insert(
             "Custom Items",
             "end",
-            text=config.option_to_name(item_url, custom=True),
+            text=item_name,
             values=[item_owned],
         )
         self.editor_frame.focus_set()

@@ -147,7 +147,7 @@ class ValidatedConfig(ConfigParser):
             self.last_error = error
             self.valid = False
 
-    def option_to_name(self, option, custom=False):
+    def option_to_name(self, option, href=False):
         """
         Convert an internal option representation to a reader-friendly name.
 
@@ -155,7 +155,7 @@ class ValidatedConfig(ConfigParser):
         :param custom: If True, the option is for a custom item.
         :return: The reader-friendly name.
         """
-        if custom:
+        if href:
             converted_option = unquote(option.split("/")[-1])
         else:
             converted_option = option.replace("_", " ").title()
