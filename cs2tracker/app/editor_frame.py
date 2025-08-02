@@ -323,8 +323,8 @@ class InventoryImportFrame(ttk.Frame):
     def _add_widgets(self):
         """Add widgets to the inventory import frame."""
         self._configure_checkboxes()
-        self.regular_inventory_checkbox.pack(anchor="w", padx=20, pady=(15, 5))
-        self.storage_units_checkbox.pack(anchor="w", padx=20, pady=5)
+        self.storage_units_checkbox.pack(anchor="w", padx=20, pady=(15, 5))
+        self.regular_inventory_checkbox.pack(anchor="w", padx=20, pady=5)
 
         self.import_cases_checkbox.pack(anchor="w", padx=20, pady=5)
         self.import_sticker_capsules_checkbox.pack(anchor="w", padx=20, pady=5)
@@ -362,7 +362,7 @@ class InventoryImportFrame(ttk.Frame):
         """Configure the checkboxes for selecting what to import from the Steam
         inventory.
         """
-        self.regular_inventory_value = tk.BooleanVar(value=True)
+        self.regular_inventory_value = tk.BooleanVar(value=False)
         self.regular_inventory_checkbox = ttk.Checkbutton(
             self,
             text="Regular Inventory",
