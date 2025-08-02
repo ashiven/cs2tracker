@@ -22,7 +22,7 @@ ADD_CUSTOM_ITEM_TITLE = "Add Custom Item"
 ADD_CUSTOM_ITEM_SIZE = "500x220"
 
 IMPORT_INVENTORY_TITLE = "Import Steam Inventory"
-IMPORT_INVENTORY_SIZE = "500x450"
+IMPORT_INVENTORY_SIZE = "600x550"
 
 IMPORT_INVENTORY_PROCESS_TITLE = "Importing Steam Inventory..."
 IMPORT_INVENTORY_PROCESS_SIZE = "700x500"
@@ -324,16 +324,16 @@ class InventoryImportFrame(ttk.Frame):
     def _add_widgets(self):
         """Add widgets to the inventory import frame."""
         self._configure_checkboxes()
-        self.regular_inventory_checkbox.pack(anchor="e", padx=10, pady=5)
-        self.storage_units_checkbox.pack(anchor="e", padx=10, pady=5)
+        self.regular_inventory_checkbox.pack(anchor="w", padx=20, pady=5)
+        self.storage_units_checkbox.pack(anchor="w", padx=20, pady=5)
 
-        self.import_cases_checkbox.pack(anchor="w", padx=10, pady=5)
-        self.import_sticker_capsules_checkbox.pack(anchor="w", padx=10, pady=5)
-        self.import_stickers_checkbox.pack(anchor="w", padx=10, pady=5)
-        self.import_others_checkbox.pack(anchor="w", padx=10, pady=5)
+        self.import_cases_checkbox.pack(anchor="w", padx=20, pady=5)
+        self.import_sticker_capsules_checkbox.pack(anchor="w", padx=20, pady=5)
+        self.import_stickers_checkbox.pack(anchor="w", padx=20, pady=5)
+        self.import_others_checkbox.pack(anchor="w", padx=20, pady=5)
 
         self._configure_entries()
-        self.user_name_label.pack(pady=10)
+        self.user_name_label.pack(pady=(20, 10))
         self.user_name_entry.pack(fill="x", padx=50)
         self.password_label.pack(pady=10)
         self.password_entry.pack(fill="x", padx=50)
