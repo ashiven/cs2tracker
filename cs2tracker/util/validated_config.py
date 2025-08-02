@@ -68,10 +68,15 @@ class ValidatedConfig(ConfigParser):
                     raise ValueError(
                         f"Invalid value in 'Custom Items' section: {custom_item_href} = {custom_item_owned}"
                     )
-            for case_name, case_owned in self.items("Cases"):
+            for case_href, case_owned in self.items("Cases"):
+                if not re.match(STEAM_MARKET_LISTING_REGEX, case_href):
+                    raise ValueError(
+                        f"Invalid Steam market listing URL in 'Custom Items' section: {case_href}"
+                    )
+
                 if int(case_owned) < 0:
                     raise ValueError(
-                        f"Invalid value in 'Cases' section: {case_name} = {case_owned}"
+                        f"Invalid value in 'Cases' section: {case_href} = {case_owned}"
                     )
             for capsule_section in CAPSULE_INFO:
                 for capsule_name, capsule_owned in self.items(capsule_section):
@@ -126,13 +131,17 @@ class ValidatedConfig(ConfigParser):
         try:
             with open(INVENTORY_IMPORT_FILE, "r", encoding="utf-8") as inventory_file:
                 inventory_data = json.load(inventory_file)
-
                 added_to_config = set()
+
                 for item_name, item_owned in inventory_data.items():
-                    config_item_name = item_name.replace(" ", "_").lower()
+                    option_name = self.name_to_option(item_name)
+                    option_name_href = self.name_to_option(item_name, href=True)
                     for section in self.sections():
-                        if config_item_name in self.options(section):
-                            self.set(section, config_item_name, str(item_owned))
+                        if option_name in self.options(section):
+                            self.set(section, option_name, str(item_owned))
+                            added_to_config.add(item_name)
+                        elif option_name_href in self.options(section):
+                            self.set(section, option_name_href, str(item_owned))
                             added_to_config.add(item_name)
 
                 for item_name, item_owned in inventory_data.items():
@@ -162,7 +171,7 @@ class ValidatedConfig(ConfigParser):
 
         return converted_option
 
-    def name_to_option(self, name, custom=False):
+    def name_to_option(self, name, href=False):
         """
         Convert a reader-friendly name to an internal option representation.
 
@@ -170,7 +179,7 @@ class ValidatedConfig(ConfigParser):
         :param custom: If True, the name is for a custom item.
         :return: The internal option representation.
         """
-        if custom:
+        if href:
             converted_name = STEAM_MARKET_LISTING_BASEURL_CS2 + quote(name)
         else:
             converted_name = name.replace(" ", "_").lower()

@@ -59,11 +59,10 @@ class ConfigEditorFrame(ttk.Frame):
             config.add_section(section)
             for item in self.tree.get_children(section):
                 item_name = self.tree.item(item, "text")
-                config_option = (
-                    config.name_to_option(item_name, custom=True)
-                    if section == "Custom Items"
-                    else config.name_to_option(item_name)
-                )
+                if section == "Custom Items" or section == "Cases":
+                    config_option = config.name_to_option(item_name, href=True)
+                else:
+                    config_option = config.name_to_option(item_name)
                 value = self.tree.item(item, "values")[0]
                 config.set(section, config_option, value)
 
