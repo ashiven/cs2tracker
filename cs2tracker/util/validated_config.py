@@ -1,7 +1,7 @@
 import json
 import re
 from configparser import ConfigParser, ParsingError
-from urllib.parse import quote
+from urllib.parse import quote, unquote
 
 from cs2tracker.constants import CAPSULE_INFO, CONFIG_FILE, INVENTORY_IMPORT_FILE
 from cs2tracker.util.padded_console import get_console
@@ -26,11 +26,20 @@ class ValidatedConfig(ConfigParser):
             console.error(f"Config error: {error}")
             self.last_error = error
 
-    def load_from_file(self):
-        """Load the configuration file and validate it."""
+    def delete_display_sections(self):
+        """
+        Delete all sections that are displayed to the user from the config.
+
+        (This excludes the internal App Settings section)
+        """
+        use_proxy = self.getboolean("App Settings", "use_proxy", fallback=False)
+        discord_notifications = self.getboolean(
+            "App Settings", "discord_notifications", fallback=False
+        )
         self.clear()
-        self.read(CONFIG_FILE)
-        self._validate_config()
+        self.add_section("App Settings")
+        self.set("App Settings", "use_proxy", str(use_proxy))
+        self.set("App Settings", "discord_notifications", str(discord_notifications))
 
     def _validate_config_sections(self):
         """Validate that the configuration file has all required sections."""
@@ -92,6 +101,12 @@ class ValidatedConfig(ConfigParser):
             self.valid = False
             self.last_error = error
 
+    def load_from_file(self):
+        """Load the configuration file and validate it."""
+        self.clear()
+        self.read(CONFIG_FILE)
+        self._validate_config()
+
     def write_to_file(self):
         """Validate the current configuration and write it to the configuration file if
         it is valid.
@@ -131,6 +146,36 @@ class ValidatedConfig(ConfigParser):
             console.error(f"Error reading inventory file: {error}")
             self.last_error = error
             self.valid = False
+
+    def option_to_name(self, option, custom=False):
+        """
+        Convert an internal option representation to a reader-friendly name.
+
+        :param option: The internal option representation to convert.
+        :param custom: If True, the option is for a custom item.
+        :return: The reader-friendly name.
+        """
+        if custom:
+            converted_option = unquote(option.split("/")[-1])
+        else:
+            converted_option = option.replace("_", " ").title()
+
+        return converted_option
+
+    def name_to_option(self, name, custom=False):
+        """
+        Convert a reader-friendly name to an internal option representation.
+
+        :param name: The reader-friendly name to convert.
+        :param custom: If True, the name is for a custom item.
+        :return: The internal option representation.
+        """
+        if custom:
+            converted_name = STEAM_MARKET_LISTING_BASEURL_CS2 + quote(name)
+        else:
+            converted_name = name.replace(" ", "_").lower()
+
+        return converted_name
 
     def toggle_use_proxy(self, enabled: bool):
         """

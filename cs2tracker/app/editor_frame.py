@@ -4,7 +4,6 @@ from shutil import copy
 from subprocess import PIPE, STDOUT
 from threading import Thread
 from tkinter import messagebox, ttk
-from urllib.parse import unquote
 
 from nodejs import node
 from ttk_text import ThemedText
@@ -53,15 +52,42 @@ class ConfigEditorFrame(ttk.Frame):
         button_frame = ConfigEditorButtonFrame(self, self.tree)
         button_frame.pack(side="bottom", padx=10, pady=(0, 10))
 
+    def save_config(self):
+        """Save the current configuration from the treeview to the config file."""
+        config.delete_display_sections()
+        for section in self.tree.get_children():
+            config.add_section(section)
+            for item in self.tree.get_children(section):
+                item_name = self.tree.item(item, "text")
+                config_option = (
+                    config.name_to_option(item_name, custom=True)
+                    if section == "Custom Items"
+                    else config.name_to_option(item_name)
+                )
+                value = self.tree.item(item, "values")[0]
+                config.set(section, config_option, value)
+
+        config.write_to_file()
+        if not config.valid:
+            config.load_from_file()
+            self.reload_config_into_tree()
+            messagebox.showerror(
+                "Config Error",
+                f"The configuration is invalid. ({config.last_error})",
+            )
+        self.parent.focus_set()
+        self.tree.focus_set()
+
     def _save_edit(self, event, row, column):
         """Save the edited value in the treeview and destroy the entry widget."""
         self.tree.set(row, column=column, value=event.widget.get())
-        event.widget.destroy()
+        self.save_config()
         self.tree.focus_set()
+        event.widget.destroy()
 
     def _set_cell_value(self, event, row=None, column=None):
         """
-        Set the value of a cell in the treeview to be editable when double- clicked.
+        Set the value of a cell in the treeview to be editable when double-clicked.
 
         Source: https://stackoverflow.com/questions/75787251/create-an-editable-tkinter-treeview-with-keyword-connection
         """
@@ -86,11 +112,30 @@ class ConfigEditorFrame(ttk.Frame):
             return
 
     def _set_selection_value(self, _):
+        """Set the value of the currently selected cell in the treeview to be
+        editable.
+        """
         selected = self.tree.selection()
         if selected:
             row = selected[0]
             column = "#1"
             self._set_cell_value(None, row=row, column=column)
+
+    def _delete_selection_value(self, _):
+        """
+        Delete the value of the currently selected cell in the treeview.
+
+        This only works for custom items, as other sections are not editable.
+        """
+        selected = self.tree.selection()
+        if selected:
+            row = selected[0]
+            section_name = self.tree.parent(row)
+            if section_name == "Custom Items":
+                self.tree.delete(row)
+                self.save_config()
+                self.tree.focus("User Settings")
+                self.tree.selection_set("User Settings")
 
     def _destroy_entry(self, _):
         """Destroy any entry widgets in the treeview on an event, such as a mouse wheel
@@ -107,8 +152,9 @@ class ConfigEditorFrame(ttk.Frame):
         """
         self.tree.bind("<Double-1>", self._set_cell_value)
         self.tree.bind("<Return>", self._set_selection_value)
-        self.parent.bind("<MouseWheel>", self._destroy_entry)  # type: ignore
-        self.parent.bind("<Escape>", self._destroy_entry)  # type: ignore
+        self.tree.bind("<BackSpace>", self._delete_selection_value)
+        self.parent.bind("<MouseWheel>", self._destroy_entry)
+        self.parent.bind("<Escape>", self._destroy_entry)
 
     def _load_config_into_tree(self):
         """Load the configuration options into the treeview for display and editing."""
@@ -118,10 +164,10 @@ class ConfigEditorFrame(ttk.Frame):
             section_level = self.tree.insert("", "end", iid=section, text=section)
             for config_option, value in config.items(section):
                 if section == "Custom Items":
-                    custom_item_name = unquote(config_option.split("/")[-1])
+                    custom_item_name = config.option_to_name(config_option, custom=True)
                     self.tree.insert(section_level, "end", text=custom_item_name, values=[value])
                 else:
-                    option_name = config_option.replace("_", " ").title()
+                    option_name = config.option_to_name(config_option)
                     self.tree.insert(section_level, "end", text=option_name, values=[value])
 
         self.tree.focus("User Settings")
@@ -175,9 +221,6 @@ class ConfigEditorButtonFrame(ttk.Frame):
         """Add buttons to the button frame for saving the configuration and adding
         custom items.
         """
-        save_button = ttk.Button(self, text="Save", command=self._save_config)
-        save_button.pack(side="left", expand=True, padx=5)
-
         reset_button = ttk.Button(self, text="Reset", command=self._reset_config)
         reset_button.pack(side="left", expand=True, padx=5)
 
@@ -188,33 +231,6 @@ class ConfigEditorButtonFrame(ttk.Frame):
             self, text="Import Steam Inventory", command=self._import_steam_inventory
         )
         import_inventory_button.pack(side="left", expand=True, padx=5)
-
-    def _save_config(self):
-        """Save the current configuration from the treeview to the config file."""
-        for child in self.tree.get_children():
-            for item in self.tree.get_children(child):
-                title_option = self.tree.item(item, "text")
-                config_option = title_option.lower().replace(" ", "_")
-                value = self.tree.item(item, "values")[0]
-                section = self.tree.parent(item)
-                section_name = self.tree.item(section, "text")
-                if section_name == "Custom Items":
-                    # custom items are already saved upon creation (Saving them again would result in duplicates)
-                    continue
-                config.set(section_name, config_option, value)
-
-        config.write_to_file()
-        if config.valid:
-            messagebox.showinfo("Config Saved", "The configuration has been saved successfully.")
-        else:
-            config.load_from_file()
-            self.parent.reload_config_into_tree()
-            messagebox.showerror(
-                "Config Error",
-                f"The configuration is invalid. ({config.last_error})",
-            )
-        self.parent.focus_set()
-        self.parent.tree.focus_set()
 
     def _reset_config(self):
         """Reset the configuration file to its default state."""
@@ -278,29 +294,20 @@ class CustomItemFrame(ttk.Frame):
 
     def _add_custom_item(self, item_url, item_owned):
         """Add a custom item to the configuration."""
-        self.parent.destroy()
-
         if not item_url or not item_owned:
             messagebox.showerror("Input Error", "All fields must be filled out.")
-            return
-        try:
-            if int(item_owned) < 0:
-                raise ValueError("Owned count must be a non-negative number.")
-        except ValueError as error:
-            messagebox.showerror("Input Error", f"Invalid owned count: {error}")
+            self.grandparent.focus_set()
+            self.parent.focus_set()
             return
 
-        config.set("Custom Items", item_url, item_owned)
-        config.write_to_file()
-        if config.valid:
-            config.load_from_file()
-            self.grandparent.reload_config_into_tree()
-        else:
-            config.remove_option("Custom Items", item_url)
-            messagebox.showerror(
-                "Config Error",
-                f"The configuration is invalid. ({config.last_error})",
-            )
+        self.tree.insert(
+            "Custom Items",
+            "end",
+            text=config.option_to_name(item_url, custom=True),
+            values=[item_owned],
+        )
+        self.parent.master.save_config()
+        self.parent.destroy()
 
 
 class InventoryImportFrame(ttk.Frame):
