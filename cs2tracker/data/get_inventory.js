@@ -70,7 +70,7 @@ console.error = (...args) => {
     let finalItemCounts = {};
 
     if (importInventory) {
-      const inventoryItemCounts = processInventory();
+      const inventoryItemCounts = await processInventory();
       for (const [itemName, count] of Object.entries(inventoryItemCounts)) {
         finalItemCounts[itemName] = (finalItemCounts[itemName] || 0) + count;
       }
@@ -98,7 +98,7 @@ console.error = (...args) => {
 
   // TODO: The inventory may contain items that are not marketable or tradable,
   // so we have to make sure to process these items correctly in the main app.
-  function processInventory() {
+  async function processInventory() {
     try {
       // filter out items that have the casket_id property set from the inventory
       // because these are items that should be contained in storage units
