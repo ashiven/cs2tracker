@@ -91,7 +91,7 @@ console.error = (...args) => {
         JSON.stringify(finalItemCounts, null, 2),
       );
       paddedLog("Processing complete.");
-      paddedLog("You may close this window now.");
+      paddedLog("This window will automatically close in 10 seconds.");
     } catch (err) {
       console.error("An error occurred during processing:", err);
     } finally {

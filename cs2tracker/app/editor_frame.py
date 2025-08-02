@@ -1,3 +1,4 @@
+import time
 import tkinter as tk
 from queue import Empty, Queue
 from shutil import copy
@@ -49,7 +50,7 @@ class ConfigEditorFrame(ttk.Frame):
         self._configure_treeview()
         self.tree.pack(expand=True, fill="both")
 
-        button_frame = ConfigEditorButtonFrame(self, self.tree)
+        button_frame = ConfigEditorButtonFrame(self)
         button_frame.pack(side="bottom", padx=10, pady=(0, 10))
 
     def save_config(self):
@@ -72,8 +73,7 @@ class ConfigEditorFrame(ttk.Frame):
             config.load_from_file()
             self.reload_config_into_tree()
             messagebox.showerror(
-                "Config Error",
-                f"The configuration is invalid. ({config.last_error})",
+                "Config Error", f"The configuration is invalid. ({config.last_error})", parent=self
             )
         self.parent.focus_set()
         self.tree.focus_set()
@@ -82,7 +82,6 @@ class ConfigEditorFrame(ttk.Frame):
         """Save the edited value in the treeview and destroy the entry widget."""
         self.tree.set(row, column=column, value=event.widget.get())
         self.save_config()
-        self.tree.focus_set()
         event.widget.destroy()
 
     def _set_cell_value(self, event, row=None, column=None):
@@ -134,8 +133,8 @@ class ConfigEditorFrame(ttk.Frame):
             if section_name == "Custom Items":
                 self.tree.delete(row)
                 self.save_config()
-                self.tree.focus("User Settings")
-                self.tree.selection_set("User Settings")
+                self.tree.focus("Custom Items")
+                self.tree.selection_set("Custom Items")
 
     def _destroy_entry(self, _):
         """Destroy any entry widgets in the treeview on an event, such as a mouse wheel
@@ -205,14 +204,13 @@ class ConfigEditorFrame(ttk.Frame):
 
 
 class ConfigEditorButtonFrame(ttk.Frame):
-    def __init__(self, parent, tree):
+    def __init__(self, editor_frame):
         """Initialize the button frame that contains buttons for saving the updated
         configuration and adding custom items.
         """
-        super().__init__(parent, padding=10)
+        super().__init__(editor_frame, padding=10)
 
-        self.parent = parent
-        self.tree = tree
+        self.editor_frame = editor_frame
         self.custom_item_dialog = None
 
         self._add_widgets()
@@ -235,43 +233,44 @@ class ConfigEditorButtonFrame(ttk.Frame):
     def _reset_config(self):
         """Reset the configuration file to its default state."""
         confirm = messagebox.askokcancel(
-            "Reset Config", "Are you sure you want to reset the configuration?"
+            "Reset Config", "Are you sure you want to reset the configuration?", parent=self
         )
         if confirm:
             copy(CONFIG_FILE_BACKUP, CONFIG_FILE)
             config.load_from_file()
-            self.parent.reload_config_into_tree()
-        self.parent.focus_set()
-        self.parent.tree.focus_set()
+            self.editor_frame.reload_config_into_tree()
+        self.editor_frame.focus_set()
+        self.editor_frame.tree.focus_set()
 
     def _add_custom_item(self):
         """Open a window to add a new custom item."""
-        custom_item_window = tk.Toplevel(self.parent)
+        custom_item_window = tk.Toplevel(self.editor_frame)
         custom_item_window.title(ADD_CUSTOM_ITEM_TITLE)
         custom_item_window.geometry(ADD_CUSTOM_ITEM_SIZE)
         custom_item_window.focus_set()
 
-        custom_item_frame = CustomItemFrame(custom_item_window, self.parent, self.tree)
+        custom_item_frame = CustomItemFrame(custom_item_window, self.editor_frame)
         custom_item_frame.pack(expand=True, fill="both", padx=15, pady=15)
+        self.editor_frame.tree.focus_set()
 
     def _import_steam_inventory(self):
         """Open a window to import the user's Steam inventory."""
-        steam_inventory_window = tk.Toplevel(self.parent)
+        steam_inventory_window = tk.Toplevel(self.editor_frame)
         steam_inventory_window.title(IMPORT_INVENTORY_TITLE)
         steam_inventory_window.geometry(IMPORT_INVENTORY_SIZE)
         steam_inventory_window.focus_set()
 
-        steam_inventory_frame = InventoryImportFrame(steam_inventory_window, self)
+        steam_inventory_frame = InventoryImportFrame(steam_inventory_window, self.editor_frame)
         steam_inventory_frame.pack(expand=True, fill="both", padx=15, pady=15)
+        self.editor_frame.tree.focus_set()
 
 
 class CustomItemFrame(ttk.Frame):
-    def __init__(self, parent, grandparent, tree):
+    def __init__(self, parent, editor_frame):
         """Initialize the custom item frame that allows users to add custom items."""
         super().__init__(parent, style="Card.TFrame", padding=15)
         self.parent = parent
-        self.grandparent = grandparent
-        self.tree = tree
+        self.editor_frame = editor_frame
         self._add_widgets()
 
     def _add_widgets(self):
@@ -295,35 +294,39 @@ class CustomItemFrame(ttk.Frame):
     def _add_custom_item(self, item_url, item_owned):
         """Add a custom item to the configuration."""
         if not item_url or not item_owned:
-            messagebox.showerror("Input Error", "All fields must be filled out.")
-            self.grandparent.focus_set()
+            messagebox.showerror("Input Error", "All fields must be filled out.", parent=self)
+            self.editor_frame.focus_set()
             self.parent.focus_set()
             return
 
-        self.tree.insert(
+        self.editor_frame.tree.insert(
             "Custom Items",
             "end",
             text=config.option_to_name(item_url, custom=True),
             values=[item_owned],
         )
-        self.parent.master.save_config()
+        self.editor_frame.focus_set()
+        self.editor_frame.save_config()
         self.parent.destroy()
 
 
 class InventoryImportFrame(ttk.Frame):
     # pylint: disable=too-many-instance-attributes
-    def __init__(self, parent, grandparent):
+    def __init__(self, parent, editor_frame):
         """Initialize the inventory import frame that allows users to import their Steam
         inventory.
         """
         super().__init__(parent, style="Card.TFrame", padding=10)
         self.parent = parent
-        self.grandparent = grandparent
+        self.editor_frame = editor_frame
         self._add_widgets()
 
     def _add_widgets(self):
         """Add widgets to the inventory import frame."""
         self._configure_checkboxes()
+        self.regular_inventory_checkbox.pack(anchor="e", padx=10, pady=5)
+        self.storage_units_checkbox.pack(anchor="e", padx=10, pady=5)
+
         self.import_cases_checkbox.pack(anchor="w", padx=10, pady=5)
         self.import_sticker_capsules_checkbox.pack(anchor="w", padx=10, pady=5)
         self.import_stickers_checkbox.pack(anchor="w", padx=10, pady=5)
@@ -337,15 +340,45 @@ class InventoryImportFrame(ttk.Frame):
         self.two_factor_label.pack(pady=10)
         self.two_factor_entry.pack(fill="x", padx=50)
 
-        self.import_button = ttk.Button(self, text="Import", command=self._import_inventory)
+        self.import_button = ttk.Button(
+            self, text="Import", command=self._import_inventory, state="disabled"
+        )
         self.import_button.pack(pady=10)
         self.parent.bind("<Return>", lambda _: self.import_button.invoke())
+
+        def form_complete(_):
+            if (
+                len(self.user_name_entry.get().strip()) > 0
+                and len(self.password_entry.get().strip()) > 0
+                and len(self.two_factor_entry.get().strip()) > 0
+            ):
+                self.import_button.configure(state="normal")
+            else:
+                self.import_button.configure(state="disabled")
+
+        self.parent.bind("<KeyRelease>", form_complete)
 
     def _configure_checkboxes(self):
         # pylint: disable=attribute-defined-outside-init
         """Configure the checkboxes for selecting what to import from the Steam
         inventory.
         """
+        self.regular_inventory_value = tk.BooleanVar(value=True)
+        self.regular_inventory_checkbox = ttk.Checkbutton(
+            self,
+            text="Regular Inventory",
+            variable=self.regular_inventory_value,
+            style="Switch.TCheckbutton",
+        )
+
+        self.storage_units_value = tk.BooleanVar(value=True)
+        self.storage_units_checkbox = ttk.Checkbutton(
+            self,
+            text="Storage Units",
+            variable=self.storage_units_value,
+            style="Switch.TCheckbutton",
+        )
+
         self.import_cases_value = tk.BooleanVar(value=True)
         self.import_cases_checkbox = ttk.Checkbutton(
             self, text="Import Cases", variable=self.import_cases_value, style="Switch.TCheckbutton"
@@ -386,7 +419,7 @@ class InventoryImportFrame(ttk.Frame):
         self.password_label = ttk.Label(self, text="Steam Password:")
         self.password_entry = ttk.Entry(self, show="*", justify="center", font=("Helvetica", 11))
 
-        self.two_factor_label = ttk.Label(self, text="Steam Guard Code (if enabled):")
+        self.two_factor_label = ttk.Label(self, text="Steam Guard Code:")
         self.two_factor_entry = ttk.Entry(self, justify="center", font=("Helvetica", 11))
 
     def _import_inventory(self):
@@ -422,11 +455,11 @@ class InventoryImportFrame(ttk.Frame):
         self.parent.destroy()
 
     def _display_node_subprocess(self, node_cmd):
-        text_window = tk.Toplevel(self.grandparent)
+        text_window = tk.Toplevel(self.editor_frame)
         text_window.title(IMPORT_INVENTORY_PROCESS_TITLE)
         text_window.geometry(IMPORT_INVENTORY_PROCESS_SIZE)
 
-        process_frame = InventoryImportProcessFrame(text_window)
+        process_frame = InventoryImportProcessFrame(text_window, self.editor_frame)
         process_frame.pack(expand=True, fill="both", padx=15, pady=15)
         process_frame.start(node_cmd)
         process_frame.console.focus_set()
@@ -435,10 +468,11 @@ class InventoryImportFrame(ttk.Frame):
 class InventoryImportProcessFrame(ttk.Frame):
     # pylint: disable=attribute-defined-outside-init
     # Source: https://stackoverflow.com/questions/27327886/issues-intercepting-subprocess-output-in-real-time
-    def __init__(self, parent):
+    def __init__(self, parent, editor_frame):
         """Initialize the frame that displays the output of the subprocess."""
         super().__init__(parent)
         self.parent = parent
+        self.editor_frame = editor_frame
         self._add_widgets()
 
     def _add_widgets(self):
@@ -498,7 +532,10 @@ class InventoryImportProcessFrame(ttk.Frame):
         from the newly written inventory file.
         """
         config.read_from_inventory_file()
-        self.parent.master.master.reload_config_into_tree()
-
+        self.editor_frame.reload_config_into_tree()
+        self.editor_frame.tree.focus_set()
         self.process.wait()
         self.thread.join()
+
+        time.sleep(10)
+        self.parent.destroy()

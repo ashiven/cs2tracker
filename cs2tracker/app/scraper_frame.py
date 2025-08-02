@@ -90,4 +90,4 @@ class ScraperFrame(ttk.Frame):
 
         if self.scraper.error_stack:
             last_error = self.scraper.error_stack[-1]
-            messagebox.showerror("An Error Occurred", f"{last_error.message}")
+            messagebox.showerror("An Error Occurred", f"{last_error.message}", parent=self)

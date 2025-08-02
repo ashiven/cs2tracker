@@ -235,6 +235,7 @@ class Application:
             messagebox.showerror(
                 "Config Error",
                 "You need to enter a valid crawlbase API key into the configuration to use this feature.",
+                parent=self.application_window,
             )
             return False
 
@@ -248,6 +249,7 @@ class Application:
             messagebox.showerror(
                 "Config Error",
                 "You need to enter a valid Discord webhook URL into the configuration to use this feature.",
+                parent=self.application_window,
             )
             return False
 
