@@ -79,7 +79,7 @@
 ## Configuration
 
 You can configure the app settings via the **Edit Config** option.
-This will open the config editor where you can change any setting by simply double clicking on it. On top of that, the config editor allows you to:
+This will open the config editor where you can change any setting by double clicking on it or navigating to it with the arrow keys and hitting enter. On top of that, the config editor allows you to:
 
 - Automatically import items from your Storage Units
 - Manually Specify the number of items you own
