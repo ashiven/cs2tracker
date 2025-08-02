@@ -34,25 +34,20 @@ config = get_config()
 class Application:
     def __init__(self):
         self.scraper = Scraper()
-        self.application_window = None
 
     def run(self):
-        """Run the main application window with buttons for scraping prices, editing the
-        configuration, showing history in a chart, and editing the log file.
-        """
-        self.application_window = self._configure_window()
+        """Run the main application window."""
+        window = self._configure_window()
 
         if DARK_THEME:
             sv_ttk.use_dark_theme()
         else:
             sv_ttk.use_light_theme()
 
-        self.application_window.mainloop()
+        window.mainloop()
 
     def _configure_window(self):
-        """Configure the main application window UI and add buttons for the main
-        functionalities.
-        """
+        """Configure the main application window."""
         window = tk.Tk()
         window.title(APPLICATION_NAME)
         window.geometry(WINDOW_SIZE)

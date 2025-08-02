@@ -3,6 +3,9 @@ import os
 import sys
 from datetime import datetime
 from shutil import copy
+from subprocess import DEVNULL
+
+from nodejs import npm
 
 try:
     from cs2tracker._version import version  # pylint: disable=E0611
@@ -80,6 +83,17 @@ INVENTORY_IMPORT_SCRIPT_DEPENDENCIES = [
     "@node-steam/vdf",
     "axios",
 ]
+
+# Ensures that the necessary node modules are installed if a user wants
+# to import their steam inventory via the cs2tracker/data/get_inventory.js Node.js script.
+if not os.path.exists(os.path.join(DATA_DIR, "node_modules")):
+    npm.Popen(
+        ["install", "-g", "--prefix", DATA_DIR] + INVENTORY_IMPORT_SCRIPT_DEPENDENCIES,
+        stdout=DEVNULL,
+        stderr=DEVNULL,
+        shell=True,
+        cwd=DATA_DIR,
+    )
 
 
 BANNER = """
