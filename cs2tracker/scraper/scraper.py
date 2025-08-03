@@ -9,7 +9,7 @@ from tenacity import RetryError, retry, stop_after_attempt
 
 from cs2tracker.constants import AUTHOR_STRING, BANNER
 from cs2tracker.scraper.discord_notifier import DiscordNotifier
-from cs2tracker.scraper.parsers import SteamParser
+from cs2tracker.scraper.parsers import CSGOTrader
 from cs2tracker.util import PriceLogs, get_config, get_console
 
 HTTP_PROXY_URL = "http://{}:@smartproxy.crawlbase.com:8012"
@@ -48,7 +48,7 @@ class Scraper:
     def __init__(self):
         """Initialize the Scraper class."""
         self._start_session()
-        self._add_parser(SteamParser)
+        self._add_parser(CSGOTrader)
 
         self.error_stack = []
         self.usd_total = 0
