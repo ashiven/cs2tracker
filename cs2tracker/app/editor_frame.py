@@ -59,11 +59,10 @@ class ConfigEditorFrame(ttk.Frame):
             config.add_section(section)
             for item in self.tree.get_children(section):
                 item_name = self.tree.item(item, "text")
-                config_option = (
-                    config.name_to_option(item_name, custom=True)
-                    if section == "Custom Items"
-                    else config.name_to_option(item_name)
-                )
+                if section not in ("App Settings", "User Settings"):
+                    config_option = config.name_to_option(item_name, href=True)
+                else:
+                    config_option = config.name_to_option(item_name)
                 value = self.tree.item(item, "values")[0]
                 config.set(section, config_option, value)
 
@@ -95,7 +94,7 @@ class ConfigEditorFrame(ttk.Frame):
                 column = self.tree.identify_column(event.x)
 
             item_text = self.tree.item(row, "text")
-            if any(item_text == section for section in config.sections()):
+            if column == "#0" or any(item_text == section for section in config.sections()):
                 return
             item_value = self.tree.item(row, "values")[0]
 
@@ -161,9 +160,9 @@ class ConfigEditorFrame(ttk.Frame):
                 continue
             section_level = self.tree.insert("", "end", iid=section, text=section)
             for config_option, value in config.items(section):
-                if section == "Custom Items":
-                    custom_item_name = config.option_to_name(config_option, custom=True)
-                    self.tree.insert(section_level, "end", text=custom_item_name, values=[value])
+                if section not in ("User Settings", "App Settings"):
+                    option_name = config.option_to_name(config_option, href=True)
+                    self.tree.insert(section_level, "end", text=option_name, values=[value])
                 else:
                     option_name = config.option_to_name(config_option)
                     self.tree.insert(section_level, "end", text=option_name, values=[value])
@@ -290,18 +289,30 @@ class CustomItemFrame(ttk.Frame):
         add_button.pack(pady=10)
         self.parent.bind("<Return>", lambda _: add_button.invoke())
 
-    def _add_custom_item(self, item_url, item_owned):
+    def _add_custom_item(self, item_href, item_owned):
         """Add a custom item to the configuration."""
-        if not item_url or not item_owned:
+        if not item_href or not item_owned:
             messagebox.showerror("Input Error", "All fields must be filled out.", parent=self)
             self.editor_frame.focus_set()
             self.parent.focus_set()
             return
 
+        item_name = config.option_to_name(item_href, href=True)
+
+        # Make sure not to reinsert custom items that have already been added
+        for option in self.editor_frame.tree.get_children("Custom Items"):
+            option_name = self.editor_frame.tree.item(option, "text")
+            if option_name == item_name:
+                self.editor_frame.tree.set(option, column="#1", value=item_owned)
+                self.editor_frame.focus_set()
+                self.editor_frame.save_config()
+                self.parent.destroy()
+                return
+
         self.editor_frame.tree.insert(
             "Custom Items",
             "end",
-            text=config.option_to_name(item_url, custom=True),
+            text=item_name,
             values=[item_owned],
         )
         self.editor_frame.focus_set()

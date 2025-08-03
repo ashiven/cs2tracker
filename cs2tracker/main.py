@@ -1,18 +1,9 @@
 import sys
-from subprocess import DEVNULL
 
 import urllib3
-from nodejs import npm
 
 from cs2tracker.app import Application
-from cs2tracker.constants import (
-    AUTHOR_STRING,
-    BANNER,
-    DATA_DIR,
-    INVENTORY_IMPORT_SCRIPT_DEPENDENCIES,
-    OS,
-    OSType,
-)
+from cs2tracker.constants import AUTHOR_STRING, BANNER, OS, OSType
 from cs2tracker.scraper import Scraper
 from cs2tracker.util import get_console
 
@@ -39,16 +30,6 @@ def main():
         scraper = Scraper()
         scraper.scrape_prices()
     else:
-        # Ensures that the necessary node modules are installed if a user wants
-        # to import their steam inventory via the cs2tracker/data/get_inventory.js Node.js script.
-        npm.Popen(
-            ["install", "-g", "--prefix", DATA_DIR] + INVENTORY_IMPORT_SCRIPT_DEPENDENCIES,
-            stdout=DEVNULL,
-            stderr=DEVNULL,
-            shell=True,
-            cwd=DATA_DIR,
-        )
-
         application = Application()
         application.run()
 

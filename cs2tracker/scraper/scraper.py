@@ -1,21 +1,16 @@
 import time
 from datetime import datetime
-from urllib.parse import unquote
 
-from bs4 import BeautifulSoup
-from bs4.element import Tag
 from currency_converter import CurrencyConverter
-from requests import RequestException, Session
+from requests import RequestException
 from requests.adapters import HTTPAdapter, Retry
+from requests_cache import CachedSession
 from tenacity import RetryError, retry, stop_after_attempt
 
-from cs2tracker.constants import AUTHOR_STRING, BANNER, CAPSULE_INFO, CASE_HREFS
+from cs2tracker.constants import AUTHOR_STRING, BANNER
 from cs2tracker.scraper.discord_notifier import DiscordNotifier
+from cs2tracker.scraper.parsers import CSGOTrader, PriceSource
 from cs2tracker.util import PriceLogs, get_config, get_console
-
-MAX_LINE_LEN = 72
-SEPARATOR = "-"
-PRICE_INFO = "Owned: {:<10}  Steam market price: ${:<10}  Total: ${:<10}\n"
 
 HTTP_PROXY_URL = "http://{}:@smartproxy.crawlbase.com:8012"
 HTTPS_PROXY_URL = "http://{}:@smartproxy.crawlbase.com:8012"
@@ -27,6 +22,11 @@ config = get_config()
 class ConfigError:
     def __init__(self):
         self.message = "Invalid configuration. Please fix the config file before running."
+
+
+class ParsingError:
+    def __init__(self, message):
+        self.message = message
 
 
 class RequestLimitExceededError:
@@ -48,13 +48,16 @@ class Scraper:
     def __init__(self):
         """Initialize the Scraper class."""
         self._start_session()
+        self._add_parser(CSGOTrader)
+
         self.error_stack = []
-        self.usd_total = 0
-        self.eur_total = 0
+        self.totals = {
+            price_source: {"usd": 0.0, "eur": 0.0} for price_source in self.parser.SOURCES
+        }
 
     def _start_session(self):
         """Start a requests session with custom headers and retry logic."""
-        self.session = Session()
+        self.session = CachedSession("scraper_cache", backend="memory")
         self.session.headers.update(
             {
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"
@@ -64,11 +67,15 @@ class Scraper:
         self.session.mount("http://", HTTPAdapter(max_retries=retries))
         self.session.mount("https://", HTTPAdapter(max_retries=retries))
 
+    def _add_parser(self, parser):
+        """Add a parser for a specific page where item prices should be scraped."""
+        self.parser = parser
+
     def _print_error(self):
         """Print the last error message from the error stack, if any."""
         last_error = self.error_stack[-1] if self.error_stack else None
         if last_error:
-            console.error(f"{last_error.message}\n")
+            console.error(f"{last_error.message}")
 
     def scrape_prices(self, update_sheet_callback=None):
         """
@@ -84,47 +91,58 @@ class Scraper:
             return
 
         # Reset totals from the previous run and clear the error stack
-        self.usd_total, self.eur_total = 0, 0
         self.error_stack.clear()
+        self.totals = {
+            price_source: {"usd": 0.0, "eur": 0.0} for price_source in self.parser.SOURCES
+        }
 
-        capsule_usd_total = self._scrape_capsule_section_prices(update_sheet_callback)
-        case_usd_total = self._scrape_case_prices(update_sheet_callback)
-        custom_item_usd_total = self._scrape_custom_item_prices(update_sheet_callback)
+        for section in config.sections():
+            if section in ("User Settings", "App Settings"):
+                continue
+            self._scrape_item_prices(section, update_sheet_callback)
 
-        self.usd_total += capsule_usd_total
-        self.usd_total += case_usd_total
-        self.usd_total += custom_item_usd_total
-        self.eur_total = CurrencyConverter().convert(self.usd_total, "USD", "EUR")
+        for price_source, totals in self.totals.items():
+            usd_total = totals["usd"]
+            eur_total = CurrencyConverter().convert(usd_total, "USD", "EUR")
+            self.totals.update({price_source: {"usd": usd_total, "eur": eur_total}})  # type: ignore
 
         if update_sheet_callback:
-            update_sheet_callback(["", "", "", ""])
-            update_sheet_callback(
-                [
-                    f"[{datetime.now().strftime('%Y-%m-%d')}] Total:",
-                    f"${self.usd_total:.2f}",
-                    f"€{self.eur_total:.2f}",
-                    "",
-                ]
-            )
+            update_sheet_callback(["", ""] + ["", ""] * len(self.parser.SOURCES))
+            for price_source, totals in self.totals.items():
+                usd_total = totals["usd"]
+                eur_total = totals["eur"]
+                update_sheet_callback(
+                    [
+                        f"[{datetime.now().strftime('%Y-%m-%d')}] {price_source.value.title()} Total:",
+                        f"${usd_total:.2f}",
+                        f"€{eur_total:.2f}",
+                        "",
+                    ]
+                )
 
         self._print_total()
-        PriceLogs.save(self.usd_total, self.eur_total)
         self._send_discord_notification()
+
+        # TODO: modify price logs, charts etc for multiple sources (only use steam as source for now)
+        steam_usd_total = self.totals[PriceSource.STEAM]["usd"]
+        steam_eur_total = self.totals[PriceSource.STEAM]["eur"]
+        PriceLogs.save(steam_usd_total, steam_eur_total)
 
     def _print_total(self):
         """Print the total prices in USD and EUR, formatted with titles and
         separators.
         """
-        usd_title = "USD Total".center(MAX_LINE_LEN, SEPARATOR)
-        console.print(f"[bold green]{usd_title}")
-        console.print(f"${self.usd_total:.2f}")
+        console.title("USD Total", "green")
+        for price_source, totals in self.totals.items():
+            usd_total = totals.get("usd")
+            console.print(f"{price_source.value.title():<10}: ${usd_total:.2f}")
 
-        eur_title = "EUR Total".center(MAX_LINE_LEN, SEPARATOR)
-        console.print(f"[bold green]{eur_title}")
-        console.print(f"€{self.eur_total:.2f}")
+        console.title("EUR Total", "green")
+        for price_source, totals in self.totals.items():
+            eur_total = totals.get("eur")
+            console.print(f"{price_source.value.title():<10}: €{eur_total:.2f}")
 
-        end_string = SEPARATOR * MAX_LINE_LEN
-        console.print(f"[bold green]{end_string}\n")
+        console.separator("green")
 
     def _send_discord_notification(self):
         """Send a message to a Discord webhook if notifications are enabled in the
@@ -171,207 +189,79 @@ class Scraper:
 
         return page
 
-    def _print_item_title(self, raw_item_str, from_config=False, from_href=False):
+    def _scrape_prices_from_all_sources(self, item_href, owned):
         """
-        Print the title for a case, capsule, or custom item.
+        For a given item href and owned count, scrape the item's price from all sources
+        available to the currently registered parser.
 
-        :param raw_item_str: The raw string to convert into an item name and title.
-        :param from_config: Whether the raw item string is from the config file.
-        :param from_href: Whether the raw item string is an href.
-        :return: The formatted item name.
+        :param item_href: The url of the steamcommunity market listing of the item
+        :param owned: How many of this item the user owns
+        :return: A list of item prices for the different sources
+        :raises RequestException: If the request fails.
+        :raises RetryError: If the retry limit is reached.
+        :raises ValueError: If the parser could not find the item
         """
-        if from_config:
-            item_name = raw_item_str.replace("_", " ").title()
-        elif from_href:
-            item_name = unquote(raw_item_str.split("/")[-1])
-        else:
-            item_name = raw_item_str
+        prices = []
+        for price_source in self.parser.SOURCES:
+            try:
+                item_page_url = self.parser.get_item_page_url(item_href, price_source)
+                item_page = self._get_page(item_page_url)
+                price_usd = self.parser.parse_item_price(item_page, item_href, price_source)
 
-        item_title = item_name.center(MAX_LINE_LEN, SEPARATOR)
-        console.print(f"[bold magenta]{item_title}\n")
-        return item_name
+                price_usd_owned = round(float(int(owned) * price_usd), 2)
+                self.totals[price_source]["usd"] += price_usd_owned
 
-    def _parse_item_price(self, item_page, item_href):
-        """
-        Parse the price of an item from the given steamcommunity market page and item
-        href.
-
-        :param item_page: The HTTP response object containing the item page content.
-        :param item_href: The href of the item listing to find the price for.
-        :return: The price of the item as a float.
-        :raises ValueError: If the item listing or price span cannot be found.
-        """
-        item_soup = BeautifulSoup(item_page.content, "html.parser")
-        item_listing = item_soup.find("a", attrs={"href": f"{item_href}"})
-        if not isinstance(item_listing, Tag):
-            raise ValueError(f"Failed to find item listing: {item_href}")
-
-        item_price_span = item_listing.find("span", attrs={"class": "normal_price"})
-        if not isinstance(item_price_span, Tag):
-            raise ValueError(f"Failed to find price span in item listing: {item_href}")
-
-        price_str = item_price_span.text.split()[2]
-        price = float(price_str.replace("$", ""))
-
-        return price
-
-    def _scrape_capsule_prices(self, capsule_section, capsule_info, update_sheet_callback=None):
-        """
-        Scrape prices for a specific capsule section, printing the details to the
-        console.
-
-        :param capsule_section: The section name in the config for the capsule.
-        :param capsule_info: A dictionary containing information about the capsule page,
-            hrefs, and names.
-        :param update_sheet_callback: Optional callback function to update a tksheet
-            that is displayed in the GUI with the latest scraper price calculation.
-        """
-        self._print_item_title(capsule_section)
-        capsule_usd_total = 0
-        try:
-            capsule_page = self._get_page(capsule_info["page"])
-            for capsule_href in capsule_info["items"]:
-                capsule_name = unquote(capsule_href.split("/")[-1])
-                config_capsule_name = capsule_name.replace(" ", "_").lower()
-                owned = config.getint(capsule_section, config_capsule_name, fallback=0)
-                if owned == 0:
-                    continue
-
-                price_usd = self._parse_item_price(capsule_page, capsule_href)
-                price_usd_owned = round(float(owned * price_usd), 2)
-
-                console.print(f"[bold deep_sky_blue4]{capsule_name}")
-                console.print(PRICE_INFO.format(owned, price_usd, price_usd_owned))
-                capsule_usd_total += price_usd_owned
-
-                if update_sheet_callback:
-                    update_sheet_callback([capsule_name, owned, price_usd, price_usd_owned])
-        except (RetryError, ValueError):
-            self.error_stack.append(RequestLimitExceededError())
-            self._print_error()
-        except Exception as error:
-            self.error_stack.append(UnexpectedError(error))
-            self._print_error()
-
-        return capsule_usd_total
-
-    def _scrape_capsule_section_prices(self, update_sheet_callback=None):
-        """
-        Scrape prices for all capsule sections defined in the configuration.
-
-        :param update_sheet_callback: Optional callback function to update a tksheet
-            that is displayed in the GUI with the latest scraper price calculation.
-        """
-        capsule_usd_total = 0
-        for capsule_section, capsule_info in CAPSULE_INFO.items():
-            if self.error_stack:
-                break
-
-            # Only scrape capsule sections where the user owns at least one item
-            if any(int(owned) > 0 for _, owned in config.items(capsule_section)):
-                capsule_usd_total += self._scrape_capsule_prices(
-                    capsule_section, capsule_info, update_sheet_callback
+                prices += [price_usd, price_usd_owned]
+                console.price(
+                    self.parser.PRICE_INFO,
+                    owned,
+                    price_source.value.title(),
+                    price_usd,
+                    price_usd_owned,
                 )
+            except ValueError as error:
+                prices += [0.0, 0.0]
+                self.error_stack.append(ParsingError(error))
+                self._print_error()
 
-                if not config.getboolean("App Settings", "use_proxy", fallback=False):
-                    time.sleep(1)
+        return prices
 
-        return capsule_usd_total
-
-    def _market_page_from_href(self, item_href):
+    def _scrape_item_prices(self, section, update_sheet_callback=None):
         """
-        Convert an href of a Steam Community Market item to a market page URL.
+        Scrape prices for all items defined in a configuration section that uses hrefs
+        as option keys.
 
-        :param item_href: The href of the item listing, typically ending with the item's
-            name.
-        :return: A URL string for the Steam Community Market page of the item.
-        """
-        url_encoded_name = item_href.split("/")[-1]
-        page_url = f"https://steamcommunity.com/market/search?q={url_encoded_name}"
-
-        return page_url
-
-    def _scrape_case_prices(self, update_sheet_callback=None):
-        """
-        Scrape prices for all cases defined in the configuration.
-
-        For each case, it prints the case name, owned count, price per item, and total
+        For each item, it prints the item name, owned count, price per item, and total
         price for owned items.
 
         :param update_sheet_callback: Optional callback function to update a tksheet
             that is displayed in the GUI with the latest scraper price calculation.
         """
-        case_usd_total = 0
-        for case_index, (config_case_name, owned) in enumerate(config.items("Cases")):
-            if self.error_stack:
+        for item_href, owned in config.items(section):
+            if self.error_stack and isinstance(self.error_stack[-1], RequestLimitExceededError):
                 break
             if int(owned) == 0:
                 continue
 
-            case_name = self._print_item_title(config_case_name, from_config=True)
+            item_name = config.option_to_name(item_href, href=True)
+            console.title(item_name, "magenta")
             try:
-                case_page_url = self._market_page_from_href(CASE_HREFS[case_index])
-                case_page = self._get_page(case_page_url)
-                price_usd = self._parse_item_price(case_page, CASE_HREFS[case_index])
-                price_usd_owned = round(float(int(owned) * price_usd), 2)
-
-                console.print(PRICE_INFO.format(owned, price_usd, price_usd_owned))
-                case_usd_total += price_usd_owned
+                prices = self._scrape_prices_from_all_sources(item_href, owned)
 
                 if update_sheet_callback:
-                    update_sheet_callback([case_name, owned, price_usd, price_usd_owned])
+                    update_sheet_callback([item_name, owned] + prices)
 
-                if not config.getboolean("App Settings", "use_proxy", fallback=False):
+                if (
+                    not config.getboolean("App Settings", "use_proxy", fallback=False)
+                    and self.parser.NEEDS_TIMEOUT
+                ):
                     time.sleep(1)
-            except (RetryError, ValueError):
+            except RetryError:
                 self.error_stack.append(RequestLimitExceededError())
                 self._print_error()
             except Exception as error:
                 self.error_stack.append(UnexpectedError(error))
                 self._print_error()
-
-        return case_usd_total
-
-    def _scrape_custom_item_prices(self, update_sheet_callback=None):
-        """
-        Scrape prices for custom items defined in the configuration.
-
-        For each custom item, it prints the item name, owned count, price per item, and
-        total price for owned items.
-
-        :param update_sheet_callback: Optional callback function to update a tksheet
-            that is displayed in the GUI with the latest scraper price calculation.
-        """
-        custom_item_usd_total = 0
-        for custom_item_href, owned in config.items("Custom Items"):
-            if self.error_stack:
-                break
-            if int(owned) == 0:
-                continue
-
-            custom_item_name = self._print_item_title(custom_item_href, from_href=True)
-            try:
-                custom_item_page_url = self._market_page_from_href(custom_item_href)
-                custom_item_page = self._get_page(custom_item_page_url)
-                price_usd = self._parse_item_price(custom_item_page, custom_item_href)
-                price_usd_owned = round(float(int(owned) * price_usd), 2)
-
-                console.print(PRICE_INFO.format(owned, price_usd, price_usd_owned))
-                custom_item_usd_total += price_usd_owned
-
-                if update_sheet_callback:
-                    update_sheet_callback([custom_item_name, owned, price_usd, price_usd_owned])
-
-                if not config.getboolean("App Settings", "use_proxy", fallback=False):
-                    time.sleep(1)
-            except (RetryError, ValueError):
-                self.error_stack.append(RequestLimitExceededError())
-                self._print_error()
-            except Exception as error:
-                self.error_stack.append(UnexpectedError(error))
-                self._print_error()
-
-        return custom_item_usd_total
 
 
 if __name__ == "__main__":
