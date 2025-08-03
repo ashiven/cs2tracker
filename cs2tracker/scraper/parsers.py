@@ -43,6 +43,7 @@ class Parser(ABC):
 class SteamParser(Parser):
     STEAM_MARKET_SEARCH_PAGE_BASE_URL = "https://steamcommunity.com/market/search?q={}"
     PRICE_INFO = "Owned: {:<10}  Steam market price: ${:<10}  Total: ${:<10}\n"
+    NEEDS_TIMEOUT = True
 
     @classmethod
     def get_item_page_url(cls, item_href):
@@ -80,6 +81,7 @@ class SteamParser(Parser):
 class SkinLedgerParser(Parser):
     SKINLEDGER_PRICE_LIST = ""
     PRICE_INFO = "Owned: {:<10}  Clash price: ${:<10}  Total: ${:<10}\n"
+    NEEDS_TIMEOUT = False
 
     @classmethod
     def get_item_page_url(cls, item_href) -> str:
@@ -93,6 +95,7 @@ class SkinLedgerParser(Parser):
 class ClashParser(Parser):
     CLASH_ITEM_API_BASE_URL = "https://inventory.clash.gg/api/GetItemPrice?id={}"
     PRICE_INFO = "Owned: {:<10}  Clash price: ${:<10}  Total: ${:<10}\n"
+    NEEDS_TIMEOUT = True
 
     @classmethod
     def get_item_page_url(cls, item_href):

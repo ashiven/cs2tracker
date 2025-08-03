@@ -95,6 +95,8 @@ class Scraper:
         self.error_stack.clear()
 
         for section in config.sections():
+            if section in ("User Settings", "App Settings"):
+                continue
             self.usd_total += self._scrape_item_prices(section, update_sheet_callback)
         self.eur_total = CurrencyConverter().convert(self.usd_total, "USD", "EUR")
 
@@ -202,7 +204,10 @@ class Scraper:
                     if update_sheet_callback:
                         update_sheet_callback([item_name, owned, price_usd, price_usd_owned])
 
-                    if not config.getboolean("App Settings", "use_proxy", fallback=False):
+                    if (
+                        not config.getboolean("App Settings", "use_proxy", fallback=False)
+                        and parser.NEEDS_TIMEOUT
+                    ):
                         time.sleep(1)
             except ValueError as error:
                 self.error_stack.append(ParsingError(error))
