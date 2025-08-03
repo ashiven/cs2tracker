@@ -147,7 +147,7 @@ class ClashParser(Parser):
 class CSGOTrader(Parser):
     CSGOTRADER_PRICE_LIST = "https://prices.csgotrader.app/latest/{}.json"
     PRICE_INFO = "Owned: {:<10}  CSGOTrader price: ${:<10}  Total: ${:<10}\n"
-    NEEDS_TIMEOUT = True
+    NEEDS_TIMEOUT = False
     MULTIPLE_SOURCES = True
 
     usd_total, eur_total = 0.0, 0.0
