@@ -37,6 +37,7 @@ class PaddedConsole:
         console.print(f"[bold {color}]{separator}")
 
     def price(self, price_str, price_source, owned, steam_market_price, total_owned):
+        # pylint: disable=too-many-arguments,too-many-positional-arguments
         """Print price information."""
         console.print(price_str.format(price_source, owned, steam_market_price, total_owned))
 
