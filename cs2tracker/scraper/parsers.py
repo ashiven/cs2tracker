@@ -45,6 +45,8 @@ class SteamParser(Parser):
     PRICE_INFO = "Owned: {:<10}  Steam market price: ${:<10}  Total: ${:<10}\n"
     NEEDS_TIMEOUT = True
 
+    usd_total, eur_total = 0.0, 0.0
+
     @classmethod
     def get_item_page_url(cls, item_href):
         # For higher efficiency we want to reuse the same page for sticker capsules (scraper uses caching)
@@ -83,6 +85,8 @@ class SkinLedgerParser(Parser):
     PRICE_INFO = "Owned: {:<10}  Clash price: ${:<10}  Total: ${:<10}\n"
     NEEDS_TIMEOUT = False
 
+    usd_total, eur_total = 0.0, 0.0
+
     @classmethod
     def get_item_page_url(cls, item_href) -> str:
         return super().get_item_page_url(item_href)
@@ -96,6 +100,8 @@ class ClashParser(Parser):
     CLASH_ITEM_API_BASE_URL = "https://inventory.clash.gg/api/GetItemPrice?id={}"
     PRICE_INFO = "Owned: {:<10}  Clash price: ${:<10}  Total: ${:<10}\n"
     NEEDS_TIMEOUT = True
+
+    usd_total, eur_total = 0.0, 0.0
 
     @classmethod
     def get_item_page_url(cls, item_href):

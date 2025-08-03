@@ -48,7 +48,7 @@ class Scraper:
     def __init__(self):
         """Initialize the Scraper class."""
         self._start_session()
-        self._add_parsers()
+        self._add_parser(SteamParser)
 
         self.error_stack = []
         self.usd_total = 0
@@ -66,10 +66,9 @@ class Scraper:
         self.session.mount("http://", HTTPAdapter(max_retries=retries))
         self.session.mount("https://", HTTPAdapter(max_retries=retries))
 
-    def _add_parsers(self):
-        """Add parsers for specific pages where item prices should be scraped."""
-        self.parsers = []
-        self.parsers.append(SteamParser)
+    def _add_parser(self, parser):
+        """Add a parser for a specific page where item prices should be scraped."""
+        self.parser = parser
 
     def _print_error(self):
         """Print the last error message from the error stack, if any."""
@@ -193,22 +192,21 @@ class Scraper:
             item_name = config.option_to_name(item_href, href=True)
             console.title(item_name, "magenta")
             try:
-                for parser in self.parsers:
-                    item_page_url = parser.get_item_page_url(item_href)
-                    item_page = self._get_page(item_page_url)
-                    price_usd = parser.parse_item_price(item_page, item_href)
-                    price_usd_owned = round(float(int(owned) * price_usd), 2)
-                    item_usd_total += price_usd_owned
+                item_page_url = self.parser.get_item_page_url(item_href)
+                item_page = self._get_page(item_page_url)
+                price_usd = self.parser.parse_item_price(item_page, item_href)
+                price_usd_owned = round(float(int(owned) * price_usd), 2)
+                self.parser.usd_total += price_usd_owned
 
-                    console.price(parser.PRICE_INFO, owned, price_usd, price_usd_owned)
-                    if update_sheet_callback:
-                        update_sheet_callback([item_name, owned, price_usd, price_usd_owned])
+                console.price(self.parser.PRICE_INFO, owned, price_usd, price_usd_owned)
+                if update_sheet_callback:
+                    update_sheet_callback([item_name, owned, price_usd, price_usd_owned])
 
-                    if (
-                        not config.getboolean("App Settings", "use_proxy", fallback=False)
-                        and parser.NEEDS_TIMEOUT
-                    ):
-                        time.sleep(1)
+                if (
+                    not config.getboolean("App Settings", "use_proxy", fallback=False)
+                    and self.parser.NEEDS_TIMEOUT
+                ):
+                    time.sleep(1)
             except ValueError as error:
                 self.error_stack.append(ParsingError(error))
                 self._print_error()
