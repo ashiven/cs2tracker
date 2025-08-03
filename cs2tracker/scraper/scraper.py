@@ -75,7 +75,7 @@ class Scraper:
         """Print the last error message from the error stack, if any."""
         last_error = self.error_stack[-1] if self.error_stack else None
         if last_error:
-            console.error(f"{last_error.message}\n")
+            console.error(f"{last_error.message}")
 
     def scrape_prices(self, update_sheet_callback=None):
         """
@@ -189,6 +189,43 @@ class Scraper:
 
         return page
 
+    def _scrape_prices_from_all_sources(self, item_href, owned):
+        """
+        For a given item href and owned count, scrape the item's price from all sources
+        available to the currently registered parser.
+
+        :param item_href: The url of the steamcommunity market listing of the item
+        :param owned: How many of this item the user owns
+        :return: A list of item prices for the different sources
+        :raises RequestException: If the request fails.
+        :raises RetryError: If the retry limit is reached.
+        :raises ValueError: If the parser could not find the item
+        """
+        prices = []
+        for price_source in self.parser.SOURCES:
+            try:
+                item_page_url = self.parser.get_item_page_url(item_href, price_source)
+                item_page = self._get_page(item_page_url)
+                price_usd = self.parser.parse_item_price(item_page, item_href, price_source)
+
+                price_usd_owned = round(float(int(owned) * price_usd), 2)
+                self.totals[price_source]["usd"] += price_usd_owned
+
+                prices += [price_usd, price_usd_owned]
+                console.price(
+                    self.parser.PRICE_INFO,
+                    owned,
+                    price_source.value.title(),
+                    price_usd,
+                    price_usd_owned,
+                )
+            except ValueError as error:
+                prices += [0.0, 0.0]
+                self.error_stack.append(ParsingError(error))
+                self._print_error()
+
+        return prices
+
     def _scrape_item_prices(self, section, update_sheet_callback=None):
         """
         Scrape prices for all items defined in a configuration section that uses hrefs
@@ -209,23 +246,7 @@ class Scraper:
             item_name = config.option_to_name(item_href, href=True)
             console.title(item_name, "magenta")
             try:
-                prices = []
-                for price_source in self.parser.SOURCES:
-                    item_page_url = self.parser.get_item_page_url(item_href, price_source)
-                    item_page = self._get_page(item_page_url)
-                    price_usd = self.parser.parse_item_price(item_page, item_href, price_source)
-
-                    price_usd_owned = round(float(int(owned) * price_usd), 2)
-                    self.totals[price_source]["usd"] += price_usd_owned
-
-                    prices += [price_usd, price_usd_owned]
-                    console.price(
-                        self.parser.PRICE_INFO,
-                        owned,
-                        price_source.value.title(),
-                        price_usd,
-                        price_usd_owned,
-                    )
+                prices = self._scrape_prices_from_all_sources(item_href, owned)
 
                 if update_sheet_callback:
                     update_sheet_callback([item_name, owned] + prices)
@@ -235,9 +256,6 @@ class Scraper:
                     and self.parser.NEEDS_TIMEOUT
                 ):
                     time.sleep(1)
-            except ValueError as error:
-                self.error_stack.append(ParsingError(error))
-                self._print_error()
             except RetryError:
                 self.error_stack.append(RequestLimitExceededError())
                 self._print_error()

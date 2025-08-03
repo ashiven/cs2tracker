@@ -4,6 +4,8 @@ from tkinter.filedialog import asksaveasfilename
 
 from tksheet import Sheet
 
+from cs2tracker.scraper.scraper import ParsingError
+
 
 class ScraperFrame(ttk.Frame):
     def __init__(self, parent, scraper, sheet_size, dark_theme):
@@ -104,4 +106,5 @@ class ScraperFrame(ttk.Frame):
 
         if self.scraper.error_stack:
             last_error = self.scraper.error_stack[-1]
-            messagebox.showerror("An Error Occurred", f"{last_error.message}", parent=self)
+            if not isinstance(last_error, ParsingError):
+                messagebox.showerror("An Error Occurred", f"{last_error.message}", parent=self)

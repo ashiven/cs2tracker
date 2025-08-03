@@ -159,25 +159,32 @@ class CSGOTrader(Parser):
         price_list = item_page.json()
 
         url_decoded_name = unquote(item_href.split("/")[-1])
+        if source in (PriceSource.BUFF163, PriceSource.SKINPORT):
+            url_decoded_name = url_decoded_name.replace("Holo-Foil", "Holo/Foil")
+
         price_info = price_list.get(url_decoded_name, None)
         if not price_info:
             raise ValueError(f"CSGOTrader: Could not find item price info: {item_page}")
 
         if source == PriceSource.STEAM:
-            price = price_info.get("last_24h", None)
+            price = price_info.get("last_24h")
             if not price:
-                raise ValueError(
-                    f"CSGOTrader: Could not find steam price of the last 24 hours: {item_page}"
-                )
+                price = price_info.get("last_7d")
+                if not price:
+                    raise ValueError(
+                        f"CSGOTrader: Could not find steam price of the past 7 days: {item_page}"
+                    )
         elif source == PriceSource.BUFF163:
             price = price_info.get("starting_at")
             if not price:
-                raise ValueError(f"CSGOTrader: Could not find buff163 price: {item_page}")
+                raise ValueError(f"CSGOTrader: Could not find buff163 listing: {item_page}")
             price = price.get("price")
+            if not price:
+                raise ValueError(f"CSGOTrader: Could not find recent buff163 price: {item_page}")
         else:
             price = price_info.get("starting_at")
             if not price:
-                raise ValueError(f"CSGOTrader: Could not find skinport price: {item_page}")
+                raise ValueError(f"CSGOTrader: Could not find skinport listing: {item_page}")
 
         price = float(price)
         return price
