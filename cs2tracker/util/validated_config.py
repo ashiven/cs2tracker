@@ -71,7 +71,7 @@ class ValidatedConfig(ConfigParser):
             for case_href, case_owned in self.items("Cases"):
                 if not re.match(STEAM_MARKET_LISTING_REGEX, case_href):
                     raise ValueError(
-                        f"Invalid Steam market listing URL in 'Custom Items' section: {case_href}"
+                        f"Invalid Steam market listing URL in 'Cases' section: {case_href}"
                     )
 
                 if int(case_owned) < 0:

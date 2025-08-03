@@ -77,11 +77,11 @@ class SteamParser(Parser):
         item_soup = BeautifulSoup(item_page.content, "html.parser")
         item_listing = item_soup.find("a", attrs={"href": f"{item_href}"})
         if not isinstance(item_listing, Tag):
-            raise ValueError(f"Steam: Failed to find item listing: {item_page}")
+            raise ValueError(f"Steam: Failed to find item listing for: {item_href}")
 
         item_price_span = item_listing.find("span", attrs={"class": "normal_price"})
         if not isinstance(item_price_span, Tag):
-            raise ValueError(f"Steam: Failed to find price span in item listing: {item_page}")
+            raise ValueError(f"Steam: Failed to find price span in item listing for: {item_href}")
 
         price_str = item_price_span.text.split()[2]
         price = float(price_str.replace("$", ""))
@@ -127,11 +127,11 @@ class ClashParser(Parser):
 
         data = item_page.json()
         if data.get("success", "false") == "false":
-            raise ValueError(f"Clash: Response failed: {item_page}")
+            raise ValueError(f"Clash: Response failed for: {item_href}")
 
         price = data.get("average_price", None)
         if not price:
-            raise ValueError(f"Clash: Failed to find item price: {item_page}")
+            raise ValueError(f"Clash: Failed to find item price for: {item_href}")
 
         price = float(price)
 
@@ -164,7 +164,7 @@ class CSGOTrader(Parser):
 
         price_info = price_list.get(url_decoded_name, None)
         if not price_info:
-            raise ValueError(f"CSGOTrader: Could not find item price info: {item_page}")
+            raise ValueError(f"CSGOTrader: Could not find item price info: {url_decoded_name}")
 
         if source == PriceSource.STEAM:
             price = price_info.get("last_24h")
@@ -172,19 +172,21 @@ class CSGOTrader(Parser):
                 price = price_info.get("last_7d")
                 if not price:
                     raise ValueError(
-                        f"CSGOTrader: Could not find steam price of the past 7 days: {item_page}"
+                        f"CSGOTrader: Could not find steam price of the past 7 days: {url_decoded_name}"
                     )
         elif source == PriceSource.BUFF163:
             price = price_info.get("starting_at")
             if not price:
-                raise ValueError(f"CSGOTrader: Could not find buff163 listing: {item_page}")
+                raise ValueError(f"CSGOTrader: Could not find buff163 listing: {url_decoded_name}")
             price = price.get("price")
             if not price:
-                raise ValueError(f"CSGOTrader: Could not find recent buff163 price: {item_page}")
+                raise ValueError(
+                    f"CSGOTrader: Could not find recent buff163 price: {url_decoded_name}"
+                )
         else:
             price = price_info.get("starting_at")
             if not price:
-                raise ValueError(f"CSGOTrader: Could not find skinport listing: {item_page}")
+                raise ValueError(f"CSGOTrader: Could not find skinport listing: {url_decoded_name}")
 
         price = float(price)
         return price
