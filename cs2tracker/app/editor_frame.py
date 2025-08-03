@@ -94,7 +94,7 @@ class ConfigEditorFrame(ttk.Frame):
                 column = self.tree.identify_column(event.x)
 
             item_text = self.tree.item(row, "text")
-            if any(item_text == section for section in config.sections()):
+            if column == "#0" or any(item_text == section for section in config.sections()):
                 return
             item_value = self.tree.item(row, "values")[0]
 

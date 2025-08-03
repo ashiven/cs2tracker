@@ -1,15 +1,15 @@
 import time
 from datetime import datetime
-from urllib.parse import unquote
 
 from currency_converter import CurrencyConverter
-from requests import RequestException, Session
+from requests import RequestException
 from requests.adapters import HTTPAdapter, Retry
+from requests_cache import CachedSession
 from tenacity import RetryError, retry, stop_after_attempt
 
-from cs2tracker.constants import AUTHOR_STRING, BANNER, CAPSULE_INFO
+from cs2tracker.constants import AUTHOR_STRING, BANNER
 from cs2tracker.scraper.discord_notifier import DiscordNotifier
-from cs2tracker.scraper.steam_parser import SteamParser
+from cs2tracker.scraper.parsers import SteamParser
 from cs2tracker.util import PriceLogs, get_config, get_console
 
 HTTP_PROXY_URL = "http://{}:@smartproxy.crawlbase.com:8012"
@@ -22,6 +22,11 @@ config = get_config()
 class ConfigError:
     def __init__(self):
         self.message = "Invalid configuration. Please fix the config file before running."
+
+
+class ParsingError:
+    def __init__(self, message):
+        self.message = message
 
 
 class RequestLimitExceededError:
@@ -51,7 +56,7 @@ class Scraper:
 
     def _start_session(self):
         """Start a requests session with custom headers and retry logic."""
-        self.session = Session()
+        self.session = CachedSession()
         self.session.headers.update(
             {
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"
@@ -89,13 +94,8 @@ class Scraper:
         self.usd_total, self.eur_total = 0, 0
         self.error_stack.clear()
 
-        # capsule_usd_total = self._scrape_capsule_section_prices(update_sheet_callback)
-        case_usd_total = self._scrape_item_prices_href("Cases", update_sheet_callback)
-        custom_item_usd_total = self._scrape_item_prices_href("Custom Items", update_sheet_callback)
-
-        # self.usd_total += capsule_usd_total
-        self.usd_total += case_usd_total
-        self.usd_total += custom_item_usd_total
+        for section in config.sections():
+            self.usd_total += self._scrape_item_prices(section, update_sheet_callback)
         self.eur_total = CurrencyConverter().convert(self.usd_total, "USD", "EUR")
 
         if update_sheet_callback:
@@ -170,70 +170,7 @@ class Scraper:
 
         return page
 
-    def _scrape_capsule_prices(self, capsule_section, capsule_info, update_sheet_callback=None):
-        """
-        Scrape prices for a specific capsule section, printing the details to the
-        console.
-
-        :param capsule_section: The section name in the config for the capsule.
-        :param capsule_info: A dictionary containing information about the capsule page,
-            hrefs, and names.
-        :param update_sheet_callback: Optional callback function to update a tksheet
-            that is displayed in the GUI with the latest scraper price calculation.
-        """
-        console.title(capsule_section, "magenta")
-        capsule_usd_total = 0
-        try:
-            capsule_page = self._get_page(capsule_info["page"])
-            for capsule_href in capsule_info["items"]:
-                capsule_name = unquote(capsule_href.split("/")[-1])
-                config_capsule_name = capsule_name.replace(" ", "_").lower()
-                owned = config.getint(capsule_section, config_capsule_name, fallback=0)
-                if owned == 0:
-                    continue
-
-                price_usd = self._parse_item_price(capsule_page, capsule_href)
-                price_usd_owned = round(float(owned * price_usd), 2)
-
-                console.print(f"[bold deep_sky_blue4]{capsule_name}")
-                console.steam_price(owned, price_usd, price_usd_owned)
-                capsule_usd_total += price_usd_owned
-
-                if update_sheet_callback:
-                    update_sheet_callback([capsule_name, owned, price_usd, price_usd_owned])
-        except (RetryError, ValueError):
-            self.error_stack.append(RequestLimitExceededError())
-            self._print_error()
-        except Exception as error:
-            self.error_stack.append(UnexpectedError(error))
-            self._print_error()
-
-        return capsule_usd_total
-
-    def _scrape_capsule_section_prices(self, update_sheet_callback=None):
-        """
-        Scrape prices for all capsule sections defined in the configuration.
-
-        :param update_sheet_callback: Optional callback function to update a tksheet
-            that is displayed in the GUI with the latest scraper price calculation.
-        """
-        capsule_usd_total = 0
-        for capsule_section, capsule_info in CAPSULE_INFO.items():
-            if self.error_stack:
-                break
-
-            # Only scrape capsule sections where the user owns at least one item
-            if any(int(owned) > 0 for _, owned in config.items(capsule_section)):
-                capsule_usd_total += self._scrape_capsule_prices(
-                    capsule_section, capsule_info, update_sheet_callback
-                )
-
-                if not config.getboolean("App Settings", "use_proxy", fallback=False):
-                    time.sleep(1)
-
-        return capsule_usd_total
-
-    def _scrape_item_prices_href(self, section, update_sheet_callback=None):
+    def _scrape_item_prices(self, section, update_sheet_callback=None):
         """
         Scrape prices for all items defined in a configuration section that uses hrefs
         as option keys.
@@ -246,12 +183,12 @@ class Scraper:
         """
         item_usd_total = 0
         for item_href, owned in config.items(section):
-            if self.error_stack:
+            if self.error_stack and isinstance(self.error_stack[-1], RequestLimitExceededError):
                 break
             if int(owned) == 0:
                 continue
 
-            item_name = config.option_to_name(item_href)
+            item_name = config.option_to_name(item_href, href=True)
             console.title(item_name, "magenta")
             try:
                 for parser in self.parsers:
@@ -261,13 +198,16 @@ class Scraper:
                     price_usd_owned = round(float(int(owned) * price_usd), 2)
                     item_usd_total += price_usd_owned
 
-                    console.steam_price(owned, price_usd, price_usd_owned)
+                    console.price(parser.PRICE_INFO, owned, price_usd, price_usd_owned)
                     if update_sheet_callback:
                         update_sheet_callback([item_name, owned, price_usd, price_usd_owned])
 
                     if not config.getboolean("App Settings", "use_proxy", fallback=False):
                         time.sleep(1)
-            except (RetryError, ValueError):
+            except ValueError as error:
+                self.error_stack.append(ParsingError(error))
+                self._print_error()
+            except RetryError:
                 self.error_stack.append(RequestLimitExceededError())
                 self._print_error()
             except Exception as error:

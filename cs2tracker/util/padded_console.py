@@ -9,7 +9,6 @@ PADDING_RIGHT = 0
 
 MAX_LINE_LEN = 72
 SEPARATOR = "-"
-STEAM_PRICE_INFO = "Owned: {:<10}  Steam market price: ${:<10}  Total: ${:<10}\n"
 
 
 class PaddedConsole:
@@ -37,9 +36,9 @@ class PaddedConsole:
         separator = SEPARATOR * MAX_LINE_LEN
         console.print(f"[bold {color}]{separator}")
 
-    def steam_price(self, owned, steam_market_price, total_owned):
+    def price(self, price_str, owned, steam_market_price, total_owned):
         """Print price information."""
-        console.print(STEAM_PRICE_INFO.format(owned, steam_market_price, total_owned))
+        console.print(price_str.format(owned, steam_market_price, total_owned))
 
     def __getattr__(self, attr):
         """Ensure console methods can be called directly on PaddedConsole."""
