@@ -9,7 +9,7 @@ from tenacity import RetryError, retry, stop_after_attempt
 
 from cs2tracker.constants import AUTHOR_STRING, BANNER
 from cs2tracker.scraper.discord_notifier import DiscordNotifier
-from cs2tracker.scraper.parsers import CSGOTrader
+from cs2tracker.scraper.parsers import CSGOTrader, PriceSource
 from cs2tracker.util import PriceLogs, get_config, get_console
 
 HTTP_PROXY_URL = "http://{}:@smartproxy.crawlbase.com:8012"
@@ -51,8 +51,9 @@ class Scraper:
         self._add_parser(CSGOTrader)
 
         self.error_stack = []
-        self.usd_total = 0
-        self.eur_total = 0
+        self.totals = {
+            price_source: {"usd": 0.0, "eur": 0.0} for price_source in self.parser.SOURCES
+        }
 
     def _start_session(self):
         """Start a requests session with custom headers and retry logic."""
@@ -90,39 +91,56 @@ class Scraper:
             return
 
         # Reset totals from the previous run and clear the error stack
-        self.usd_total, self.eur_total = 0, 0
         self.error_stack.clear()
+        self.totals = {
+            price_source: {"usd": 0.0, "eur": 0.0} for price_source in self.parser.SOURCES
+        }
 
         for section in config.sections():
             if section in ("User Settings", "App Settings"):
                 continue
-            self.usd_total += self._scrape_item_prices(section, update_sheet_callback)
-        self.eur_total = CurrencyConverter().convert(self.usd_total, "USD", "EUR")
+            self._scrape_item_prices(section, update_sheet_callback)
+
+        for price_source, totals in self.totals.items():
+            usd_total = totals["usd"]
+            eur_total = CurrencyConverter().convert(usd_total, "USD", "EUR")
+            self.totals.update({price_source: {"usd": usd_total, "eur": eur_total}})  # type: ignore
 
         if update_sheet_callback:
-            update_sheet_callback(["", "", "", ""])
-            update_sheet_callback(
-                [
-                    f"[{datetime.now().strftime('%Y-%m-%d')}] Total:",
-                    f"${self.usd_total:.2f}",
-                    f"€{self.eur_total:.2f}",
-                    "",
-                ]
-            )
+            update_sheet_callback(["", ""] + ["", ""] * len(self.parser.SOURCES))
+            for price_source, totals in self.totals.items():
+                usd_total = totals["usd"]
+                eur_total = totals["eur"]
+                update_sheet_callback(
+                    [
+                        f"[{datetime.now().strftime('%Y-%m-%d')}] {price_source.value.title()} Total:",
+                        f"${usd_total:.2f}",
+                        f"€{eur_total:.2f}",
+                        "",
+                    ]
+                )
 
         self._print_total()
         self._send_discord_notification()
-        PriceLogs.save(self.usd_total, self.eur_total)
+
+        # TODO: modify price logs, charts etc for multiple sources (only use steam as source for now)
+        steam_usd_total = self.totals[PriceSource.STEAM]["usd"]
+        steam_eur_total = self.totals[PriceSource.STEAM]["eur"]
+        PriceLogs.save(steam_usd_total, steam_eur_total)
 
     def _print_total(self):
         """Print the total prices in USD and EUR, formatted with titles and
         separators.
         """
         console.title("USD Total", "green")
-        console.print(f"${self.usd_total:.2f}")
+        for price_source, totals in self.totals.items():
+            usd_total = totals.get("usd")
+            console.print(f"{price_source.value.title():<10}: ${usd_total:.2f}")
 
         console.title("EUR Total", "green")
-        console.print(f"€{self.eur_total:.2f}")
+        for price_source, totals in self.totals.items():
+            eur_total = totals.get("eur")
+            console.print(f"{price_source.value.title():<10}: €{eur_total:.2f}")
 
         console.separator("green")
 
@@ -182,7 +200,6 @@ class Scraper:
         :param update_sheet_callback: Optional callback function to update a tksheet
             that is displayed in the GUI with the latest scraper price calculation.
         """
-        item_usd_total = 0
         for item_href, owned in config.items(section):
             if self.error_stack and isinstance(self.error_stack[-1], RequestLimitExceededError):
                 break
@@ -192,15 +209,26 @@ class Scraper:
             item_name = config.option_to_name(item_href, href=True)
             console.title(item_name, "magenta")
             try:
-                item_page_url = self.parser.get_item_page_url(item_href)
-                item_page = self._get_page(item_page_url)
-                price_usd = self.parser.parse_item_price(item_page, item_href)
-                price_usd_owned = round(float(int(owned) * price_usd), 2)
-                self.parser.usd_total += price_usd_owned
+                prices = []
+                for price_source in self.parser.SOURCES:
+                    item_page_url = self.parser.get_item_page_url(item_href, price_source)
+                    item_page = self._get_page(item_page_url)
+                    price_usd = self.parser.parse_item_price(item_page, item_href, price_source)
 
-                console.price(self.parser.PRICE_INFO, owned, price_usd, price_usd_owned)
+                    price_usd_owned = round(float(int(owned) * price_usd), 2)
+                    self.totals[price_source]["usd"] += price_usd_owned
+
+                    prices += [price_usd, price_usd_owned]
+                    console.price(
+                        self.parser.PRICE_INFO,
+                        owned,
+                        price_source.value.title(),
+                        price_usd,
+                        price_usd_owned,
+                    )
+
                 if update_sheet_callback:
-                    update_sheet_callback([item_name, owned, price_usd, price_usd_owned])
+                    update_sheet_callback([item_name, owned] + prices)
 
                 if (
                     not config.getboolean("App Settings", "use_proxy", fallback=False)
@@ -216,8 +244,6 @@ class Scraper:
             except Exception as error:
                 self.error_stack.append(UnexpectedError(error))
                 self._print_error()
-
-        return item_usd_total
 
 
 if __name__ == "__main__":

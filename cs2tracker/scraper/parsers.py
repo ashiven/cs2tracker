@@ -48,11 +48,9 @@ class Parser(ABC):
 
 class SteamParser(Parser):
     STEAM_MARKET_SEARCH_PAGE_BASE_URL = "https://steamcommunity.com/market/search?q={}"
-    PRICE_INFO = "Owned: {:<10}  Steam market price: ${:<10}  Total: ${:<10}\n"
+    PRICE_INFO = "Owned: {:<10}  {} price: ${:<10}  Total: ${:<10}"
     NEEDS_TIMEOUT = True
-    MULTIPLE_SOURCES = False
-
-    usd_total, eur_total = 0.0, 0.0
+    SOURCES = [PriceSource.STEAM]
 
     @classmethod
     def get_item_page_url(cls, item_href, source=PriceSource.STEAM):
@@ -93,11 +91,9 @@ class SteamParser(Parser):
 
 class SkinLedgerParser(Parser):
     SKINLEDGER_PRICE_LIST = ""
-    PRICE_INFO = "Owned: {:<10}  SkinLedger price: ${:<10}  Total: ${:<10}\n"
+    PRICE_INFO = "Owned: {:<10}  {} price: ${:<10}  Total: ${:<10}"
     NEEDS_TIMEOUT = False
-    MULTIPLE_SOURCES = True
-
-    usd_total, eur_total = 0.0, 0.0
+    SOURCES = [PriceSource.STEAM, PriceSource.BUFF163, PriceSource.SKINPORT]
 
     @classmethod
     def get_item_page_url(cls, item_href, source=PriceSource.STEAM) -> str:
@@ -112,11 +108,9 @@ class SkinLedgerParser(Parser):
 
 class ClashParser(Parser):
     CLASH_ITEM_API_BASE_URL = "https://inventory.clash.gg/api/GetItemPrice?id={}"
-    PRICE_INFO = "Owned: {:<10}  Clash price: ${:<10}  Total: ${:<10}\n"
+    PRICE_INFO = "Owned: {:<10}  {} price: ${:<10}  Total: ${:<10}"
     NEEDS_TIMEOUT = True
-    MULTIPLE_SOURCES = True
-
-    usd_total, eur_total = 0.0, 0.0
+    SOURCES = [PriceSource.STEAM]
 
     @classmethod
     def get_item_page_url(cls, item_href, source=PriceSource.STEAM):
@@ -146,11 +140,9 @@ class ClashParser(Parser):
 
 class CSGOTrader(Parser):
     CSGOTRADER_PRICE_LIST = "https://prices.csgotrader.app/latest/{}.json"
-    PRICE_INFO = "Owned: {:<10}  CSGOTrader price: ${:<10}  Total: ${:<10}\n"
+    PRICE_INFO = "Owned: {:<10}  {:<10}: ${:<10}  Total: ${:<10}"
     NEEDS_TIMEOUT = False
-    MULTIPLE_SOURCES = True
-
-    usd_total, eur_total = 0.0, 0.0
+    SOURCES = [PriceSource.STEAM, PriceSource.BUFF163, PriceSource.SKINPORT]
 
     @classmethod
     def get_item_page_url(cls, item_href, source=PriceSource.STEAM):
@@ -171,9 +163,21 @@ class CSGOTrader(Parser):
         if not price_info:
             raise ValueError(f"CSGOTrader: Could not find item price info: {item_page}")
 
-        price_24h = price_info.get("last_24h", None)
-        if not price_24h:
-            raise ValueError(f"CSGOTrader: Could not find price for the last 24 hours: {item_page}")
+        if source == PriceSource.STEAM:
+            price = price_info.get("last_24h", None)
+            if not price:
+                raise ValueError(
+                    f"CSGOTrader: Could not find steam price of the last 24 hours: {item_page}"
+                )
+        elif source == PriceSource.BUFF163:
+            price = price_info.get("starting_at")
+            if not price:
+                raise ValueError(f"CSGOTrader: Could not find buff163 price: {item_page}")
+            price = price.get("price")
+        else:
+            price = price_info.get("starting_at")
+            if not price:
+                raise ValueError(f"CSGOTrader: Could not find skinport price: {item_page}")
 
-        price = float(price_24h)
+        price = float(price)
         return price

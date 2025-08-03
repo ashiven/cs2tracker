@@ -43,18 +43,36 @@ class ScraperFrame(ttk.Frame):
             height=self.sheet_height,
             width=self.sheet_width,
             auto_resize_columns=150,
+            default_column_width=150,
             sticky="nsew",
         )
         self.sheet.enable_bindings()
-        self.sheet.insert_row(
-            ["Item Name", "Item Owned", "Steam Market Price (USD)", "Total Value Owned (USD)"]
-        )
-        self.sheet.column_width(0, 220)
-        self.sheet.column_width(1, 20)
-        self.sheet.align_rows([0], "c")
-        self.sheet.align_columns([1, 2, 3], "c")
-        self.sheet.popup_menu_add_command("Save Sheet", self._save_sheet)
 
+        source_titles = []
+        for price_source in self.scraper.parser.SOURCES:
+            source_titles += [
+                f"{price_source.value.title()} (USD)",
+                f"{price_source.value.title()} Owned (USD)",
+            ]
+        self.sheet.insert_row(
+            [
+                "Item Name",
+                "Item Owned",
+            ]
+            + source_titles
+        )
+        self.sheet.align_rows([0], "c")
+
+        price_columns = list(range(2 * len(self.scraper.parser.SOURCES)))
+        price_columns = [1] + [column_index + 2 for column_index in price_columns]
+        self.sheet.align_columns(price_columns, "c")
+        self.sheet.column_width(0, 220)
+
+        required_window_width = 220 + 150 * len(price_columns)
+        if int(self.sheet_width) < required_window_width:
+            self.parent.geometry(f"{required_window_width}x{self.sheet_height}")
+
+        self.sheet.popup_menu_add_command("Save Sheet", self._save_sheet)
         self.parent.bind("<Configure>", self._readjust_sheet_size_with_window_size)
 
     def _save_sheet(self):
@@ -83,10 +101,6 @@ class ScraperFrame(ttk.Frame):
             self.parent.update_idletasks()
 
         self.scraper.scrape_prices(update_sheet_callback)
-
-        row_heights = self.sheet.get_row_heights()
-        last_row_index = len(row_heights) - 1
-        self.sheet.align_rows(last_row_index, "c")
 
         if self.scraper.error_stack:
             last_error = self.scraper.error_stack[-1]

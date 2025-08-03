@@ -29,16 +29,16 @@ class PaddedConsole:
     def title(self, text, color):
         """Print the given text as a title."""
         title = text.center(MAX_LINE_LEN, SEPARATOR)
-        console.print(f"[bold {color}]{title}\n")
+        console.print(f"\n[bold {color}]{title}\n")
 
     def separator(self, color):
         """Print a separator line."""
         separator = SEPARATOR * MAX_LINE_LEN
         console.print(f"[bold {color}]{separator}")
 
-    def price(self, price_str, owned, steam_market_price, total_owned):
+    def price(self, price_str, price_source, owned, steam_market_price, total_owned):
         """Print price information."""
-        console.print(price_str.format(owned, steam_market_price, total_owned))
+        console.print(price_str.format(price_source, owned, steam_market_price, total_owned))
 
     def __getattr__(self, attr):
         """Ensure console methods can be called directly on PaddedConsole."""
