@@ -56,7 +56,7 @@ class Scraper:
 
     def _start_session(self):
         """Start a requests session with custom headers and retry logic."""
-        self.session = CachedSession()
+        self.session = CachedSession("scraper_cache", backend="memory")
         self.session.headers.update(
             {
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"

@@ -3,7 +3,7 @@ import re
 from configparser import ConfigParser, ParsingError
 from urllib.parse import quote, unquote
 
-from cs2tracker.constants import CAPSULE_INFO, CONFIG_FILE, INVENTORY_IMPORT_FILE
+from cs2tracker.constants import CAPSULE_PAGES, CONFIG_FILE, INVENTORY_IMPORT_FILE
 from cs2tracker.util.padded_console import get_console
 
 STEAM_MARKET_LISTING_BASEURL_CS2 = "https://steamcommunity.com/market/listings/730/"
@@ -51,7 +51,7 @@ class ValidatedConfig(ConfigParser):
             raise ValueError("Missing 'Custom Items' section in the configuration file.")
         if not self.has_section("Cases"):
             raise ValueError("Missing 'Cases' section in the configuration file.")
-        for capsule_section in CAPSULE_INFO:
+        for capsule_section in CAPSULE_PAGES:
             if not self.has_section(capsule_section):
                 raise ValueError(f"Missing '{capsule_section}' section in the configuration file.")
 
@@ -78,11 +78,11 @@ class ValidatedConfig(ConfigParser):
                     raise ValueError(
                         f"Invalid value in 'Cases' section: {case_href} = {case_owned}"
                     )
-            for capsule_section in CAPSULE_INFO:
-                for capsule_name, capsule_owned in self.items(capsule_section):
+            for capsule_section in CAPSULE_PAGES:
+                for capsule_href, capsule_owned in self.items(capsule_section):
                     if int(capsule_owned) < 0:
                         raise ValueError(
-                            f"Invalid value in '{capsule_section}' section: {capsule_name} = {capsule_owned}"
+                            f"Invalid value in '{capsule_section}' section: {capsule_href} = {capsule_owned}"
                         )
         except ValueError as error:
             if "Invalid " in str(error):
@@ -134,13 +134,9 @@ class ValidatedConfig(ConfigParser):
                 added_to_config = set()
 
                 for item_name, item_owned in inventory_data.items():
-                    option_name = self.name_to_option(item_name)
                     option_name_href = self.name_to_option(item_name, href=True)
                     for section in self.sections():
-                        if option_name in self.options(section):
-                            self.set(section, option_name, str(item_owned))
-                            added_to_config.add(item_name)
-                        elif option_name_href in self.options(section):
+                        if option_name_href in self.options(section):
                             self.set(section, option_name_href, str(item_owned))
                             added_to_config.add(item_name)
 

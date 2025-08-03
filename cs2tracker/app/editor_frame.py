@@ -59,7 +59,7 @@ class ConfigEditorFrame(ttk.Frame):
             config.add_section(section)
             for item in self.tree.get_children(section):
                 item_name = self.tree.item(item, "text")
-                if section == "Custom Items" or section == "Cases":
+                if section not in ("App Settings", "User Settings"):
                     config_option = config.name_to_option(item_name, href=True)
                 else:
                     config_option = config.name_to_option(item_name)
@@ -160,7 +160,7 @@ class ConfigEditorFrame(ttk.Frame):
                 continue
             section_level = self.tree.insert("", "end", iid=section, text=section)
             for config_option, value in config.items(section):
-                if section == "Custom Items" or section == "Cases":
+                if section not in ("User Settings", "App Settings"):
                     option_name = config.option_to_name(config_option, href=True)
                     self.tree.insert(section_level, "end", text=option_name, values=[value])
                 else:

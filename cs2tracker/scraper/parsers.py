@@ -3,8 +3,11 @@ from abc import ABC, abstractmethod
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 
+from cs2tracker.constants import CAPSULE_PAGES
 from cs2tracker.util import get_console
+from cs2tracker.util.validated_config import get_config
 
+config = get_config()
 console = get_console()
 
 
@@ -44,8 +47,13 @@ class SteamParser(Parser):
     @classmethod
     def get_item_page_url(cls, item_href):
         # For higher efficiency we want to reuse the same page for sticker capsules (scraper uses caching)
-        # Therefore if the provided item is a sticker capsule we return a search page defined in CAPSULE_PAGE
+        # Therefore, if the provided item is a sticker capsule we return a search page defined in CAPSULE_PAGES
         # where all of the sticker capsules of one section are listed
+        for section in config.sections():
+            if section in ("Custom Items", "Cases", "User Settings", "App Settings"):
+                continue
+            if any(item_href == option for option in config.options(section)):
+                return CAPSULE_PAGES[section]
 
         url_encoded_name = item_href.split("/")[-1]
         page_url = cls.STEAM_MARKET_SEARCH_PAGE_BASE_URL.format(url_encoded_name)
