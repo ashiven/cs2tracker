@@ -66,6 +66,7 @@ class Application:
 
 
 class MainFrame(ttk.Frame):
+    # pylint: disable=too-many-instance-attributes,attribute-defined-outside-init
     def __init__(self, parent, scraper):
         super().__init__(parent, padding=15)
         self.parent = parent

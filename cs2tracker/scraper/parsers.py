@@ -23,7 +23,6 @@ class Parser(ABC):
             name.
         :return: A URL string for the Parser market page of the item.
         """
-        pass
 
     @classmethod
     @abstractmethod
@@ -37,7 +36,6 @@ class Parser(ABC):
         :return: The price of the item as a float.
         :raises ValueError: If the item listing or price span cannot be found.
         """
-        pass
 
 
 class SteamParser(Parser):
