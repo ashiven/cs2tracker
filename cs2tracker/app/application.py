@@ -3,14 +3,11 @@ import tkinter as tk
 from shutil import copy
 from tkinter import messagebox, ttk
 from tkinter.filedialog import askopenfilename, asksaveasfile
-from typing import cast
 
-import matplotlib.pyplot as plt
 import sv_ttk
-from matplotlib.axes import Axes
-from matplotlib.dates import DateFormatter
 
 from cs2tracker.app.editor_frame import ConfigEditorFrame
+from cs2tracker.app.history_frame import PriceHistoryFrame
 from cs2tracker.app.scraper_frame import ScraperFrame
 from cs2tracker.constants import ICON_FILE, OS, OUTPUT_FILE, OSType
 from cs2tracker.scraper import BackgroundTask, Scraper
@@ -27,6 +24,8 @@ SCRAPER_WINDOW_SIZE = "900x750"
 CONFIG_EDITOR_TITLE = "Config Editor"
 CONFIG_EDITOR_SIZE = "900x750"
 
+PRICE_HISTORY_TITLE = "CS2Tracker Price History"
+PRICE_HISTORY_SIZE = "800x600"
 
 config = get_config()
 
@@ -182,20 +181,12 @@ class MainFrame(ttk.Frame):
 
     def _draw_plot(self):
         """Draw a plot of the scraped prices over time."""
-        dates, usd_prices, eur_prices = PriceLogs.read()
+        price_history_window = tk.Toplevel(self.parent)
+        price_history_window.geometry(PRICE_HISTORY_SIZE)
+        price_history_window.title(PRICE_HISTORY_TITLE)
 
-        fig, ax_raw = plt.subplots(figsize=(10, 8), num="CS2Tracker Price History")
-        fig.suptitle("CS2Tracker Price History", fontsize=16)
-        fig.autofmt_xdate()
-
-        ax = cast(Axes, ax_raw)
-        ax.plot(dates, usd_prices, label="Dollars")
-        ax.plot(dates, eur_prices, label="Euros")
-        ax.legend()
-        date_formatter = DateFormatter("%Y-%m-%d")
-        ax.xaxis.set_major_formatter(date_formatter)
-
-        plt.show()
+        history_frame = PriceHistoryFrame(price_history_window)
+        history_frame.pack(expand=True, fill="both")
 
     def _export_log_file(self):
         """Lets the user export the log file to a different location."""
