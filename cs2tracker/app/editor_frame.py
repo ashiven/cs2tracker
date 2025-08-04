@@ -21,7 +21,7 @@ ADD_CUSTOM_ITEM_TITLE = "Add Custom Item"
 ADD_CUSTOM_ITEM_SIZE = "500x220"
 
 IMPORT_INVENTORY_TITLE = "Import Steam Inventory"
-IMPORT_INVENTORY_SIZE = "600x550"
+IMPORT_INVENTORY_SIZE = "615x575"
 
 IMPORT_INVENTORY_PROCESS_TITLE = "Importing Steam Inventory..."
 IMPORT_INVENTORY_PROCESS_SIZE = "700x500"
@@ -129,10 +129,15 @@ class ConfigEditorFrame(ttk.Frame):
             row = selected[0]
             section_name = self.tree.parent(row)
             if section_name == "Custom Items":
+                next_option = self.tree.next(row)
                 self.tree.delete(row)
                 self.save_config()
-                self.tree.focus("Custom Items")
-                self.tree.selection_set("Custom Items")
+                if next_option:
+                    self.tree.focus(next_option)
+                    self.tree.selection_set(next_option)
+                else:
+                    self.tree.focus("Custom Items")
+                    self.tree.selection_set("Custom Items")
 
     def _destroy_entry(self, _):
         """Destroy any entry widgets in the treeview on an event, such as a mouse wheel
@@ -156,16 +161,36 @@ class ConfigEditorFrame(ttk.Frame):
     def _load_config_into_tree(self):
         """Load the configuration options into the treeview for display and editing."""
         for section in config.sections():
+            # App Settings are internal and shouldn't be displayed to the user
             if section == "App Settings":
                 continue
+
             section_level = self.tree.insert("", "end", iid=section, text=section)
-            for config_option, value in config.items(section):
+
+            # Items in the Custom Items section should be displayed alphabetically sorted
+            section_items = config.items(section)
+            if section == "Custom Items":
+                section_items = sorted(section_items)
+
+            for config_option, value in section_items:
                 if section not in ("User Settings", "App Settings"):
                     option_name = config.option_to_name(config_option, href=True)
-                    self.tree.insert(section_level, "end", text=option_name, values=[value])
+                    self.tree.insert(
+                        section_level,
+                        "end",
+                        iid=f"{section}-{option_name}",
+                        text=option_name,
+                        values=[value],
+                    )
                 else:
                     option_name = config.option_to_name(config_option)
-                    self.tree.insert(section_level, "end", text=option_name, values=[value])
+                    self.tree.insert(
+                        section_level,
+                        "end",
+                        iid=f"{section}-{option_name}",
+                        text=option_name,
+                        values=[value],
+                    )
 
         self.tree.focus("User Settings")
         self.tree.selection_set("User Settings")
@@ -174,9 +199,21 @@ class ConfigEditorFrame(ttk.Frame):
         """Reload the configuration options into the treeview for display and
         editing.
         """
+        selected = self.tree.selection()[0]
+        selected_section = self.tree.parent(selected)
+        selected_text = self.tree.item(selected, "text")
+
         for item in self.tree.get_children():
             self.tree.delete(item)
         self._load_config_into_tree()
+
+        if selected_section:
+            self.tree.item(selected_section, open=True)
+            self.tree.focus(f"{selected_section}-{selected_text}")
+            self.tree.selection_set(f"{selected_section}-{selected_text}")
+        else:
+            self.tree.focus(selected_text)
+            self.tree.selection_set(selected_text)
 
     def _configure_treeview(self):
         """Configure a treeview to display and edit configuration options."""
@@ -312,11 +349,12 @@ class CustomItemFrame(ttk.Frame):
         self.editor_frame.tree.insert(
             "Custom Items",
             "end",
+            iid=f"Custom Items-{item_name}",
             text=item_name,
             values=[item_owned],
         )
-        self.editor_frame.focus_set()
         self.editor_frame.save_config()
+        self.editor_frame.reload_config_into_tree()
         self.parent.destroy()
 
 

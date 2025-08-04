@@ -18,6 +18,7 @@ class ItemNameConverter {
     this.prefabs = {};
     this.paintKits = {};
     this.stickerKits = {};
+    this.musicKits = {};
   }
 
   async initialize() {
@@ -58,6 +59,7 @@ class ItemNameConverter {
       this.prefabs = require(itemsCacheFile).prefabs;
       this.paintKits = require(itemsCacheFile).paint_kits;
       this.stickerKits = require(itemsCacheFile).sticker_kits;
+      this.musicKits = require(itemsCacheFile).music_definitions;
       return;
     }
 
@@ -67,6 +69,7 @@ class ItemNameConverter {
     this.prefabs = parsed.prefabs;
     this.paintKits = parsed.paint_kits;
     this.stickerKits = parsed.sticker_kits;
+    this.musicKits = parsed.music_definitions;
 
     fs.writeFileSync(itemsCacheFile, JSON.stringify(parsed, null, 2));
   }
@@ -90,7 +93,7 @@ class ItemNameConverter {
     let stickerName = "";
     if (baseName === "Sticker" && item.stickers && item.stickers.length === 1) {
       stickerName = this.translate(
-        this.stickerKits[String(item.stickers[0].sticker_id)].item_name,
+        this.stickerKits[item.stickers[0].sticker_id].item_name,
       );
     }
 
@@ -106,12 +109,7 @@ class ItemNameConverter {
       wear = this.getWearName(item.paint_wear);
     }
 
-    // It is a knife / glove
-    if (item.quality === 3) {
-      baseName = "★ " + baseName;
-    }
-
-    // It is a stattrak or souvenir item
+    // Item is stattrak/souvenir/music kit
     if (item.attribute && item.attribute.length > 0) {
       for (let [_attributeName, attributeValue] of Object.entries(
         item.attribute,
@@ -127,14 +125,27 @@ class ItemNameConverter {
               ? baseName
               : "Souvenir " + baseName;
             break;
+          case 166:
+            if (baseName === "Music Kit") {
+              let music_index = attributeValue.value_bytes.readUInt32LE(0);
+              let musicKitName = this.translate(
+                this.musicKits[music_index].loc_name,
+              );
+              baseName = baseName + ` | ${musicKitName}`;
+            }
         }
       }
     }
 
-    if (baseName && skinName) {
-      return `${baseName} | ${skinName}${wear ? ` (${wear})` : ""}`;
-    } else if (baseName && stickerName) {
+    // Item is a knife / glove
+    if (item.quality === 3) {
+      baseName = "★ " + baseName;
+    }
+
+    if (baseName && stickerName) {
       return `${baseName} | ${stickerName}`;
+    } else if (baseName && skinName) {
+      return `${baseName} | ${skinName}${wear ? ` (${wear})` : ""}`;
     }
 
     return baseName;
