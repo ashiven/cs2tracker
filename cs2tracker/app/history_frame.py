@@ -10,6 +10,7 @@ from cs2tracker.util import PriceLogs
 
 
 class PriceHistoryFrame(ttk.Frame):
+    # pylint: disable=attribute-defined-outside-init
     def __init__(self, parent):
         """Initialize the price history frame."""
         super().__init__(parent)
