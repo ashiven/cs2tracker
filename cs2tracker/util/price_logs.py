@@ -98,3 +98,9 @@ class PriceLogs:
             return False
 
         return True
+
+    @classmethod
+    def empty(cls):
+        """Checks if the price history is empty and returns True if it is."""
+        with open(OUTPUT_FILE, "r", encoding="utf-8") as price_logs:
+            return len(list(price_logs)) == 0

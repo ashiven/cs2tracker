@@ -18,13 +18,13 @@ APPLICATION_NAME = "CS2Tracker"
 WINDOW_SIZE = "630x335"
 DARK_THEME = True
 
-SCRAPER_WINDOW_TITLE = "CS2Tracker Scraper"
+SCRAPER_WINDOW_TITLE = "Price Overview"
 SCRAPER_WINDOW_SIZE = "900x750"
 
 CONFIG_EDITOR_TITLE = "Config Editor"
 CONFIG_EDITOR_SIZE = "900x750"
 
-PRICE_HISTORY_TITLE = "CS2Tracker Price History"
+PRICE_HISTORY_TITLE = "Price History"
 PRICE_HISTORY_SIZE = "800x600"
 
 config = get_config()
@@ -96,7 +96,7 @@ class MainFrame(ttk.Frame):
 
         self._add_button("Run!", self.scrape_prices, 0)
         self._add_button("Edit Config", self._edit_config, 1)
-        self._add_button("Show History", self._draw_plot, 2)
+        self._add_button("Show History", self._show_history, 2)
         self._add_button("Export History", self._export_log_file, 3)
         self._add_button("Import History", self._import_log_file, 4)
 
@@ -179,8 +179,11 @@ class MainFrame(ttk.Frame):
         editor_frame = ConfigEditorFrame(config_editor_window)
         editor_frame.pack(expand=True, fill="both")
 
-    def _draw_plot(self):
-        """Draw a plot of the scraped prices over time."""
+    def _show_history(self):
+        """Show a chart containing past calculations."""
+        if PriceLogs.empty():
+            return
+
         price_history_window = tk.Toplevel(self.parent)
         price_history_window.geometry(PRICE_HISTORY_SIZE)
         price_history_window.title(PRICE_HISTORY_TITLE)
@@ -190,6 +193,9 @@ class MainFrame(ttk.Frame):
 
     def _export_log_file(self):
         """Lets the user export the log file to a different location."""
+        if PriceLogs.empty():
+            return
+
         export_path = asksaveasfile(
             title="Export Log File",
             defaultextension=".csv",
