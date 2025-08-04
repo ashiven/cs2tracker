@@ -22,10 +22,10 @@ SCRAPER_WINDOW_TITLE = "Price Overview"
 SCRAPER_WINDOW_SIZE = "900x750"
 
 CONFIG_EDITOR_TITLE = "Config Editor"
-CONFIG_EDITOR_SIZE = "900x750"
+CONFIG_EDITOR_SIZE = "850x750"
 
 PRICE_HISTORY_TITLE = "Price History"
-PRICE_HISTORY_SIZE = "800x600"
+PRICE_HISTORY_SIZE = "900x700"
 
 config = get_config()
 
@@ -80,7 +80,7 @@ class MainFrame(ttk.Frame):
         self.rowconfigure(0, weight=1)
 
         self._configure_button_frame()
-        self.button_frame.grid(row=0, column=0, padx=10, pady=(7, 20), sticky="nsew")
+        self.button_frame.grid(row=0, column=0, padx=10, pady=(0, 20), sticky="nsew")
         self._configure_checkbox_frame()
         self.checkbox_frame.grid(row=0, column=1, padx=10, pady=(0, 20), sticky="nsew")
 

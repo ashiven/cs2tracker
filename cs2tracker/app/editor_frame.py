@@ -22,7 +22,7 @@ ADD_CUSTOM_ITEM_TITLE = "Add Custom Item"
 ADD_CUSTOM_ITEM_SIZE = "500x220"
 
 IMPORT_INVENTORY_TITLE = "Import Steam Inventory"
-IMPORT_INVENTORY_SIZE = "615x575"
+IMPORT_INVENTORY_SIZE = "700x350"
 
 IMPORT_INVENTORY_PROCESS_TITLE = "Importing Steam Inventory..."
 IMPORT_INVENTORY_PROCESS_SIZE = "700x500"
@@ -197,12 +197,14 @@ class ConfigEditorFrame(ttk.Frame):
         self.tree.selection_set("User Settings")
 
     def reload_config_into_tree(self):
-        """Reload the configuration options into the treeview for display and
-        editing.
+        """Reload the configuration options into the treeview for display and editing
+        and maintain the users current selection.
         """
-        selected = self.tree.selection()[0]
-        selected_section = self.tree.parent(selected)
-        selected_text = self.tree.item(selected, "text")
+        selected = self.tree.selection()
+        selected_text, selected_section = None, None
+        if selected:
+            selected_text = self.tree.item(selected[0], "text")
+            selected_section = self.tree.parent(selected[0])
 
         for item in self.tree.get_children():
             self.tree.delete(item)
@@ -212,9 +214,9 @@ class ConfigEditorFrame(ttk.Frame):
             self.tree.item(selected_section, open=True)
             self.tree.focus(f"{selected_section}-{selected_text}")
             self.tree.selection_set(f"{selected_section}-{selected_text}")
-        else:
+        elif selected:
             self.tree.focus(selected_text)
-            self.tree.selection_set(selected_text)
+            self.tree.selection_set(selected_text)  # type: ignore
 
     def _configure_treeview(self):
         """Configure a treeview to display and edit configuration options."""
@@ -377,35 +379,110 @@ class InventoryImportFrame(ttk.Frame):
         """Initialize the inventory import frame that allows users to import their Steam
         inventory.
         """
-        super().__init__(parent, style="Card.TFrame", padding=10)
+        super().__init__(parent, padding=10)
         self.parent = parent
         self.editor_frame = editor_frame
         self._add_widgets()
 
     def _add_widgets(self):
         """Add widgets to the inventory import frame."""
-        self._configure_checkboxes()
-        self.storage_units_checkbox.pack(anchor="w", padx=20, pady=(15, 5))
-        self.regular_inventory_checkbox.pack(anchor="w", padx=20, pady=5)
-
-        self.import_cases_checkbox.pack(anchor="w", padx=20, pady=5)
-        self.import_sticker_capsules_checkbox.pack(anchor="w", padx=20, pady=5)
-        self.import_stickers_checkbox.pack(anchor="w", padx=20, pady=5)
-        self.import_others_checkbox.pack(anchor="w", padx=20, pady=5)
-
         self._configure_entries()
-        self.user_name_label.pack(pady=(20, 10))
-        self.user_name_entry.pack(fill="x", padx=50)
-        self.password_label.pack(pady=10)
-        self.password_entry.pack(fill="x", padx=50)
-        self.two_factor_label.pack(pady=10)
-        self.two_factor_entry.pack(fill="x", padx=50)
+        self.user_name_label.pack(pady=5)
+        self.user_name_entry.pack(fill="x", expand=True, padx=10)
+        self.password_label.pack(pady=5)
+        self.password_entry.pack(fill="x", expand=True, padx=10)
+        self.two_factor_label.pack(pady=5)
+        self.two_factor_entry.pack(fill="x", expand=True, padx=10)
+        self.import_button.pack(pady=10)
+        self.entry_frame.pack(side="left", padx=10, pady=(0, 20), fill="both", expand=True)
+
+        self._configure_checkboxes()
+        self.storage_units_checkbox.pack(anchor="w", padx=10, pady=5)
+        self.regular_inventory_checkbox.pack(anchor="w", padx=10, pady=5)
+        self.import_cases_checkbox.pack(anchor="w", padx=10, pady=5)
+        self.import_sticker_capsules_checkbox.pack(anchor="w", padx=10, pady=5)
+        self.import_stickers_checkbox.pack(anchor="w", padx=10, pady=5)
+        self.import_others_checkbox.pack(anchor="w", padx=10, pady=5)
+        self.checkbox_frame.pack(side="left", padx=10, pady=(0, 20), fill="both", expand=True)
+
+    def _configure_checkboxes(self):
+        # pylint: disable=attribute-defined-outside-init
+        """Configure the checkboxes for selecting what to import from the Steam
+        inventory.
+        """
+        self.checkbox_frame = ttk.LabelFrame(self, text="Import Settings", padding=15)
+
+        self.regular_inventory_value = tk.BooleanVar(value=False)
+        self.regular_inventory_checkbox = ttk.Checkbutton(
+            self.checkbox_frame,
+            text="Regular Inventory",
+            variable=self.regular_inventory_value,
+            style="Switch.TCheckbutton",
+        )
+
+        self.storage_units_value = tk.BooleanVar(value=True)
+        self.storage_units_checkbox = ttk.Checkbutton(
+            self.checkbox_frame,
+            text="Storage Units",
+            variable=self.storage_units_value,
+            style="Switch.TCheckbutton",
+        )
+
+        self.import_cases_value = tk.BooleanVar(value=True)
+        self.import_cases_checkbox = ttk.Checkbutton(
+            self.checkbox_frame,
+            text="Import Cases",
+            variable=self.import_cases_value,
+            style="Switch.TCheckbutton",
+        )
+
+        self.import_sticker_capsules_value = tk.BooleanVar(value=True)
+        self.import_sticker_capsules_checkbox = ttk.Checkbutton(
+            self.checkbox_frame,
+            text="Import Sticker Capsules",
+            variable=self.import_sticker_capsules_value,
+            style="Switch.TCheckbutton",
+        )
+
+        self.import_stickers_value = tk.BooleanVar(value=False)
+        self.import_stickers_checkbox = ttk.Checkbutton(
+            self.checkbox_frame,
+            text="Import Stickers",
+            variable=self.import_stickers_value,
+            style="Switch.TCheckbutton",
+        )
+
+        self.import_others_value = tk.BooleanVar(value=False)
+        self.import_others_checkbox = ttk.Checkbutton(
+            self.checkbox_frame,
+            text="Import Other Items",
+            variable=self.import_others_value,
+            style="Switch.TCheckbutton",
+        )
+
+    def _configure_entries(self):
+        # pylint: disable=attribute-defined-outside-init
+        """Configure the entry fields for Steam username, password, and two-factor
+        code.
+        """
+        self.entry_frame = ttk.Frame(self, style="Card.TFrame", padding=15)
+
+        self.user_name_label = ttk.Label(self.entry_frame, text="Steam Username:")
+        self.user_name_entry = ttk.Entry(self.entry_frame, justify="center", font=("Helvetica", 11))
+
+        self.password_label = ttk.Label(self.entry_frame, text="Steam Password:")
+        self.password_entry = ttk.Entry(
+            self.entry_frame, show="*", justify="center", font=("Helvetica", 11)
+        )
+
+        self.two_factor_label = ttk.Label(self.entry_frame, text="Steam Guard Code:")
+        self.two_factor_entry = ttk.Entry(
+            self.entry_frame, justify="center", font=("Helvetica", 11)
+        )
 
         self.import_button = ttk.Button(
-            self, text="Import", command=self._import_inventory, state="disabled"
+            self.entry_frame, text="Import", command=self._import_inventory, state="disabled"
         )
-        self.import_button.pack(pady=10)
-        self.parent.bind("<Return>", lambda _: self.import_button.invoke())
 
         def form_complete(_):
             if (
@@ -418,70 +495,7 @@ class InventoryImportFrame(ttk.Frame):
                 self.import_button.configure(state="disabled")
 
         self.parent.bind("<KeyRelease>", form_complete)
-
-    def _configure_checkboxes(self):
-        # pylint: disable=attribute-defined-outside-init
-        """Configure the checkboxes for selecting what to import from the Steam
-        inventory.
-        """
-        self.regular_inventory_value = tk.BooleanVar(value=False)
-        self.regular_inventory_checkbox = ttk.Checkbutton(
-            self,
-            text="Regular Inventory",
-            variable=self.regular_inventory_value,
-            style="Switch.TCheckbutton",
-        )
-
-        self.storage_units_value = tk.BooleanVar(value=True)
-        self.storage_units_checkbox = ttk.Checkbutton(
-            self,
-            text="Storage Units",
-            variable=self.storage_units_value,
-            style="Switch.TCheckbutton",
-        )
-
-        self.import_cases_value = tk.BooleanVar(value=True)
-        self.import_cases_checkbox = ttk.Checkbutton(
-            self, text="Import Cases", variable=self.import_cases_value, style="Switch.TCheckbutton"
-        )
-
-        self.import_sticker_capsules_value = tk.BooleanVar(value=True)
-        self.import_sticker_capsules_checkbox = ttk.Checkbutton(
-            self,
-            text="Import Sticker Capsules",
-            variable=self.import_sticker_capsules_value,
-            style="Switch.TCheckbutton",
-        )
-
-        self.import_stickers_value = tk.BooleanVar(value=False)
-        self.import_stickers_checkbox = ttk.Checkbutton(
-            self,
-            text="Import Stickers",
-            variable=self.import_stickers_value,
-            style="Switch.TCheckbutton",
-        )
-
-        self.import_others_value = tk.BooleanVar(value=False)
-        self.import_others_checkbox = ttk.Checkbutton(
-            self,
-            text="Import Other Items",
-            variable=self.import_others_value,
-            style="Switch.TCheckbutton",
-        )
-
-    def _configure_entries(self):
-        # pylint: disable=attribute-defined-outside-init
-        """Configure the entry fields for Steam username, password, and two-factor
-        code.
-        """
-        self.user_name_label = ttk.Label(self, text="Steam Username:")
-        self.user_name_entry = ttk.Entry(self, justify="center", font=("Helvetica", 11))
-
-        self.password_label = ttk.Label(self, text="Steam Password:")
-        self.password_entry = ttk.Entry(self, show="*", justify="center", font=("Helvetica", 11))
-
-        self.two_factor_label = ttk.Label(self, text="Steam Guard Code:")
-        self.two_factor_entry = ttk.Entry(self, justify="center", font=("Helvetica", 11))
+        self.parent.bind("<Return>", lambda _: self.import_button.invoke())
 
     def _import_inventory(self):
         """
