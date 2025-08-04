@@ -11,8 +11,8 @@ from cs2tracker.app.history_frame import PriceHistoryFrame
 from cs2tracker.app.scraper_frame import ScraperFrame
 from cs2tracker.constants import ICON_FILE, OS, OUTPUT_FILE, OSType
 from cs2tracker.scraper import BackgroundTask, Scraper
-from cs2tracker.util import PriceLogs
-from cs2tracker.util.validated_config import get_config
+from cs2tracker.util import PriceLogs, get_config
+from cs2tracker.util.tkinter import centered, size_info
 
 APPLICATION_NAME = "CS2Tracker"
 WINDOW_SIZE = "630x335"
@@ -49,7 +49,8 @@ class Application:
         """Configure the main application window."""
         window = tk.Tk()
         window.title(APPLICATION_NAME)
-        window.geometry(WINDOW_SIZE)
+        window.geometry(centered(window, WINDOW_SIZE))
+        window.minsize(*size_info(WINDOW_SIZE))
 
         if OS == OSType.WINDOWS:
             app_id = "cs2tracker.unique.id"
@@ -158,7 +159,8 @@ class MainFrame(ttk.Frame):
         results to a file.
         """
         scraper_window = tk.Toplevel(self.parent)
-        scraper_window.geometry(SCRAPER_WINDOW_SIZE)
+        scraper_window.geometry(centered(scraper_window, SCRAPER_WINDOW_SIZE))
+        scraper_window.minsize(*size_info(SCRAPER_WINDOW_SIZE))
         scraper_window.title(SCRAPER_WINDOW_TITLE)
 
         run_frame = ScraperFrame(
@@ -173,7 +175,8 @@ class MainFrame(ttk.Frame):
     def _edit_config(self):
         """Open a new window with a config editor GUI."""
         config_editor_window = tk.Toplevel(self.parent)
-        config_editor_window.geometry(CONFIG_EDITOR_SIZE)
+        config_editor_window.geometry(centered(config_editor_window, CONFIG_EDITOR_SIZE))
+        config_editor_window.minsize(*size_info(CONFIG_EDITOR_SIZE))
         config_editor_window.title(CONFIG_EDITOR_TITLE)
 
         editor_frame = ConfigEditorFrame(config_editor_window)
@@ -185,7 +188,8 @@ class MainFrame(ttk.Frame):
             return
 
         price_history_window = tk.Toplevel(self.parent)
-        price_history_window.geometry(PRICE_HISTORY_SIZE)
+        price_history_window.geometry(centered(price_history_window, PRICE_HISTORY_SIZE))
+        price_history_window.minsize(*size_info(PRICE_HISTORY_SIZE))
         price_history_window.title(PRICE_HISTORY_TITLE)
 
         history_frame = PriceHistoryFrame(price_history_window)

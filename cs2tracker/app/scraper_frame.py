@@ -4,7 +4,8 @@ from tkinter.filedialog import asksaveasfilename
 
 from tksheet import Sheet
 
-from cs2tracker.scraper.scraper import ParsingError
+from cs2tracker.scraper.scraper import ParsingError, SheetNotFoundError
+from cs2tracker.util.tkinter import centered
 
 
 class ScraperFrame(ttk.Frame):
@@ -72,7 +73,9 @@ class ScraperFrame(ttk.Frame):
 
         required_window_width = 220 + 150 * len(price_columns)
         if int(self.sheet_width) < required_window_width:
-            self.parent.geometry(f"{required_window_width}x{self.sheet_height}")
+            self.parent.geometry(
+                centered(self.parent, f"{required_window_width}x{self.sheet_height}")
+            )
 
         self.sheet.popup_menu_add_command("Save Sheet", self._save_sheet)
         self.parent.bind("<Configure>", self._readjust_sheet_size_with_window_size)
@@ -104,7 +107,9 @@ class ScraperFrame(ttk.Frame):
 
         self.scraper.scrape_prices(update_sheet_callback)
 
-        if self.scraper.error_stack:
+        if self.scraper.error_stack and not isinstance(
+            self.scraper.error_stack[-1], SheetNotFoundError
+        ):
             last_error = self.scraper.error_stack[-1]
             if not isinstance(last_error, ParsingError):
                 messagebox.showerror("An Error Occurred", f"{last_error.message}", parent=self)

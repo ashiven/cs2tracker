@@ -16,6 +16,7 @@ from cs2tracker.constants import (
     INVENTORY_IMPORT_SCRIPT,
 )
 from cs2tracker.util import get_config
+from cs2tracker.util.tkinter import centered, size_info
 
 ADD_CUSTOM_ITEM_TITLE = "Add Custom Item"
 ADD_CUSTOM_ITEM_SIZE = "500x220"
@@ -281,23 +282,35 @@ class ConfigEditorButtonFrame(ttk.Frame):
         """Open a window to add a new custom item."""
         custom_item_window = tk.Toplevel(self.editor_frame)
         custom_item_window.title(ADD_CUSTOM_ITEM_TITLE)
-        custom_item_window.geometry(ADD_CUSTOM_ITEM_SIZE)
+        custom_item_window.geometry(centered(custom_item_window, ADD_CUSTOM_ITEM_SIZE))
+        custom_item_window.minsize(*size_info(ADD_CUSTOM_ITEM_SIZE))
         custom_item_window.focus_set()
+
+        def on_close():
+            custom_item_window.destroy()
+            self.editor_frame.tree.focus_set()
+
+        custom_item_window.protocol("WM_DELETE_WINDOW", on_close)
 
         custom_item_frame = CustomItemFrame(custom_item_window, self.editor_frame)
         custom_item_frame.pack(expand=True, fill="both", padx=15, pady=15)
-        self.editor_frame.tree.focus_set()
 
     def _import_steam_inventory(self):
         """Open a window to import the user's Steam inventory."""
         steam_inventory_window = tk.Toplevel(self.editor_frame)
         steam_inventory_window.title(IMPORT_INVENTORY_TITLE)
-        steam_inventory_window.geometry(IMPORT_INVENTORY_SIZE)
+        steam_inventory_window.geometry(centered(steam_inventory_window, IMPORT_INVENTORY_SIZE))
+        steam_inventory_window.minsize(*size_info(IMPORT_INVENTORY_SIZE))
         steam_inventory_window.focus_set()
+
+        def on_close():
+            steam_inventory_window.destroy()
+            self.editor_frame.tree.focus_set()
+
+        steam_inventory_window.protocol("WM_DELETE_WINDOW", on_close)
 
         steam_inventory_frame = InventoryImportFrame(steam_inventory_window, self.editor_frame)
         steam_inventory_frame.pack(expand=True, fill="both", padx=15, pady=15)
-        self.editor_frame.tree.focus_set()
 
 
 class CustomItemFrame(ttk.Frame):
@@ -508,12 +521,19 @@ class InventoryImportFrame(ttk.Frame):
         self.parent.destroy()
 
     def _display_node_subprocess(self, node_cmd):
-        text_window = tk.Toplevel(self.editor_frame)
-        text_window.title(IMPORT_INVENTORY_PROCESS_TITLE)
-        text_window.geometry(IMPORT_INVENTORY_PROCESS_SIZE)
-        text_window.focus_set()
+        console_window = tk.Toplevel(self.editor_frame)
+        console_window.title(IMPORT_INVENTORY_PROCESS_TITLE)
+        console_window.geometry(centered(console_window, IMPORT_INVENTORY_PROCESS_SIZE))
+        console_window.minsize(*size_info(IMPORT_INVENTORY_PROCESS_SIZE))
+        console_window.focus_set()
 
-        process_frame = InventoryImportProcessFrame(text_window, self.editor_frame)
+        def on_close():
+            console_window.destroy()
+            self.editor_frame.tree.focus_set()
+
+        console_window.protocol("WM_DELETE_WINDOW", on_close)
+
+        process_frame = InventoryImportProcessFrame(console_window, self.editor_frame)
         process_frame.pack(expand=True, fill="both", padx=15, pady=15)
         process_frame.console.focus_set()
         process_frame.start(node_cmd)

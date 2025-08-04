@@ -44,6 +44,11 @@ class UnexpectedError:
         self.message = f"An unexpected error occurred: {error}"
 
 
+class SheetNotFoundError:
+    def __init__(self):
+        self.message = "Could not find sheet to update."
+
+
 class Scraper:
     def __init__(self):
         """Initialize the Scraper class."""
@@ -71,11 +76,12 @@ class Scraper:
         """Add a parser for a specific page where item prices should be scraped."""
         self.parser = parser
 
-    def _print_error(self):
-        """Print the last error message from the error stack, if any."""
-        last_error = self.error_stack[-1] if self.error_stack else None
-        if last_error:
-            console.error(f"{last_error.message}")
+    def _error(self, error):
+        """Add an error to the error stack and print the last error message from the
+        error stack.
+        """
+        self.error_stack.append(error)
+        console.error(f"{error.message}")
 
     def scrape_prices(self, update_sheet_callback=None):
         """
@@ -86,8 +92,7 @@ class Scraper:
             that is displayed in the GUI with the latest scraper price calculation.
         """
         if not config.valid:
-            self.error_stack.append(ConfigError())
-            self._print_error()
+            self._error(ConfigError())
             return
 
         # Reset totals from the previous run and clear the error stack
@@ -106,7 +111,9 @@ class Scraper:
             eur_total = CurrencyConverter().convert(usd_total, "USD", "EUR")
             self.totals.update({price_source: {"usd": usd_total, "eur": eur_total}})  # type: ignore
 
-        if update_sheet_callback:
+        if update_sheet_callback and not (
+            self.error_stack and isinstance(self.error_stack[-1], SheetNotFoundError)
+        ):
             update_sheet_callback(["", ""] + ["", ""] * len(self.parser.SOURCES))
             for price_source, totals in self.totals.items():
                 usd_total = totals["usd"]
@@ -183,8 +190,7 @@ class Scraper:
             page = self.session.get(url)
 
         if not page.ok or not page.content:
-            self.error_stack.append(PageLoadError(page.status_code))
-            self._print_error()
+            self._error(PageLoadError(page.status_code))
             raise RequestException(f"Failed to load page: {url}")
 
         return page
@@ -221,8 +227,7 @@ class Scraper:
                 )
             except ValueError as error:
                 prices += [0.0, 0.0]
-                self.error_stack.append(ParsingError(error))
-                self._print_error()
+                self._error(ParsingError(error))
 
         return prices
 
@@ -238,7 +243,9 @@ class Scraper:
             that is displayed in the GUI with the latest scraper price calculation.
         """
         for item_href, owned in config.items(section):
-            if self.error_stack and isinstance(self.error_stack[-1], RequestLimitExceededError):
+            if self.error_stack and isinstance(
+                self.error_stack[-1], (RequestLimitExceededError, SheetNotFoundError)
+            ):
                 break
             if int(owned) == 0:
                 continue
@@ -249,7 +256,10 @@ class Scraper:
                 prices = self._scrape_prices_from_all_sources(item_href, owned)
 
                 if update_sheet_callback:
-                    update_sheet_callback([item_name, owned] + prices)
+                    try:
+                        update_sheet_callback([item_name, owned] + prices)
+                    except Exception:
+                        self._error(SheetNotFoundError())
 
                 if (
                     not config.getboolean("App Settings", "use_proxy", fallback=False)
@@ -257,11 +267,9 @@ class Scraper:
                 ):
                     time.sleep(1)
             except RetryError:
-                self.error_stack.append(RequestLimitExceededError())
-                self._print_error()
+                self._error(RequestLimitExceededError())
             except Exception as error:
-                self.error_stack.append(UnexpectedError(error))
-                self._print_error()
+                self._error(UnexpectedError(error))
 
 
 if __name__ == "__main__":
