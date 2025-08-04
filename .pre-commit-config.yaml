@@ -1,6 +1,6 @@
 repos:
    - repo: https://github.com/pre-commit/pre-commit-hooks
-     rev: v4.5.0
+     rev: v5.0.0
      hooks:
         - id: check-yaml
         - id: end-of-file-fixer
@@ -10,20 +10,20 @@ repos:
      hooks:
         - id: seed-isort-config
    - repo: https://github.com/ambv/black
-     rev: 23.10.1
+     rev: 25.1.0
      hooks:
         - id: black
    - repo: https://github.com/PyCQA/flake8
-     rev: 6.1.0
+     rev: 7.3.0
      hooks:
         - id: flake8
    - repo: https://github.com/timothycrosley/isort
-     rev: 5.12.0
+     rev: 6.0.1
      hooks:
         - id: isort
           args: ["--profile=black"]
    - repo: https://github.com/PyCQA/docformatter
-     rev: v1.7.5
+     rev: v1.7.8-rc1
      hooks:
         - id: docformatter
           additional_dependencies: [tomli]
