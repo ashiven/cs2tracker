@@ -36,10 +36,13 @@ class ValidatedConfig(ConfigParser):
         discord_notifications = self.getboolean(
             "App Settings", "discord_notifications", fallback=False
         )
+        conversion_currency = self.get("App Settings", "conversion_currency", fallback="EUR")
+
         self.clear()
         self.add_section("App Settings")
         self.set("App Settings", "use_proxy", str(use_proxy))
         self.set("App Settings", "discord_notifications", str(discord_notifications))
+        self.set("App Settings", "conversion_currency", conversion_currency)
 
     def _validate_config_sections(self):
         """Validate that the configuration file has all required sections."""

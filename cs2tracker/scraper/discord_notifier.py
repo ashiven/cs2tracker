@@ -1,13 +1,18 @@
 import requests
 from requests.exceptions import RequestException
 
-from cs2tracker.util import PriceLogs, get_console
+from cs2tracker.config import get_config
+from cs2tracker.util.padded_console import get_console
+from cs2tracker.util.price_logs import PriceLogs
 
 DC_WEBHOOK_USERNAME = "CS2Tracker"
 DC_WEBHOOK_AVATAR_URL = "https://img.icons8.com/?size=100&id=uWQJp2tLXUH6&format=png&color=000000"
 DC_RECENT_HISTORY_LIMIT = 5
 
 console = get_console()
+config = get_config()
+
+CONVERSION_CURRENCY = config.get("App Settings", "conversion_currency", fallback="EUR")
 
 
 class DiscordNotifier:
@@ -19,42 +24,39 @@ class DiscordNotifier:
 
         :return: A list of embeds for the Discord message.
         """
-        dates, usd_prices, eur_prices = PriceLogs.read()
-        dates, usd_prices, eur_prices = reversed(dates), reversed(usd_prices), reversed(eur_prices)
+        dates, totals = PriceLogs.read(newest_first=True, with_symbols=True)
 
-        date_history, usd_history, eur_history = [], [], []
-        for date, usd_log, eur_log in zip(dates, usd_prices, eur_prices):
-            if len(date_history) >= DC_RECENT_HISTORY_LIMIT:
-                break
-            date_history.append(date.strftime("%Y-%m-%d"))
-            usd_history.append(f"${usd_log:.2f}")
-            eur_history.append(f"€{eur_log:.2f}")
-
-        date_history = "\n".join(date_history)
-        usd_history = "\n".join(usd_history)
-        eur_history = "\n".join(eur_history)
+        date_field = [
+            {
+                "name": "Date",
+                "value": "\n".join([date.strftime("%Y-%m-%d") for date in dates][:DC_RECENT_HISTORY_LIMIT]),  # type: ignore
+                "inline": True,
+            },
+        ]
+        price_fields = [
+            {
+                "name": f"{price_source.value.title()} (USD | {CONVERSION_CURRENCY})",
+                "value": "\n".join(
+                    [
+                        f"{usd_total} | {converted_total}"
+                        for usd_total, converted_total in zip(
+                            totals[price_source]["USD"][:DC_RECENT_HISTORY_LIMIT],
+                            totals[price_source][CONVERSION_CURRENCY][:DC_RECENT_HISTORY_LIMIT],
+                        )
+                    ]
+                ),
+                "inline": True,
+            }
+            for price_source in totals
+        ][
+            :2
+        ]  # Limit to the first two price sources because Discord can only display 3 fields per line (Date + 2 Price Sources)
 
         embeds = [
             {
-                "title": "📊 Recent Price History",
+                "title": "📊 Recent Investment History",
                 "color": 5814783,
-                "fields": [
-                    {
-                        "name": "Date",
-                        "value": date_history,
-                        "inline": True,
-                    },
-                    {
-                        "name": "USD Total",
-                        "value": usd_history,
-                        "inline": True,
-                    },
-                    {
-                        "name": "EUR Total",
-                        "value": eur_history,
-                        "inline": True,
-                    },
-                ],
+                "fields": date_field + price_fields,
             }
         ]
 

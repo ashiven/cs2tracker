@@ -1,19 +1,28 @@
 import csv
 from datetime import datetime
 
+from cs2tracker.config import get_config
 from cs2tracker.constants import OUTPUT_FILE
+from cs2tracker.scraper.parsers import get_parser
+from cs2tracker.util.currency_conversion import convert, to_symbol
+
+config = get_config()
+Parser = get_parser()
+
+CONVERSION_CURRENCY = config.get("App Settings", "conversion_currency", fallback="EUR")
 
 
 class PriceLogs:
     @classmethod
-    def _append_latest_calculation(cls, date, usd_total, converted_total):
+    def _append_latest_calculation(cls, date, usd_totals):
         """Append the first price calculation of the day."""
         with open(OUTPUT_FILE, "a", newline="", encoding="utf-8") as price_logs:
             price_logs_writer = csv.writer(price_logs)
-            price_logs_writer.writerow([date, f"{usd_total:.2f}$", f"{converted_total:.2f}€"])
+            price_entries_today = [f"{usd_total:.2f}$" for usd_total in usd_totals]
+            price_logs_writer.writerow([date] + price_entries_today)
 
     @classmethod
-    def _replace_latest_calculation(cls, date, usd_total, converted_total):
+    def _replace_latest_calculation(cls, date, usd_totals):
         """Replace the last calculation of today with the most recent one of today."""
         with open(OUTPUT_FILE, "r+", newline="", encoding="utf-8") as price_logs:
             price_logs_reader = csv.reader(price_logs)
@@ -24,13 +33,13 @@ class PriceLogs:
 
             price_logs_writer = csv.writer(price_logs)
             price_logs_writer.writerows(rows_without_today)
-            price_logs_writer.writerow([date, f"{usd_total:.2f}$", f"{converted_total:.2f}€"])
+            price_entries_today = [f"{usd_total:.2f}$" for usd_total in usd_totals]
+            price_logs_writer.writerow([date] + price_entries_today)
 
     @classmethod
-    def save(cls, usd_total, converted_total):
+    def save(cls, usd_totals):
         """
-        Save the current date and total prices in USD and the converted currency to a
-        CSV file.
+        Save the current date and total prices in USD to a CSV file.
 
         This will append a new entry to the output file if no entry has been made for
         today.
@@ -43,42 +52,71 @@ class PriceLogs:
         with open(OUTPUT_FILE, "r", encoding="utf-8") as price_logs:
             price_logs_reader = csv.reader(price_logs)
             rows = list(price_logs_reader)
-            last_log_date, _, _ = rows[-1] if rows else ("", "", "")
+            last_log_date = rows[-1][0] if rows else ""
 
         today = datetime.now().strftime("%Y-%m-%d")
         if last_log_date != today:
-            cls._append_latest_calculation(today, usd_total, converted_total)
+            cls._append_latest_calculation(today, usd_totals)
         else:
-            cls._replace_latest_calculation(today, usd_total, converted_total)
+            cls._replace_latest_calculation(today, usd_totals)
 
     @classmethod
-    def read(cls):
+    def read(cls, newest_first=False, with_symbols=False):
         """
         Parse the output file to extract dates, dollar prices, and the converted
         currency prices. This data is used for drawing the plot of past prices.
 
-        :return: A tuple containing three lists: dates, dollar prices, and converted
-            prices.
+        :param newest_first: If True, the dates and totals will be returned in reverse
+            order
+        :return: A tuple containing dates and a dictionary of totals for each price
+            source.
         :raises FileNotFoundError: If the output file does not exist.
         :raises IOError: If there is an error reading the output file.
         """
-        dates, usd_prices, converted_prices = [], [], []
+
+        dates = []
+        totals = {
+            price_source: {"USD": [], CONVERSION_CURRENCY: []} for price_source in Parser.SOURCES
+        }
         with open(OUTPUT_FILE, "r", encoding="utf-8") as price_logs:
             price_logs_reader = csv.reader(price_logs)
             for row in price_logs_reader:
-                date, price_usd, price_converted = row
+                date, *usd_totals = row
                 date = datetime.strptime(date, "%Y-%m-%d")
-                price_usd = float(price_usd.rstrip("$"))
-                price_converted = float(price_converted.rstrip("€"))
+
+                usd_totals = [float(price_usd.rstrip("$")) for price_usd in usd_totals]
+                converted_totals = [
+                    convert(price_usd, "USD", CONVERSION_CURRENCY) for price_usd in usd_totals
+                ]
 
                 dates.append(date)
-                usd_prices.append(price_usd)
-                converted_prices.append(price_converted)
+                for price_source_index, price_source in enumerate(Parser.SOURCES):
+                    totals[price_source]["USD"].append(usd_totals[price_source_index])
+                    totals[price_source][CONVERSION_CURRENCY].append(
+                        converted_totals[price_source_index]
+                    )
 
-        return dates, usd_prices, converted_prices
+            if newest_first:
+                dates.reverse()
+                for price_source in Parser.SOURCES:
+                    totals[price_source]["USD"].reverse()
+                    totals[price_source][CONVERSION_CURRENCY].reverse()
+
+            if with_symbols:
+                for price_source in Parser.SOURCES:
+                    totals[price_source]["USD"] = [
+                        f"${price:.2f}" for price in totals[price_source]["USD"]
+                    ]
+                    totals[price_source][CONVERSION_CURRENCY] = [
+                        f"{to_symbol(CONVERSION_CURRENCY)}{price:.2f}"
+                        for price in totals[price_source][CONVERSION_CURRENCY]
+                    ]
+
+        return dates, totals
 
     @classmethod
     def validate_file(cls, log_file_path):
+        # pylint: disable=expression-not-assigned
         """
         Ensures that the provided price log file has the right format. This should be
         used before importing a price log file to ensure it is valid.
@@ -90,10 +128,9 @@ class PriceLogs:
             with open(log_file_path, "r", encoding="utf-8") as price_logs:
                 price_logs_reader = csv.reader(price_logs)
                 for row in price_logs_reader:
-                    date_str, price_usd, price_converted = row
+                    date_str, *usd_totals = row
                     datetime.strptime(date_str, "%Y-%m-%d")
-                    float(price_usd.rstrip("$"))
-                    float(price_converted.rstrip("€"))
+                    [float(price_usd.rstrip("$")) for price_usd in usd_totals]
         except (FileNotFoundError, IOError, ValueError, TypeError):
             return False
         except Exception:

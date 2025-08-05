@@ -1,22 +1,27 @@
 import time
 from datetime import datetime
 
-from currency_converter import CurrencyConverter
 from requests import RequestException
 from requests.adapters import HTTPAdapter, Retry
 from requests_cache import CachedSession
 from tenacity import RetryError, retry, stop_after_attempt
 
+from cs2tracker.config import get_config
 from cs2tracker.constants import AUTHOR_STRING, BANNER
 from cs2tracker.scraper.discord_notifier import DiscordNotifier
-from cs2tracker.scraper.parsers import CSGOTrader, PriceSource
-from cs2tracker.util import PriceLogs, get_config, get_console
+from cs2tracker.scraper.parsers import get_parser
+from cs2tracker.util.currency_conversion import convert, to_symbol
+from cs2tracker.util.padded_console import get_console
+from cs2tracker.util.price_logs import PriceLogs
 
 HTTP_PROXY_URL = "http://{}:@smartproxy.crawlbase.com:8012"
 HTTPS_PROXY_URL = "http://{}:@smartproxy.crawlbase.com:8012"
 
 console = get_console()
 config = get_config()
+Parser = get_parser()
+
+CONVERSION_CURRENCY = config.get("App Settings", "conversion_currency", fallback="EUR")
 
 
 class ConfigError:
@@ -53,11 +58,13 @@ class Scraper:
     def __init__(self):
         """Initialize the Scraper class."""
         self._start_session()
-        self._add_parser(CSGOTrader)
-
         self.error_stack = []
         self.totals = {
-            price_source: {"usd": 0.0, "converted": 0.0} for price_source in self.parser.SOURCES
+            price_source: {
+                "USD": 0.0,
+                CONVERSION_CURRENCY: 0.0,
+            }
+            for price_source in Parser.SOURCES
         }
 
     def _start_session(self):
@@ -72,10 +79,6 @@ class Scraper:
         self.session.mount("http://", HTTPAdapter(max_retries=retries))
         self.session.mount("https://", HTTPAdapter(max_retries=retries))
 
-    def _add_parser(self, parser):
-        """Add a parser for a specific page where item prices should be scraped."""
-        self.parser = parser
-
     def _error(self, error):
         """Add an error to the error stack and print the last error message from the
         error stack.
@@ -85,7 +88,7 @@ class Scraper:
 
     def scrape_prices(self, update_sheet_callback=None):
         """
-        Scrape prices for capsules and cases, calculate totals in USD and converted
+        Scrape prices for capsules and cases, calculate totals in USD and conversion
         currency, and print/save the results.
 
         :param update_sheet_callback: Optional callback function to update a tksheet
@@ -98,7 +101,11 @@ class Scraper:
         # Reset totals from the previous run and clear the error stack
         self.error_stack.clear()
         self.totals = {
-            price_source: {"usd": 0.0, "converted": 0.0} for price_source in self.parser.SOURCES
+            price_source: {
+                "USD": 0.0,
+                CONVERSION_CURRENCY: 0.0,
+            }
+            for price_source in Parser.SOURCES
         }
 
         for section in config.sections():
@@ -106,52 +113,62 @@ class Scraper:
                 continue
             self._scrape_item_prices(section, update_sheet_callback)
 
+        self._convert_totals()
+        self._print_totals(update_sheet_callback)
+        self._send_discord_notification()
+
+        usd_totals = [self.totals[price_source]["USD"] for price_source in Parser.SOURCES]
+        PriceLogs.save(usd_totals)
+
+    def _convert_totals(self):
+        """
+        Convert the total prices from USD to the configured conversion currency and
+        update the totals dictionary.
+
+        with the converted totals.
+        """
         for price_source, totals in self.totals.items():
-            usd_total = totals["usd"]
-            conversion_currency = config.get("App Settings", "conversion_currency", fallback="EUR")
-            converted_total = CurrencyConverter().convert(usd_total, "USD", conversion_currency)
-            self.totals.update({price_source: {"usd": usd_total, "converted": converted_total}})  # type: ignore
+            usd_total = totals["USD"]
+            converted_total = convert(usd_total, "USD", CONVERSION_CURRENCY)
+            self.totals.update({price_source: {"USD": usd_total, CONVERSION_CURRENCY: converted_total}})  # type: ignore
+
+    def _print_totals(self, update_sheet_callback=None):
+        """
+        Print the total prices in USD and converted currency, formatted with titles and
+        separators.
+
+        :param update_sheet_callback: Optional callback function to update a tksheet
+            with the final totals.
+        """
+        console.title("USD Total", "green")
+        for price_source, totals in self.totals.items():
+            usd_total = totals["USD"]
+            console.print(f"{price_source.value.title():<10}: ${usd_total:.2f}")
+
+        console.title(f"{CONVERSION_CURRENCY} Total", "green")
+        for price_source, totals in self.totals.items():
+            converted_total = totals[CONVERSION_CURRENCY]
+            console.print(
+                f"{price_source.value.title():<10}: {to_symbol(CONVERSION_CURRENCY)}{converted_total:.2f}"
+            )
+
+        console.separator("green")
 
         if update_sheet_callback and not (
             self.error_stack and isinstance(self.error_stack[-1], SheetNotFoundError)
         ):
-            update_sheet_callback(["", ""] + ["", ""] * len(self.parser.SOURCES))
+            update_sheet_callback(["", ""] + ["", ""] * len(Parser.SOURCES))
             for price_source, totals in self.totals.items():
-                usd_total = totals["usd"]
-                converted_total = totals["converted"]
+                usd_total = totals["USD"]
+                converted_total = totals[CONVERSION_CURRENCY]
                 update_sheet_callback(
                     [
                         f"[{datetime.now().strftime('%Y-%m-%d')}] {price_source.value.title()} Total:",
                         f"${usd_total:.2f}",
-                        f"€{converted_total:.2f}",
+                        f"{to_symbol(CONVERSION_CURRENCY)}{converted_total:.2f}",
                         "",
                     ]
                 )
-
-        self._print_total()
-        self._send_discord_notification()
-
-        # TODO: modify price logs, charts etc for multiple sources (only use steam as source for now)
-        steam_usd_total = self.totals[PriceSource.STEAM]["usd"]
-        steam_converted_total = self.totals[PriceSource.STEAM]["converted"]
-        PriceLogs.save(steam_usd_total, steam_converted_total)
-
-    def _print_total(self):
-        """Print the total prices in USD and converted currency, formatted with titles
-        and separators.
-        """
-        console.title("USD Total", "green")
-        for price_source, totals in self.totals.items():
-            usd_total = totals.get("usd")
-            console.print(f"{price_source.value.title():<10}: ${usd_total:.2f}")
-
-        conversion_currency = config.get("App Settings", "conversion_currency", fallback="EUR")
-        console.title(f"{conversion_currency} Total", "green")
-        for price_source, totals in self.totals.items():
-            converted_total = totals.get("converted")
-            console.print(f"{price_source.value.title():<10}: €{converted_total:.2f}")
-
-        console.separator("green")
 
     def _send_discord_notification(self):
         """Send a message to a Discord webhook if notifications are enabled in the
@@ -210,18 +227,18 @@ class Scraper:
         :raises ValueError: If the parser could not find the item
         """
         prices = []
-        for price_source in self.parser.SOURCES:
+        for price_source in Parser.SOURCES:
             try:
-                item_page_url = self.parser.get_item_page_url(item_href, price_source)
+                item_page_url = Parser.get_item_page_url(item_href, price_source)
                 item_page = self._get_page(item_page_url)
-                price_usd = self.parser.parse_item_price(item_page, item_href, price_source)
+                price_usd = Parser.parse_item_price(item_page, item_href, price_source)
 
                 price_usd_owned = round(float(int(owned) * price_usd), 2)
-                self.totals[price_source]["usd"] += price_usd_owned
+                self.totals[price_source]["USD"] += price_usd_owned
 
                 prices += [price_usd, price_usd_owned]
                 console.price(
-                    self.parser.PRICE_INFO,
+                    Parser.PRICE_INFO,
                     owned,
                     price_source.value.title(),
                     price_usd,
@@ -265,7 +282,7 @@ class Scraper:
 
                 if (
                     not config.getboolean("App Settings", "use_proxy", fallback=False)
-                    and self.parser.NEEDS_TIMEOUT
+                    and Parser.NEEDS_TIMEOUT
                 ):
                     time.sleep(1)
             except RetryError:

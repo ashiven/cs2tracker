@@ -9,9 +9,11 @@ import sv_ttk
 from cs2tracker.app.editor_frame import ConfigEditorFrame
 from cs2tracker.app.history_frame import PriceHistoryFrame
 from cs2tracker.app.scraper_frame import ScraperFrame
+from cs2tracker.config import get_config
 from cs2tracker.constants import ICON_FILE, OS, OUTPUT_FILE, OSType
-from cs2tracker.scraper import BackgroundTask, Scraper
-from cs2tracker.util import PriceLogs, get_config
+from cs2tracker.scraper.background_task import BackgroundTask
+from cs2tracker.scraper.scraper import Scraper
+from cs2tracker.util.price_logs import PriceLogs
 from cs2tracker.util.tkinter import centered, size_info
 
 APPLICATION_NAME = "CS2Tracker"

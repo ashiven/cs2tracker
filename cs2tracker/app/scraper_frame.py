@@ -4,8 +4,11 @@ from tkinter.filedialog import asksaveasfilename
 
 from tksheet import Sheet
 
+from cs2tracker.scraper.parsers import get_parser
 from cs2tracker.scraper.scraper import ParsingError, SheetNotFoundError
 from cs2tracker.util.tkinter import centered
+
+Parser = get_parser()
 
 
 class ScraperFrame(ttk.Frame):
@@ -52,7 +55,7 @@ class ScraperFrame(ttk.Frame):
         self.sheet.enable_bindings()
 
         source_titles = []
-        for price_source in self.scraper.parser.SOURCES:
+        for price_source in Parser.SOURCES:
             source_titles += [
                 f"{price_source.value.title()} (USD)",
                 f"{price_source.value.title()} Owned (USD)",
@@ -66,7 +69,7 @@ class ScraperFrame(ttk.Frame):
         )
         self.sheet.align_rows([0], "c")
 
-        price_columns = list(range(2 * len(self.scraper.parser.SOURCES)))
+        price_columns = list(range(2 * len(Parser.SOURCES)))
         price_columns = [1] + [column_index + 2 for column_index in price_columns]
         self.sheet.align_columns(price_columns, "c")
         self.sheet.column_width(0, 220)

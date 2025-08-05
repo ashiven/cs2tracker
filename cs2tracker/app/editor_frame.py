@@ -8,6 +8,7 @@ from tkinter import messagebox, ttk
 from nodejs import node
 from ttk_text import ThemedText
 
+from cs2tracker.config import get_config
 from cs2tracker.constants import (
     CONFIG_FILE,
     CONFIG_FILE_BACKUP,
@@ -15,7 +16,6 @@ from cs2tracker.constants import (
     INVENTORY_IMPORT_FILE,
     INVENTORY_IMPORT_SCRIPT,
 )
-from cs2tracker.util import get_config
 from cs2tracker.util.tkinter import centered, size_info
 
 ADD_CUSTOM_ITEM_TITLE = "Add Custom Item"
