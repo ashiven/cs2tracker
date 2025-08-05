@@ -57,7 +57,7 @@ class Scraper:
 
         self.error_stack = []
         self.totals = {
-            price_source: {"usd": 0.0, "eur": 0.0} for price_source in self.parser.SOURCES
+            price_source: {"usd": 0.0, "converted": 0.0} for price_source in self.parser.SOURCES
         }
 
     def _start_session(self):
@@ -85,8 +85,8 @@ class Scraper:
 
     def scrape_prices(self, update_sheet_callback=None):
         """
-        Scrape prices for capsules and cases, calculate totals in USD and EUR, and
-        print/save the results.
+        Scrape prices for capsules and cases, calculate totals in USD and converted
+        currency, and print/save the results.
 
         :param update_sheet_callback: Optional callback function to update a tksheet
             that is displayed in the GUI with the latest scraper price calculation.
@@ -98,7 +98,7 @@ class Scraper:
         # Reset totals from the previous run and clear the error stack
         self.error_stack.clear()
         self.totals = {
-            price_source: {"usd": 0.0, "eur": 0.0} for price_source in self.parser.SOURCES
+            price_source: {"usd": 0.0, "converted": 0.0} for price_source in self.parser.SOURCES
         }
 
         for section in config.sections():
@@ -108,8 +108,9 @@ class Scraper:
 
         for price_source, totals in self.totals.items():
             usd_total = totals["usd"]
-            eur_total = CurrencyConverter().convert(usd_total, "USD", "EUR")
-            self.totals.update({price_source: {"usd": usd_total, "eur": eur_total}})  # type: ignore
+            conversion_currency = config.get("App Settings", "conversion_currency", fallback="EUR")
+            converted_total = CurrencyConverter().convert(usd_total, "USD", conversion_currency)
+            self.totals.update({price_source: {"usd": usd_total, "converted": converted_total}})  # type: ignore
 
         if update_sheet_callback and not (
             self.error_stack and isinstance(self.error_stack[-1], SheetNotFoundError)
@@ -117,12 +118,12 @@ class Scraper:
             update_sheet_callback(["", ""] + ["", ""] * len(self.parser.SOURCES))
             for price_source, totals in self.totals.items():
                 usd_total = totals["usd"]
-                eur_total = totals["eur"]
+                converted_total = totals["converted"]
                 update_sheet_callback(
                     [
                         f"[{datetime.now().strftime('%Y-%m-%d')}] {price_source.value.title()} Total:",
                         f"${usd_total:.2f}",
-                        f"€{eur_total:.2f}",
+                        f"€{converted_total:.2f}",
                         "",
                     ]
                 )
@@ -132,22 +133,23 @@ class Scraper:
 
         # TODO: modify price logs, charts etc for multiple sources (only use steam as source for now)
         steam_usd_total = self.totals[PriceSource.STEAM]["usd"]
-        steam_eur_total = self.totals[PriceSource.STEAM]["eur"]
-        PriceLogs.save(steam_usd_total, steam_eur_total)
+        steam_converted_total = self.totals[PriceSource.STEAM]["converted"]
+        PriceLogs.save(steam_usd_total, steam_converted_total)
 
     def _print_total(self):
-        """Print the total prices in USD and EUR, formatted with titles and
-        separators.
+        """Print the total prices in USD and converted currency, formatted with titles
+        and separators.
         """
         console.title("USD Total", "green")
         for price_source, totals in self.totals.items():
             usd_total = totals.get("usd")
             console.print(f"{price_source.value.title():<10}: ${usd_total:.2f}")
 
-        console.title("EUR Total", "green")
+        conversion_currency = config.get("App Settings", "conversion_currency", fallback="EUR")
+        console.title(f"{conversion_currency} Total", "green")
         for price_source, totals in self.totals.items():
-            eur_total = totals.get("eur")
-            console.print(f"{price_source.value.title():<10}: €{eur_total:.2f}")
+            converted_total = totals.get("converted")
+            console.print(f"{price_source.value.title():<10}: €{converted_total:.2f}")
 
         console.separator("green")
 

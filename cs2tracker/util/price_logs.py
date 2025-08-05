@@ -6,14 +6,14 @@ from cs2tracker.constants import OUTPUT_FILE
 
 class PriceLogs:
     @classmethod
-    def _append_latest_calculation(cls, date, usd_total, eur_total):
+    def _append_latest_calculation(cls, date, usd_total, converted_total):
         """Append the first price calculation of the day."""
         with open(OUTPUT_FILE, "a", newline="", encoding="utf-8") as price_logs:
             price_logs_writer = csv.writer(price_logs)
-            price_logs_writer.writerow([date, f"{usd_total:.2f}$", f"{eur_total:.2f}€"])
+            price_logs_writer.writerow([date, f"{usd_total:.2f}$", f"{converted_total:.2f}€"])
 
     @classmethod
-    def _replace_latest_calculation(cls, date, usd_total, eur_total):
+    def _replace_latest_calculation(cls, date, usd_total, converted_total):
         """Replace the last calculation of today with the most recent one of today."""
         with open(OUTPUT_FILE, "r+", newline="", encoding="utf-8") as price_logs:
             price_logs_reader = csv.reader(price_logs)
@@ -24,18 +24,19 @@ class PriceLogs:
 
             price_logs_writer = csv.writer(price_logs)
             price_logs_writer.writerows(rows_without_today)
-            price_logs_writer.writerow([date, f"{usd_total:.2f}$", f"{eur_total:.2f}€"])
+            price_logs_writer.writerow([date, f"{usd_total:.2f}$", f"{converted_total:.2f}€"])
 
     @classmethod
-    def save(cls, usd_total, eur_total):
+    def save(cls, usd_total, converted_total):
         """
-        Save the current date and total prices in USD and EUR to a CSV file.
+        Save the current date and total prices in USD and the converted currency to a
+        CSV file.
 
         This will append a new entry to the output file if no entry has been made for
         today.
 
         :param usd_total: The total price in USD to save.
-        :param eur_total: The total price in EUR to save.
+        :param converted_total: The total price in the converted currency to save.
         :raises FileNotFoundError: If the output file does not exist.
         :raises IOError: If there is an error writing to the output file.
         """
@@ -46,34 +47,35 @@ class PriceLogs:
 
         today = datetime.now().strftime("%Y-%m-%d")
         if last_log_date != today:
-            cls._append_latest_calculation(today, usd_total, eur_total)
+            cls._append_latest_calculation(today, usd_total, converted_total)
         else:
-            cls._replace_latest_calculation(today, usd_total, eur_total)
+            cls._replace_latest_calculation(today, usd_total, converted_total)
 
     @classmethod
     def read(cls):
         """
-        Parse the output file to extract dates, dollar prices, and euro prices. This
-        data is used for drawing the plot of past prices.
+        Parse the output file to extract dates, dollar prices, and the converted
+        currency prices. This data is used for drawing the plot of past prices.
 
-        :return: A tuple containing three lists: dates, dollar prices, and euro prices.
+        :return: A tuple containing three lists: dates, dollar prices, and converted
+            prices.
         :raises FileNotFoundError: If the output file does not exist.
         :raises IOError: If there is an error reading the output file.
         """
-        dates, usd_prices, eur_prices = [], [], []
+        dates, usd_prices, converted_prices = [], [], []
         with open(OUTPUT_FILE, "r", encoding="utf-8") as price_logs:
             price_logs_reader = csv.reader(price_logs)
             for row in price_logs_reader:
-                date, price_usd, price_eur = row
+                date, price_usd, price_converted = row
                 date = datetime.strptime(date, "%Y-%m-%d")
                 price_usd = float(price_usd.rstrip("$"))
-                price_eur = float(price_eur.rstrip("€"))
+                price_converted = float(price_converted.rstrip("€"))
 
                 dates.append(date)
                 usd_prices.append(price_usd)
-                eur_prices.append(price_eur)
+                converted_prices.append(price_converted)
 
-        return dates, usd_prices, eur_prices
+        return dates, usd_prices, converted_prices
 
     @classmethod
     def validate_file(cls, log_file_path):
@@ -88,10 +90,10 @@ class PriceLogs:
             with open(log_file_path, "r", encoding="utf-8") as price_logs:
                 price_logs_reader = csv.reader(price_logs)
                 for row in price_logs_reader:
-                    date_str, price_usd, price_eur = row
+                    date_str, price_usd, price_converted = row
                     datetime.strptime(date_str, "%Y-%m-%d")
                     float(price_usd.rstrip("$"))
-                    float(price_eur.rstrip("€"))
+                    float(price_converted.rstrip("€"))
         except (FileNotFoundError, IOError, ValueError, TypeError):
             return False
         except Exception:
