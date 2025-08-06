@@ -81,24 +81,34 @@ class ItemNameConverter {
 
   getItemName(item) {
     const def = this.items[item.def_index];
-    if (!def) return "";
+    if (def === undefined) return "";
 
     let baseName = "";
-    if (def.item_name) {
+    if (def.item_name !== undefined) {
       baseName = this.translate(def.item_name);
-    } else if (def.prefab && this.prefabs[def.prefab]) {
+    } else if (
+      def.prefab !== undefined &&
+      this.prefabs[def.prefab] !== undefined
+    ) {
       baseName = this.translate(this.prefabs[def.prefab].item_name);
     }
 
     let stickerName = "";
-    if (baseName === "Sticker" && item.stickers && item.stickers.length === 1) {
+    if (
+      baseName === "Sticker" &&
+      item.stickers !== undefined &&
+      item.stickers.length === 1
+    ) {
       stickerName = this.translate(
         this.stickerKits[item.stickers[0].sticker_id].item_name,
       );
     }
 
     let skinName = "";
-    if (item.paint_index && this.paintKits[item.paint_index]) {
+    if (
+      item.paint_index !== undefined &&
+      this.paintKits[item.paint_index] !== undefined
+    ) {
       skinName = this.translate(
         this.paintKits[item.paint_index].description_tag,
       );
@@ -110,7 +120,7 @@ class ItemNameConverter {
     }
 
     // Item is stattrak/souvenir/music kit
-    if (item.attribute && item.attribute.length > 0) {
+    if (item.attribute !== undefined && item.attribute.length > 0) {
       for (let [_attributeName, attributeValue] of Object.entries(
         item.attribute,
       )) {
@@ -164,14 +174,14 @@ class ItemNameConverter {
 
   getItemType(item) {
     const def = this.items[item.def_index];
-    if (!def) return "unknown";
+    if (def === undefined) return "unknown";
 
-    if (def.item_name) {
+    if (def.item_name !== undefined) {
       let translatedName =
         def.item_name.replace("#", "").toLowerCase() || def.item_name;
       if (
-        translatedName.includes("crate_sticker_pack") ||
-        translatedName.includes("crate_signature_pack")
+        translatedName.startsWith("csgo_crate_sticker_pack") ||
+        translatedName.startsWith("csgo_crate_signature_pack")
       ) {
         return "sticker capsule";
       } else if (translatedName.startsWith("csgo_crate_community")) {
@@ -188,9 +198,9 @@ class ItemNameConverter {
 
   getItemTradable(item) {
     const def = this.items[item.def_index];
-    if (!def) return false;
+    if (def === undefined) return false;
 
-    if (def.item_name) {
+    if (def.item_name !== undefined) {
       let translatedName =
         def.item_name.replace("#", "").toLowerCase() || def.item_name;
       if (
@@ -211,16 +221,25 @@ class ItemNameConverter {
       return false;
     }
 
+    // Base weapons with stickers/name tags
+    if (
+      def.image_inventory !== undefined &&
+      def.image_inventory.startsWith("econ/weapons/base_weapons")
+    ) {
+      return false;
+    }
+
+    // Base weapons with stickers/name tags
     if (
       item.paint_index === undefined &&
       def.image_inventory === undefined &&
       def.prefab !== undefined
     ) {
+      let prefab = this.prefabs[def.prefab];
       if (
-        this.prefabs[def.prefab] !== undefined &&
-        this.prefabs[def.prefab].image_inventory.startsWith(
-          "econ/weapons/base_weapons",
-        )
+        prefab !== undefined &&
+        prefab.image_inventory !== undefined &&
+        prefab.image_inventory.startsWith("econ/weapons/base_weapons")
       ) {
         return false;
       }
@@ -228,6 +247,7 @@ class ItemNameConverter {
 
     return true;
   }
+
   convertInventory(inventoryList) {
     return inventoryList.map((item) => ({
       ...item,
