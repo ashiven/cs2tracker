@@ -61,6 +61,7 @@ class ValidatedConfig(ConfigParser):
                 raise ValueError(f"Missing '{capsule_section}' section in the configuration file.")
 
     def _validate_config_values(self):
+        # pylint: disable=too-many-branches
         """Validate that the configuration file has valid values for all sections."""
         try:
             for section in self.sections():

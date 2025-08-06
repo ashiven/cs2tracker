@@ -139,6 +139,7 @@ class CSGOTraderParser(BaseParser):
 
     @classmethod
     def parse_item_price(cls, item_page, item_href, source=PriceSource.STEAM):
+        # pylint: disable=too-many-branches
         _ = source
 
         price_list = item_page.json()
@@ -152,17 +153,14 @@ class CSGOTraderParser(BaseParser):
             raise ValueError(f"CSGOTrader: Could not find item price info: {url_decoded_name}")
 
         if source == PriceSource.STEAM:
-            price = price_info.get("last_24h")
-            if not price:
-                price = price_info.get("last_7d")
-                if not price:
-                    price = price_info.get("last_30d")
-                    if not price:
-                        price = price_info.get("last_90d")
-                        if not price:
-                            raise ValueError(
-                                f"CSGOTrader: Could not find a steam price info for the past 3 months: {url_decoded_name}"
-                            )
+            for timestamp in ("last_24h", "last_7d", "last_30d", "last_90d"):
+                price = price_info.get(timestamp)
+                if price:
+                    break
+            else:
+                raise ValueError(
+                    f"CSGOTrader: Could not find steam price info for the past 3 months: {url_decoded_name}"
+                )
         elif source == PriceSource.BUFF163:
             price = price_info.get("starting_at")
             if not price:
