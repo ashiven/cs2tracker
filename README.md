@@ -33,7 +33,7 @@
 ## Features
 
 - ⚡ Rapidly import your Storage Units
-- 🔍 Track CS2 prices on Steam, Buff163, Youpin898
+- 🔍 Track prices on Steam, Buff163, Youpin898
 - 📈 View investment price history
 - 🧾 Export/Import history data
 - 📤 Discord notifications on updates
