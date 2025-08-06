@@ -164,7 +164,7 @@ class MainFrame(ttk.Frame):
             self.settings_frame,
             state="readonly",
             values=list(CURRENCY_SYMBOLS),
-            postcommand=lambda: self.parent.focus_set(),
+            postcommand=self.parent.focus_set,
         )
         self.currency_selection.set(config.conversion_currency)
         self.currency_selection.grid(row=5, column=0, sticky="w", padx=(20, 0), pady=5)
