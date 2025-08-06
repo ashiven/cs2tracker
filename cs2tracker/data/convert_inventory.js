@@ -249,12 +249,18 @@ class ItemNameConverter {
   }
 
   convertInventory(inventoryList) {
-    return inventoryList.map((item) => ({
-      ...item,
-      item_name: this.getItemName(item),
-      item_type: this.getItemType(item),
-      item_tradable: this.getItemTradable(item),
-    }));
+    // Some untradable items were too difficult to filter out via their properties,
+    // so we filter them out by their item name here.
+    let excludeItems = ["P250 | X-Ray", "Music Kit | Valve, CS:GO"];
+
+    return inventoryList
+      .map((item) => ({
+        ...item,
+        item_name: this.getItemName(item),
+        item_type: this.getItemType(item),
+        item_tradable: this.getItemTradable(item),
+      }))
+      .filter((item) => !excludeItems.includes(item.item_name));
   }
 }
 

@@ -15,7 +15,7 @@ from cs2tracker.logs import PriceLogs
 from cs2tracker.scraper.background_task import BackgroundTask
 from cs2tracker.scraper.scraper import Scraper
 from cs2tracker.util.currency_conversion import CURRENCY_SYMBOLS
-from cs2tracker.util.tkinter import centered, size_info
+from cs2tracker.util.tkinter import centered, fix_sv_ttk, size_info
 
 APPLICATION_NAME = "CS2Tracker"
 WINDOW_SIZE = "630x335"
@@ -45,6 +45,8 @@ class Application:
             sv_ttk.use_dark_theme()
         else:
             sv_ttk.use_light_theme()
+
+        fix_sv_ttk(ttk.Style())
 
         window.mainloop()
 
@@ -152,7 +154,7 @@ class MainFrame(ttk.Frame):
         )
 
         self.dark_theme_checkbox_value = tk.BooleanVar(value=DARK_THEME)
-        self._add_checkbox("Dark Theme", self.dark_theme_checkbox_value, sv_ttk.toggle_theme, 3)
+        self._add_checkbox("Dark Theme", self.dark_theme_checkbox_value, self._toggle_theme, 3)
 
         self.currency_selection_label = ttk.Label(self.settings_frame, text="Currency:")
         self.currency_selection_label.grid(row=4, column=0, sticky="w", padx=(20, 0), pady=5)
@@ -166,9 +168,6 @@ class MainFrame(ttk.Frame):
         self.currency_selection.grid(row=5, column=0, sticky="w", padx=(20, 0), pady=5)
 
         def on_currency_change(_):
-            """Update the conversion currency in the config when the selection
-            changes.
-            """
             config.set_app_option("conversion_currency", self.currency_selection.get())
             self.currency_selection.selection_clear()
             self.parent.focus_set()
@@ -274,3 +273,10 @@ class MainFrame(ttk.Frame):
 
         config.toggle_app_option("discord_webhook", enabled)
         return True
+
+    def _toggle_theme(self):
+        if self.dark_theme_checkbox_value.get():
+            sv_ttk.use_dark_theme()
+        else:
+            sv_ttk.use_light_theme()
+        fix_sv_ttk(ttk.Style())

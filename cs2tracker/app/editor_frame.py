@@ -576,7 +576,7 @@ class InventoryImportFrame(ttk.Frame):
         console_window.title(IMPORT_INVENTORY_PROCESS_TITLE)
         console_window.geometry(centered(console_window, IMPORT_INVENTORY_PROCESS_SIZE))
         console_window.minsize(*size_info(IMPORT_INVENTORY_PROCESS_SIZE))
-        console_window.focus_set()
+        console_window.focus_force()
 
         def on_close():
             console_window.destroy()
@@ -586,7 +586,7 @@ class InventoryImportFrame(ttk.Frame):
 
         process_frame = InventoryImportProcessFrame(console_window, self.editor_frame)
         process_frame.pack(expand=True, fill="both", padx=15, pady=15)
-        process_frame.console.focus_set()
+        process_frame.console.focus_force()
         process_frame.start(node_cmd)
 
 
