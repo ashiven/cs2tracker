@@ -22,15 +22,24 @@ const password = args[8];
 const twoFactorCode = args[9];
 
 const paddedLog = (...args) => {
-  console.log(" [+] ", ...args);
+  console.log(" [INFO] ", ...args);
 };
 
 const originalConsoleError = console.error;
 console.error = (...args) => {
-  originalConsoleError("    [!] " + args.join(" "));
+  originalConsoleError(" [ERROR] " + args.join(" "));
 };
 
 (async () => {
+  const closeWithError = (message) => {
+    console.error(message);
+    console.error("This window will automatically close in 5 seconds.");
+    setTimeout(() => {
+      user.logOff();
+      process.exit(1);
+    }, 5000);
+  };
+
   let user = new SteamUser();
 
   paddedLog("Logging into Steam...");
@@ -41,25 +50,36 @@ console.error = (...args) => {
     twoFactorCode: twoFactorCode,
   });
 
-  user.on("error", (err) => {
-    console.error("Steam Error: " + err);
-    user.logOff();
-    process.exit(1);
+  const LOGIN_TIMEOUT_MS = 15000;
+  let loginTimeout = setTimeout(() => {
+    closeWithError(
+      "Login timed out. Please check your credentials and try again.",
+    );
+  }, LOGIN_TIMEOUT_MS);
+
+  user.on("steamGuard", (_domain, _callback, lastCodeWrong) => {
+    if (lastCodeWrong) {
+      closeWithError(
+        "The Steam Guard code you entered was incorrect. Please try again.",
+      );
+    }
   });
 
   user.on("loggedOn", (_details, _parental) => {
+    clearTimeout(loginTimeout);
     paddedLog("Logged into Steam.");
     user.gamesPlayed([730]);
+    paddedLog("Connecting to CS2 Game Coordinator...");
+  });
+
+  user.on("error", (err) => {
+    closeWithError(`Steam Error: ${err.message}`);
   });
 
   let cs2 = new CS2(user);
 
-  paddedLog("Connecting to CS2 Game Coordinator...");
-
   cs2.on("error", (err) => {
-    console.error("CS2 Error: " + err);
-    user.logOff();
-    process.exit(1);
+    closeWithError(`CS2 Error: ${err.message}`);
   });
 
   let nameConverter = new ItemNameConverter();
@@ -96,8 +116,6 @@ console.error = (...args) => {
     process.exit(0);
   });
 
-  // TODO: The inventory may contain items that are not marketable or tradable,
-  // so we have to make sure to process these items correctly in the main app.
   async function processInventory() {
     try {
       // filter out items that have the casket_id property set from the inventory

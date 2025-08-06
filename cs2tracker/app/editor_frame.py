@@ -570,6 +570,7 @@ class InventoryImportProcessFrame(ttk.Frame):
 
         self.console = ThemedText(self, wrap="word", yscrollcommand=self.scrollbar.set)
         self.console.config(state="disabled")
+        self.console.tag_configure("error", foreground="red")
         self.console.pack(expand=True, fill="both", padx=10, pady=10)
 
         self.scrollbar.config(command=self.console.yview)
@@ -603,7 +604,10 @@ class InventoryImportProcessFrame(ttk.Frame):
         try:
             line = self.queue.get(block=False)
             self.console.config(state="normal")
-            self.console.insert("end", line)
+            if "[ERROR]" in line:
+                self.console.insert("end", line, "error")
+            else:
+                self.console.insert("end", line)
             self.console.config(state="disabled")
             self.console.yview("end")
         except Empty:
