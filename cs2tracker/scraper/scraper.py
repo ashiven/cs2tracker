@@ -184,10 +184,10 @@ class Scraper:
         """Send a message to a Discord webhook if notifications are enabled in the
         config file and a webhook URL is provided.
         """
-        webhook_url = config.get("User Settings", "discord_webhook_url", fallback=None)
+        discord_webhook_url = config.discord_webhook_url
 
-        if config.discord_notifications and webhook_url:
-            DiscordNotifier.notify(webhook_url)
+        if config.discord_notifications and discord_webhook_url:
+            DiscordNotifier.notify(discord_webhook_url)
 
     @retry(stop=stop_after_attempt(10))
     def _get_page(self, url):
@@ -200,7 +200,7 @@ class Scraper:
         :raises RequestException: If the request fails.
         :raises RetryError: If the retry limit is reached.
         """
-        proxy_api_key = config.get("User Settings", "proxy_api_key", fallback=None)
+        proxy_api_key = config.proxy_api_key
 
         if config.use_proxy and proxy_api_key:
             page = self.session.get(

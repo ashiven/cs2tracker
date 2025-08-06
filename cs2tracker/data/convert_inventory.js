@@ -81,24 +81,34 @@ class ItemNameConverter {
 
   getItemName(item) {
     const def = this.items[item.def_index];
-    if (!def) return "";
+    if (def === undefined) return "";
 
     let baseName = "";
-    if (def.item_name) {
+    if (def.item_name !== undefined) {
       baseName = this.translate(def.item_name);
-    } else if (def.prefab && this.prefabs[def.prefab]) {
+    } else if (
+      def.prefab !== undefined &&
+      this.prefabs[def.prefab] !== undefined
+    ) {
       baseName = this.translate(this.prefabs[def.prefab].item_name);
     }
 
     let stickerName = "";
-    if (baseName === "Sticker" && item.stickers && item.stickers.length === 1) {
+    if (
+      baseName === "Sticker" &&
+      item.stickers !== undefined &&
+      item.stickers.length === 1
+    ) {
       stickerName = this.translate(
         this.stickerKits[item.stickers[0].sticker_id].item_name,
       );
     }
 
     let skinName = "";
-    if (item.paint_index && this.paintKits[item.paint_index]) {
+    if (
+      item.paint_index !== undefined &&
+      this.paintKits[item.paint_index] !== undefined
+    ) {
       skinName = this.translate(
         this.paintKits[item.paint_index].description_tag,
       );
@@ -110,7 +120,7 @@ class ItemNameConverter {
     }
 
     // Item is stattrak/souvenir/music kit
-    if (item.attribute && item.attribute.length > 0) {
+    if (item.attribute !== undefined && item.attribute.length > 0) {
       for (let [_attributeName, attributeValue] of Object.entries(
         item.attribute,
       )) {
@@ -164,21 +174,21 @@ class ItemNameConverter {
 
   getItemType(item) {
     const def = this.items[item.def_index];
-    if (!def) return "unknown";
+    if (def === undefined) return "unknown";
 
-    if (def.item_name) {
+    if (def.item_name !== undefined) {
       let translatedName =
         def.item_name.replace("#", "").toLowerCase() || def.item_name;
       if (
-        translatedName.includes("crate_sticker_pack") ||
-        translatedName.includes("crate_signature_pack")
+        translatedName.startsWith("csgo_crate_sticker_pack") ||
+        translatedName.startsWith("csgo_crate_signature_pack")
       ) {
         return "sticker capsule";
-      } else if (translatedName.includes("crate_community")) {
+      } else if (translatedName.startsWith("csgo_crate_community")) {
         return "case";
-      } else if (translatedName.includes("csgo_tool_spray")) {
+      } else if (translatedName.startsWith("csgo_tool_spray")) {
         return "graffiti kit";
-      } else if (translatedName.includes("csgo_tool_sticker")) {
+      } else if (translatedName.startsWith("csgo_tool_sticker")) {
         return "sticker";
       }
     }
@@ -186,12 +196,71 @@ class ItemNameConverter {
     return "other";
   }
 
+  getItemTradable(item) {
+    const def = this.items[item.def_index];
+    if (def === undefined) return false;
+
+    if (def.item_name !== undefined) {
+      let translatedName =
+        def.item_name.replace("#", "").toLowerCase() || def.item_name;
+      if (
+        translatedName.startsWith("csgo_collectible") ||
+        translatedName.startsWith("csgo_tournamentpass") ||
+        translatedName.startsWith("csgo_tournamentjournal") ||
+        translatedName.startsWith("csgo_ticket") ||
+        translatedName.startsWith("csgo_tool_casket_tag")
+      ) {
+        return false;
+      }
+    }
+
+    if (
+      def.prefab !== undefined &&
+      def.prefab.includes("collectible_untradable")
+    ) {
+      return false;
+    }
+
+    // Base weapons with stickers/name tags
+    if (
+      def.image_inventory !== undefined &&
+      def.image_inventory.startsWith("econ/weapons/base_weapons")
+    ) {
+      return false;
+    }
+
+    // Base weapons with stickers/name tags
+    if (
+      item.paint_index === undefined &&
+      def.image_inventory === undefined &&
+      def.prefab !== undefined
+    ) {
+      let prefab = this.prefabs[def.prefab];
+      if (
+        prefab !== undefined &&
+        prefab.image_inventory !== undefined &&
+        prefab.image_inventory.startsWith("econ/weapons/base_weapons")
+      ) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   convertInventory(inventoryList) {
-    return inventoryList.map((item) => ({
-      ...item,
-      item_name: this.getItemName(item),
-      item_type: this.getItemType(item),
-    }));
+    // Some untradable items were too difficult to filter out via their properties,
+    // so we filter them out by their item name here.
+    let excludeItems = ["P250 | X-Ray", "Music Kit | Valve, CS:GO"];
+
+    return inventoryList
+      .map((item) => ({
+        ...item,
+        item_name: this.getItemName(item),
+        item_type: this.getItemType(item),
+        item_tradable: this.getItemTradable(item),
+      }))
+      .filter((item) => !excludeItems.includes(item.item_name));
   }
 }
 

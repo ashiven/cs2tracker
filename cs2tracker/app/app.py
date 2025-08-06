@@ -15,7 +15,7 @@ from cs2tracker.logs import PriceLogs
 from cs2tracker.scraper.background_task import BackgroundTask
 from cs2tracker.scraper.scraper import Scraper
 from cs2tracker.util.currency_conversion import CURRENCY_SYMBOLS
-from cs2tracker.util.tkinter import centered, size_info
+from cs2tracker.util.tkinter import centered, fix_sv_ttk, size_info
 
 APPLICATION_NAME = "CS2Tracker"
 WINDOW_SIZE = "630x335"
@@ -45,6 +45,8 @@ class Application:
             sv_ttk.use_dark_theme()
         else:
             sv_ttk.use_light_theme()
+
+        fix_sv_ttk(ttk.Style())
 
         window.mainloop()
 
@@ -119,7 +121,7 @@ class MainFrame(ttk.Frame):
         checkbox.grid(**grid_pos)
 
     def _configure_settings_frame(self):
-        """Configure the checkbox frame for background tasks and settings."""
+        """Configure the settings frame for background tasks and other settings."""
         self.settings_frame = ttk.LabelFrame(self, text="Settings", padding=15)
         self.settings_frame.columnconfigure(0, weight=1)
 
@@ -131,9 +133,7 @@ class MainFrame(ttk.Frame):
             0,
         )
 
-        self.discord_webhook_checkbox_value = tk.BooleanVar(
-            value=config.getboolean("App Settings", "discord_notifications", fallback=False)
-        )
+        self.discord_webhook_checkbox_value = tk.BooleanVar(value=config.discord_notifications)
         self._add_checkbox(
             "Discord Notifications",
             self.discord_webhook_checkbox_value,
@@ -143,9 +143,7 @@ class MainFrame(ttk.Frame):
             1,
         )
 
-        self.use_proxy_checkbox_value = tk.BooleanVar(
-            value=config.getboolean("App Settings", "use_proxy", fallback=False)
-        )
+        self.use_proxy_checkbox_value = tk.BooleanVar(value=config.use_proxy)
         self._add_checkbox(
             "Proxy Requests",
             self.use_proxy_checkbox_value,
@@ -156,7 +154,7 @@ class MainFrame(ttk.Frame):
         )
 
         self.dark_theme_checkbox_value = tk.BooleanVar(value=DARK_THEME)
-        self._add_checkbox("Dark Theme", self.dark_theme_checkbox_value, sv_ttk.toggle_theme, 3)
+        self._add_checkbox("Dark Theme", self.dark_theme_checkbox_value, self._toggle_theme, 3)
 
         self.currency_selection_label = ttk.Label(self.settings_frame, text="Currency:")
         self.currency_selection_label.grid(row=4, column=0, sticky="w", padx=(20, 0), pady=5)
@@ -170,9 +168,6 @@ class MainFrame(ttk.Frame):
         self.currency_selection.grid(row=5, column=0, sticky="w", padx=(20, 0), pady=5)
 
         def on_currency_change(_):
-            """Update the conversion currency in the config when the selection
-            changes.
-            """
             config.set_app_option("conversion_currency", self.currency_selection.get())
             self.currency_selection.selection_clear()
             self.parent.focus_set()
@@ -211,7 +206,7 @@ class MainFrame(ttk.Frame):
         editor_frame.pack(expand=True, fill="both")
 
     def _show_history(self):
-        """Show a chart containing past calculations."""
+        """Show a chart consisting of past calculations."""
         if PriceLogs.empty():
             return
 
@@ -253,7 +248,7 @@ class MainFrame(ttk.Frame):
 
     def _toggle_use_proxy(self, enabled: bool):
         """Toggle whether the scraper should use proxy servers for requests."""
-        proxy_api_key = config.get("User Settings", "proxy_api_key", fallback=None)
+        proxy_api_key = config.proxy_api_key
         if not proxy_api_key and enabled:
             messagebox.showerror(
                 "Config Error",
@@ -267,7 +262,7 @@ class MainFrame(ttk.Frame):
 
     def _toggle_discord_webhook(self, enabled: bool):
         """Toggle whether the scraper should send notifications to a Discord webhook."""
-        discord_webhook_url = config.get("User Settings", "discord_webhook_url", fallback=None)
+        discord_webhook_url = config.discord_webhook_url
         if not discord_webhook_url and enabled:
             messagebox.showerror(
                 "Config Error",
@@ -278,3 +273,11 @@ class MainFrame(ttk.Frame):
 
         config.toggle_app_option("discord_webhook", enabled)
         return True
+
+    def _toggle_theme(self):
+        """Toggle the theme of the application."""
+        if self.dark_theme_checkbox_value.get():
+            sv_ttk.use_dark_theme()
+        else:
+            sv_ttk.use_light_theme()
+        fix_sv_ttk(ttk.Style())
