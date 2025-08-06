@@ -183,6 +183,9 @@ console.error = (...args) => {
   function filterItems(items) {
     let filteredItems = [];
     items.forEach((item) => {
+      if (!item.item_tradable) {
+        return;
+      }
       if (
         (item.item_type === "case" && importCases) ||
         (item.item_type === "sticker capsule" && importStickerCapsules) ||

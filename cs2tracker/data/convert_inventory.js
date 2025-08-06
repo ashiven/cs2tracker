@@ -174,11 +174,11 @@ class ItemNameConverter {
         translatedName.includes("crate_signature_pack")
       ) {
         return "sticker capsule";
-      } else if (translatedName.includes("crate_community")) {
+      } else if (translatedName.startsWith("csgo_crate_community")) {
         return "case";
-      } else if (translatedName.includes("csgo_tool_spray")) {
+      } else if (translatedName.startsWith("csgo_tool_spray")) {
         return "graffiti kit";
-      } else if (translatedName.includes("csgo_tool_sticker")) {
+      } else if (translatedName.startsWith("csgo_tool_sticker")) {
         return "sticker";
       }
     }
@@ -186,11 +186,61 @@ class ItemNameConverter {
     return "other";
   }
 
+  getItemTradable(item) {
+    const def = this.items[item.def_index];
+    if (!def) return false;
+
+    if (def.item_name) {
+      let translatedName =
+        def.item_name.replace("#", "").toLowerCase() || def.item_name;
+      if (
+        translatedName.startsWith("csgo_collectible") ||
+        translatedName.startsWith("csgo_tournamentpass") ||
+        translatedName.startsWith("csgo_tournamentjournal") ||
+        translatedName.startsWith("csgo_ticket") ||
+        translatedName.startsWith("csgo_tool_casket_tag")
+      ) {
+        return false;
+      }
+    }
+
+    if (
+      def.prefab !== undefined &&
+      def.prefab.includes("collectible_untradable")
+    ) {
+      return false;
+    }
+
+    if (
+      def.image_inventory !== undefined &&
+      def.image_inventory.startsWith("econ/weapons/base_weapons")
+    ) {
+      return false;
+    }
+
+    if (
+      item.paint_index === undefined &&
+      def.image_inventory === undefined &&
+      def.prefab !== undefined
+    ) {
+      if (
+        this.prefabs[def.prefab] !== undefined &&
+        this.prefabs[def.prefab].image_inventory.startsWith(
+          "econ/weapons/base_weapons",
+        )
+      ) {
+        return false;
+      }
+    }
+
+    return true;
+  }
   convertInventory(inventoryList) {
     return inventoryList.map((item) => ({
       ...item,
       item_name: this.getItemName(item),
       item_type: this.getItemType(item),
+      item_tradable: this.getItemTradable(item),
     }));
   }
 }
