@@ -46,6 +46,7 @@ CURRENCY_SYMBOLS = {
     "JPY": "¥",
     "CAD": "C$",
 }
+CURRENCY_SYMBOLS = {currency: symbol for currency, symbol in CURRENCY_SYMBOLS.items() if currency in converter.currencies}  # type: ignore
 
 
 def convert(amount, source_currency, target_currency):
