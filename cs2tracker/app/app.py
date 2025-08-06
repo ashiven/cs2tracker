@@ -121,6 +121,7 @@ class MainFrame(ttk.Frame):
     def _configure_settings_frame(self):
         """Configure the checkbox frame for background tasks and settings."""
         self.settings_frame = ttk.LabelFrame(self, text="Settings", padding=15)
+        self.settings_frame.columnconfigure(0, weight=1)
 
         self.background_checkbox_value = tk.BooleanVar(value=BackgroundTask.identify())
         self._add_checkbox(
@@ -157,12 +158,16 @@ class MainFrame(ttk.Frame):
         self.dark_theme_checkbox_value = tk.BooleanVar(value=DARK_THEME)
         self._add_checkbox("Dark Theme", self.dark_theme_checkbox_value, sv_ttk.toggle_theme, 3)
 
+        self.currency_selection_label = ttk.Label(self.settings_frame, text="Currency:")
+        self.currency_selection_label.grid(row=4, column=0, sticky="w", padx=(20, 0), pady=5)
         self.currency_selection = ttk.Combobox(
             self.settings_frame,
             state="readonly",
             values=list(CURRENCY_SYMBOLS),
+            postcommand=lambda: self.parent.focus_set(),
         )
         self.currency_selection.set(config.conversion_currency)
+        self.currency_selection.grid(row=5, column=0, sticky="w", padx=(20, 0), pady=5)
 
         def on_currency_change(_):
             """Update the conversion currency in the config when the selection
@@ -176,8 +181,6 @@ class MainFrame(ttk.Frame):
             "<<ComboboxSelected>>",
             on_currency_change,
         )
-
-        self.currency_selection.grid(row=4, column=0, sticky="ew", padx=(20, 0), pady=10)
 
     def scrape_prices(self):
         """Scrape prices from the configured sources, print the total, and save the
