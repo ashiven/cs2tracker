@@ -345,6 +345,34 @@ class CustomItemFrame(ttk.Frame):
         add_button.pack(pady=10)
         self.window.bind("<Return>", lambda _: add_button.invoke())
 
+    def _update_existing(self, section, item_name, item_owned):
+        """
+        Try to update an item in the treeview with the new item details.
+
+        :return: True if the item was updated, False if it was not found.
+        """
+        for existing_item in self.editor_frame.tree.get_children(section):
+            existing_item_name = self.editor_frame.tree.item(existing_item, "text")
+            if item_name == existing_item_name:
+                self.editor_frame.tree.set(existing_item, column="#1", value=item_owned)
+                self.editor_frame.focus_set()
+                self.editor_frame.save_config()
+                self.window.destroy()
+                return True
+        return False
+
+    def _get_insert_index(self, item_name, section):
+        """Get the index to insert the new item in alphabetical order."""
+        insert_index = "end"
+        for existing_item_index, existing_item in enumerate(
+            self.editor_frame.tree.get_children(section)
+        ):
+            existing_item_name = self.editor_frame.tree.item(existing_item, "text")
+            if item_name < existing_item_name:
+                insert_index = existing_item_index
+                break
+        return insert_index
+
     def _add_custom_item(self, item_href, item_owned):
         """Add a custom item to the configuration."""
         if not item_href or not item_owned:
@@ -364,29 +392,16 @@ class CustomItemFrame(ttk.Frame):
             messagebox.showerror("Invalid URL", str(error), parent=self.window)
             return
 
-        # Make sure not to reinsert custom items that have already been added
-        for sticker in self.editor_frame.tree.get_children("Stickers"):
-            sticker_name = self.editor_frame.tree.item(sticker, "text")
-            if item_name == sticker_name:
-                self.editor_frame.tree.set(sticker, column="#1", value=item_owned)
-                self.editor_frame.focus_set()
-                self.editor_frame.save_config()
-                self.window.destroy()
-                return
-
-        for skin in self.editor_frame.tree.get_children("Skins"):
-            skin_name = self.editor_frame.tree.item(skin, "text")
-            if item_name == skin_name:
-                self.editor_frame.tree.set(skin, column="#1", value=item_owned)
-                self.editor_frame.focus_set()
-                self.editor_frame.save_config()
-                self.window.destroy()
-                return
+        if self._update_existing("Stickers", item_name, item_owned):
+            return
+        if self._update_existing("Skins", item_name, item_owned):
+            return
 
         section = "Stickers" if item_name.startswith("Sticker") else "Skins"
+        insert_index = self._get_insert_index(item_name, section)
         self.editor_frame.tree.insert(
             section,
-            "end",
+            insert_index,
             iid=f"{section}-{item_name}",
             text=item_name,
             values=[item_owned],

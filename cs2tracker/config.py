@@ -85,7 +85,7 @@ class ValidatedConfig(ConfigParser):
                             raise ValueError("Reason: Invalid Steam market listing URL.")
                         if int(item_owned) < 0:
                             raise ValueError("Reason: Negative values are not allowed.")
-                        elif int(item_owned) > 1000000:
+                        if int(item_owned) > 1000000:
                             raise ValueError("Reason: Value exceeds maximum limit of 1,000,000.")
         except ValueError as error:
             # Re-raise the error if it contains "Invalid" to maintain the original message
@@ -136,16 +136,17 @@ class ValidatedConfig(ConfigParser):
         try:
             with open(INVENTORY_IMPORT_FILE, "r", encoding="utf-8") as inventory_file:
                 inventory_data = json.load(inventory_file)
-                added_to_config = set()
+                sorted_inventory_data = dict(sorted(inventory_data.items()))
 
-                for item_name, item_owned in inventory_data.items():
+                added_to_config = set()
+                for item_name, item_owned in sorted_inventory_data.items():
                     option = self.name_to_option(item_name, href=True)
                     for section in self.sections():
                         if option in self.options(section):
                             self.set(section, option, str(item_owned))
                             added_to_config.add(item_name)
 
-                for item_name, item_owned in inventory_data.items():
+                for item_name, item_owned in sorted_inventory_data.items():
                     if item_name not in added_to_config:
                         option = self.name_to_option(item_name, href=True)
                         if item_name.startswith("Sticker"):
