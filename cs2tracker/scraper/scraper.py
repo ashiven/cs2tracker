@@ -8,18 +8,17 @@ from tenacity import RetryError, retry, stop_after_attempt
 
 from cs2tracker.config import get_config
 from cs2tracker.constants import AUTHOR_STRING, BANNER
+from cs2tracker.logs import PriceLogs
 from cs2tracker.scraper.discord_notifier import DiscordNotifier
-from cs2tracker.scraper.parsers import get_parser
+from cs2tracker.scraper.parser import Parser
 from cs2tracker.util.currency_conversion import convert, to_symbol
 from cs2tracker.util.padded_console import get_console
-from cs2tracker.util.price_logs import PriceLogs
 
 HTTP_PROXY_URL = "http://{}:@smartproxy.crawlbase.com:8012"
 HTTPS_PROXY_URL = "http://{}:@smartproxy.crawlbase.com:8012"
 
 console = get_console()
 config = get_config()
-Parser = get_parser()
 
 CONVERSION_CURRENCY = config.get("App Settings", "conversion_currency", fallback="EUR")
 

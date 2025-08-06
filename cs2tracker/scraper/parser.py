@@ -21,7 +21,7 @@ class PriceSource(Enum):
     CSFLOAT = "csfloat"
 
 
-class Parser(ABC):
+class BaseParser(ABC):
     @classmethod
     @abstractmethod
     def get_item_page_url(cls, item_href, source=PriceSource.STEAM) -> str:
@@ -48,7 +48,7 @@ class Parser(ABC):
         """
 
 
-class SteamParser(Parser):
+class SteamParser(BaseParser):
     STEAM_MARKET_SEARCH_PAGE_BASE_URL = "https://steamcommunity.com/market/search?q={}"
     PRICE_INFO = "Owned: {:<10}  {} price: ${:<10}  Total: ${:<10}"
     NEEDS_TIMEOUT = True
@@ -91,7 +91,7 @@ class SteamParser(Parser):
         return price
 
 
-class ClashParser(Parser):
+class ClashParser(BaseParser):
     CLASH_ITEM_API_BASE_URL = "https://inventory.clash.gg/api/GetItemPrice?id={}"
     PRICE_INFO = "Owned: {:<10}  {} price: ${:<10}  Total: ${:<10}"
     NEEDS_TIMEOUT = True
@@ -123,7 +123,7 @@ class ClashParser(Parser):
         return price
 
 
-class CSGOTraderParser(Parser):
+class CSGOTraderParser(BaseParser):
     CSGOTRADER_PRICE_LIST = "https://prices.csgotrader.app/latest/{}.json"
     PRICE_INFO = "Owned: {:<10}  {:<10}: ${:<10}  Total: ${:<10}"
     NEEDS_TIMEOUT = False
@@ -179,6 +179,5 @@ class CSGOTraderParser(Parser):
         return price
 
 
-def get_parser():
-    """Return the parser that should be used by the scraper."""
-    return CSGOTraderParser
+# Default parser used by the scraper
+Parser = CSGOTraderParser

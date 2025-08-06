@@ -19,7 +19,7 @@ from cs2tracker.constants import (
 from cs2tracker.util.tkinter import centered, size_info
 
 ADD_CUSTOM_ITEM_TITLE = "Add Custom Item"
-ADD_CUSTOM_ITEM_SIZE = "500x220"
+ADD_CUSTOM_ITEM_SIZE = "500x230"
 
 IMPORT_INVENTORY_TITLE = "Import Steam Inventory"
 IMPORT_INVENTORY_SIZE = "700x350"
@@ -325,7 +325,7 @@ class CustomItemFrame(ttk.Frame):
 
     def _add_widgets(self):
         """Add widgets to the custom item frame for entering item details."""
-        ttk.Label(self, text="Item URL:").pack(pady=5)
+        ttk.Label(self, text="Steam Market Listing URL:").pack(pady=5)
         item_url_entry = ttk.Entry(self)
         item_url_entry.pack(fill="x", padx=10)
 

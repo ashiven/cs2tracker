@@ -4,11 +4,9 @@ from tkinter.filedialog import asksaveasfilename
 
 from tksheet import Sheet
 
-from cs2tracker.scraper.parsers import get_parser
+from cs2tracker.scraper.parser import Parser
 from cs2tracker.scraper.scraper import ParsingError, SheetNotFoundError
 from cs2tracker.util.tkinter import centered
-
-Parser = get_parser()
 
 
 class ScraperFrame(ttk.Frame):

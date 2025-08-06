@@ -2,9 +2,9 @@ import sys
 
 import urllib3
 
-from cs2tracker.app.app import Application
+from cs2tracker.app import Application
 from cs2tracker.constants import AUTHOR_STRING, BANNER, OS, OSType
-from cs2tracker.scraper.scraper import Scraper
+from cs2tracker.scraper import Scraper
 from cs2tracker.util.padded_console import get_console
 
 

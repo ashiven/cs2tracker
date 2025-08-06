@@ -7,11 +7,10 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolb
 from matplotlib.dates import DateFormatter
 
 from cs2tracker.config import get_config
-from cs2tracker.scraper.parsers import get_parser
-from cs2tracker.util.price_logs import PriceLogs
+from cs2tracker.logs import PriceLogs
+from cs2tracker.scraper.parser import Parser
 
 config = get_config()
-Parser = get_parser()
 
 CONVERSION_CURRENCY = config.get("App Settings", "conversion_currency", fallback="EUR")
 

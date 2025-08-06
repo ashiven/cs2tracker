@@ -3,11 +3,10 @@ from datetime import datetime
 
 from cs2tracker.config import get_config
 from cs2tracker.constants import OUTPUT_FILE
-from cs2tracker.scraper.parsers import get_parser
+from cs2tracker.scraper.parser import Parser
 from cs2tracker.util.currency_conversion import convert, to_symbol
 
 config = get_config()
-Parser = get_parser()
 
 CONVERSION_CURRENCY = config.get("App Settings", "conversion_currency", fallback="EUR")
 
