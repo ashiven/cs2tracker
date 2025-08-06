@@ -12,8 +12,6 @@ from cs2tracker.scraper.parser import Parser
 
 config = get_config()
 
-CONVERSION_CURRENCY = config.get("App Settings", "conversion_currency", fallback="EUR")
-
 
 class PriceHistoryFrame(ttk.Frame):
     # pylint: disable=attribute-defined-outside-init
@@ -50,12 +48,12 @@ class PriceHistoryFrame(ttk.Frame):
         dates, totals = PriceLogs.read()
         for price_source in Parser.SOURCES:
             usd_prices = totals[price_source]["USD"]
-            converted_prices = totals[price_source][CONVERSION_CURRENCY]
+            converted_prices = totals[price_source][config.conversion_currency]
             ax.plot(dates, usd_prices, label=f"{price_source.value.title()}: USD")
             ax.plot(
                 dates,
                 converted_prices,
-                label=f"{price_source.value.title()}: {CONVERSION_CURRENCY}",
+                label=f"{price_source.value.title()}: {config.conversion_currency}",
             )
 
         ax.legend(loc="upper left", fontsize="small")

@@ -55,8 +55,8 @@ class ScraperFrame(ttk.Frame):
         source_titles = []
         for price_source in Parser.SOURCES:
             source_titles += [
-                f"{price_source.value.title()} (USD)",
-                f"{price_source.value.title()} Owned (USD)",
+                f"{price_source.name.title()} (USD)",
+                f"{price_source.name.title()} Owned (USD)",
             ]
         self.sheet.insert_row(
             [

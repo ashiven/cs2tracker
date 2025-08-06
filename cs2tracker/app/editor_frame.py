@@ -610,7 +610,7 @@ class InventoryImportProcessFrame(ttk.Frame):
             pass
 
         if self.process.poll() is None or not self.queue.empty():
-            self.after(50, self._update_lines)
+            self.after(25, self._update_lines)
         else:
             self._cleanup()
 

@@ -185,32 +185,43 @@ class ValidatedConfig(ConfigParser):
 
         return converted_name
 
-    def toggle_use_proxy(self, enabled: bool):
+    def toggle_app_option(self, option, enabled):
         """
         Toggle the use of proxies for requests. This will update the configuration file.
 
         :param enabled: If True, proxies will be used; if False, they will not be used.
         """
-        self.set("App Settings", "use_proxy", str(enabled))
+        self.set("App Settings", option, str(enabled))
         self.write_to_file()
 
-        console.print(
-            f"[bold green]{'[+] Enabled' if enabled else '[-] Disabled'} proxy usage for requests."
-        )
+        console.info(f"{'Enabled' if enabled else 'Disabled'} option: {option}.")
 
-    def toggle_discord_webhook(self, enabled: bool):
+    def set_app_option(self, option, value):
         """
-        Toggle the use of a Discord webhook to notify users of price calculations.
+        Set an option in the App Settings to a specific value.
 
-        :param enabled: If True, the webhook will be used; if False, it will not be
-            used.
+        :param option: The option to set.
+        :param value: The value to set the option to.
         """
-        self.set("App Settings", "discord_notifications", str(enabled))
+        self.set("App Settings", option, str(value))
         self.write_to_file()
 
-        console.print(
-            f"[bold green]{'[+] Enabled' if enabled else '[-] Disabled'} Discord webhook notifications."
-        )
+        console.info(f"Set {option} to {value}.")
+
+    @property
+    def use_proxy(self):
+        """Check if the application should use proxies for requests."""
+        return self.getboolean("App Settings", "use_proxy", fallback=False)
+
+    @property
+    def discord_notifications(self):
+        """Check if the application should send Discord notifications."""
+        return self.getboolean("App Settings", "discord_notifications", fallback=False)
+
+    @property
+    def conversion_currency(self):
+        """Get the conversion currency for price calculations."""
+        return self.get("App Settings", "conversion_currency", fallback="EUR")
 
 
 config = ValidatedConfig()

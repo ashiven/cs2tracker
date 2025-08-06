@@ -5,9 +5,7 @@ from cs2tracker.config import get_config
 config = get_config()
 
 
-CONVERTER = CurrencyConverter()
-CONVERSION_CURRENCY = config.get("App Settings", "conversion_currency", fallback="EUR")
-
+converter = CurrencyConverter()
 CURRENCY_SYMBOLS = {
     "EUR": "€",
     "KRW": "₩",
@@ -59,15 +57,18 @@ def convert(amount, source_currency, target_currency):
     :param target_currency: The currency to convert to.
     :return: The converted amount in the target currency.
     """
-    if target_currency == "EUR":
-        converted_amount = CONVERTER.convert(amount, source_currency, target_currency)
-    else:
-        # The currency converter always needs the target or origin currency to be EUR
-        # Therefore we need an intermediate conversion step if the target currency is not EUR
-        intermediate_amount = CONVERTER.convert(amount, source_currency, "EUR")
-        converted_amount = CONVERTER.convert(intermediate_amount, "EUR", target_currency)
+    try:
+        if target_currency == "EUR":
+            converted_amount = converter.convert(amount, source_currency, target_currency)
+        else:
+            # The currency converter always needs the target or origin currency to be EUR
+            # Therefore we need an intermediate conversion step if the target currency is not EUR
+            intermediate_amount = converter.convert(amount, source_currency, "EUR")
+            converted_amount = converter.convert(intermediate_amount, "EUR", target_currency)
 
-    return round(converted_amount, 2)
+        return round(converted_amount, 2)
+    except Exception:
+        return 0.0
 
 
 def to_symbol(currency):

@@ -8,8 +8,6 @@ from cs2tracker.util.currency_conversion import convert, to_symbol
 
 config = get_config()
 
-CONVERSION_CURRENCY = config.get("App Settings", "conversion_currency", fallback="EUR")
-
 
 class PriceLogs:
     @classmethod
@@ -43,8 +41,7 @@ class PriceLogs:
         This will append a new entry to the output file if no entry has been made for
         today.
 
-        :param usd_total: The total price in USD to save.
-        :param converted_total: The total price in the converted currency to save.
+        :param usd_totals: The total prices in USD to save.
         :raises FileNotFoundError: If the output file does not exist.
         :raises IOError: If there is an error writing to the output file.
         """
@@ -67,16 +64,18 @@ class PriceLogs:
 
         :param newest_first: If True, the dates and totals will be returned in reverse
             order
+        :param with_symbols: If True, the prices will be formatted with currency symbols
         :return: A tuple containing dates and a dictionary of totals for each price
             source.
         :raises FileNotFoundError: If the output file does not exist.
         :raises IOError: If there is an error reading the output file.
         """
-
+        conversion_currency = config.conversion_currency
         dates = []
         totals = {
-            price_source: {"USD": [], CONVERSION_CURRENCY: []} for price_source in Parser.SOURCES
+            price_source: {"USD": [], conversion_currency: []} for price_source in Parser.SOURCES
         }
+
         with open(OUTPUT_FILE, "r", encoding="utf-8") as price_logs:
             price_logs_reader = csv.reader(price_logs)
             for row in price_logs_reader:
@@ -85,31 +84,31 @@ class PriceLogs:
 
                 usd_totals = [float(price_usd.rstrip("$")) for price_usd in usd_totals]
                 converted_totals = [
-                    convert(price_usd, "USD", CONVERSION_CURRENCY) for price_usd in usd_totals
+                    convert(price_usd, "USD", conversion_currency) for price_usd in usd_totals
                 ]
 
                 dates.append(date)
                 for price_source_index, price_source in enumerate(Parser.SOURCES):
                     totals[price_source]["USD"].append(usd_totals[price_source_index])
-                    totals[price_source][CONVERSION_CURRENCY].append(
+                    totals[price_source][conversion_currency].append(
                         converted_totals[price_source_index]
                     )
 
-            if newest_first:
-                dates.reverse()
-                for price_source in Parser.SOURCES:
-                    totals[price_source]["USD"].reverse()
-                    totals[price_source][CONVERSION_CURRENCY].reverse()
+        if newest_first:
+            dates.reverse()
+            for price_source in Parser.SOURCES:
+                totals[price_source]["USD"].reverse()
+                totals[price_source][conversion_currency].reverse()
 
-            if with_symbols:
-                for price_source in Parser.SOURCES:
-                    totals[price_source]["USD"] = [
-                        f"${price:.2f}" for price in totals[price_source]["USD"]
-                    ]
-                    totals[price_source][CONVERSION_CURRENCY] = [
-                        f"{to_symbol(CONVERSION_CURRENCY)}{price:.2f}"
-                        for price in totals[price_source][CONVERSION_CURRENCY]
-                    ]
+        if with_symbols:
+            for price_source in Parser.SOURCES:
+                totals[price_source]["USD"] = [
+                    f"${price:.2f}" for price in totals[price_source]["USD"]
+                ]
+                totals[price_source][conversion_currency] = [
+                    f"{to_symbol(conversion_currency)}{price:.2f}"
+                    for price in totals[price_source][conversion_currency]
+                ]
 
         return dates, totals
 

@@ -20,8 +20,6 @@ HTTPS_PROXY_URL = "http://{}:@smartproxy.crawlbase.com:8012"
 console = get_console()
 config = get_config()
 
-CONVERSION_CURRENCY = config.get("App Settings", "conversion_currency", fallback="EUR")
-
 
 class ConfigError:
     def __init__(self):
@@ -58,10 +56,16 @@ class Scraper:
         """Initialize the Scraper class."""
         self._start_session()
         self.error_stack = []
+
+        # We set the conversion currency as an attribute of the Scraper instance
+        # and only update it from the config at the start of the scraping process.
+        # This allows us to use the same conversion currency throughout the scraping
+        # process and prevents issues with changing the conversion currency while scraping.
+        self.conversion_currency = config.conversion_currency
         self.totals = {
             price_source: {
                 "USD": 0.0,
-                CONVERSION_CURRENCY: 0.0,
+                self.conversion_currency: 0.0,
             }
             for price_source in Parser.SOURCES
         }
@@ -85,6 +89,23 @@ class Scraper:
         self.error_stack.append(error)
         console.error(f"{error.message}")
 
+    def _prepare_new_run(self):
+        """
+        Reset totals for the next run and get the most recent conversion currency from
+        the config.
+
+        This way, we don't have to create a new Scraper instance for each run.
+        """
+        self.error_stack.clear()
+        self.conversion_currency = config.conversion_currency
+        self.totals = {
+            price_source: {
+                "USD": 0.0,
+                self.conversion_currency: 0.0,
+            }
+            for price_source in Parser.SOURCES
+        }
+
     def scrape_prices(self, update_sheet_callback=None):
         """
         Scrape prices for capsules and cases, calculate totals in USD and conversion
@@ -97,15 +118,7 @@ class Scraper:
             self._error(ConfigError())
             return
 
-        # Reset totals from the previous run and clear the error stack
-        self.error_stack.clear()
-        self.totals = {
-            price_source: {
-                "USD": 0.0,
-                CONVERSION_CURRENCY: 0.0,
-            }
-            for price_source in Parser.SOURCES
-        }
+        self._prepare_new_run()
 
         for section in config.sections():
             if section in ("User Settings", "App Settings"):
@@ -128,8 +141,8 @@ class Scraper:
         """
         for price_source, totals in self.totals.items():
             usd_total = totals["USD"]
-            converted_total = convert(usd_total, "USD", CONVERSION_CURRENCY)
-            self.totals.update({price_source: {"USD": usd_total, CONVERSION_CURRENCY: converted_total}})  # type: ignore
+            converted_total = convert(usd_total, "USD", self.conversion_currency)
+            self.totals.update({price_source: {"USD": usd_total, self.conversion_currency: converted_total}})  # type: ignore
 
     def _print_totals(self, update_sheet_callback=None):
         """
@@ -142,16 +155,14 @@ class Scraper:
         console.title("USD Total", "green")
         for price_source, totals in self.totals.items():
             usd_total = totals["USD"]
-            console.print(f"{price_source.value.title():<10}: ${usd_total:.2f}")
+            console.print(f"{price_source.name.title():<10}: ${usd_total:.2f}")
 
-        console.title(f"{CONVERSION_CURRENCY} Total", "green")
+        console.title(f"{self.conversion_currency} Total", "green")
         for price_source, totals in self.totals.items():
-            converted_total = totals[CONVERSION_CURRENCY]
+            converted_total = totals[self.conversion_currency]
             console.print(
-                f"{price_source.value.title():<10}: {to_symbol(CONVERSION_CURRENCY)}{converted_total:.2f}"
+                f"{price_source.name.title():<10}: {to_symbol(self.conversion_currency)}{converted_total:.2f}"
             )
-
-        console.separator("green")
 
         if update_sheet_callback and not (
             self.error_stack and isinstance(self.error_stack[-1], SheetNotFoundError)
@@ -159,12 +170,12 @@ class Scraper:
             update_sheet_callback(["", ""] + ["", ""] * len(Parser.SOURCES))
             for price_source, totals in self.totals.items():
                 usd_total = totals["USD"]
-                converted_total = totals[CONVERSION_CURRENCY]
+                converted_total = totals[self.conversion_currency]
                 update_sheet_callback(
                     [
-                        f"[{datetime.now().strftime('%Y-%m-%d')}] {price_source.value.title()} Total:",
+                        f"[{datetime.now().strftime('%Y-%m-%d')}] {price_source.name.title()} Total:",
                         f"${usd_total:.2f}",
-                        f"{to_symbol(CONVERSION_CURRENCY)}{converted_total:.2f}",
+                        f"{to_symbol(self.conversion_currency)}{converted_total:.2f}",
                         "",
                     ]
                 )
@@ -173,12 +184,9 @@ class Scraper:
         """Send a message to a Discord webhook if notifications are enabled in the
         config file and a webhook URL is provided.
         """
-        discord_notifications = config.getboolean(
-            "App Settings", "discord_notifications", fallback=False
-        )
         webhook_url = config.get("User Settings", "discord_webhook_url", fallback=None)
 
-        if discord_notifications and webhook_url:
+        if config.discord_notifications and webhook_url:
             DiscordNotifier.notify(webhook_url)
 
     @retry(stop=stop_after_attempt(10))
@@ -192,10 +200,9 @@ class Scraper:
         :raises RequestException: If the request fails.
         :raises RetryError: If the retry limit is reached.
         """
-        use_proxy = config.getboolean("App Settings", "use_proxy", fallback=False)
         proxy_api_key = config.get("User Settings", "proxy_api_key", fallback=None)
 
-        if use_proxy and proxy_api_key:
+        if config.use_proxy and proxy_api_key:
             page = self.session.get(
                 url=url,
                 proxies={
@@ -239,7 +246,7 @@ class Scraper:
                 console.price(
                     Parser.PRICE_INFO,
                     owned,
-                    price_source.value.title(),
+                    price_source.name.title(),
                     price_usd,
                     price_usd_owned,
                 )
@@ -279,10 +286,7 @@ class Scraper:
                     except Exception:
                         self._error(SheetNotFoundError())
 
-                if (
-                    not config.getboolean("App Settings", "use_proxy", fallback=False)
-                    and Parser.NEEDS_TIMEOUT
-                ):
+                if not config.use_proxy and Parser.NEEDS_TIMEOUT:
                     time.sleep(1)
             except RetryError:
                 self._error(RequestLimitExceededError())

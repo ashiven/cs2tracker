@@ -17,7 +17,7 @@ class PriceSource(Enum):
     STEAM = "steam"
     BUFF163 = "buff163"
     SKINPORT = "skinport"
-    YOUPIN = "youpin"
+    YOUPIN898 = "youpin"
     CSFLOAT = "csfloat"
 
 
@@ -127,7 +127,7 @@ class CSGOTraderParser(BaseParser):
     CSGOTRADER_PRICE_LIST = "https://prices.csgotrader.app/latest/{}.json"
     PRICE_INFO = "Owned: {:<10}  {:<10}: ${:<10}  Total: ${:<10}"
     NEEDS_TIMEOUT = False
-    SOURCES = [PriceSource.STEAM, PriceSource.BUFF163, PriceSource.YOUPIN]
+    SOURCES = [PriceSource.STEAM, PriceSource.BUFF163, PriceSource.YOUPIN898]
 
     @classmethod
     def get_item_page_url(cls, item_href, source=PriceSource.STEAM):
@@ -168,8 +168,12 @@ class CSGOTraderParser(BaseParser):
                 raise ValueError(
                     f"CSGOTrader: Could not find recent buff163 price: {url_decoded_name}"
                 )
-        elif source == PriceSource.YOUPIN:
+        elif source == PriceSource.YOUPIN898:
             price = price_info
+            if not price:
+                raise ValueError(
+                    f"CSGOTrader: Could not find recent youpin898 price: {url_decoded_name}"
+                )
         else:
             price = price_info.get("starting_at")
             if not price:

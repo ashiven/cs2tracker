@@ -12,8 +12,9 @@ from cs2tracker.app.scraper_frame import ScraperFrame
 from cs2tracker.config import get_config
 from cs2tracker.constants import ICON_FILE, OS, OUTPUT_FILE, OSType
 from cs2tracker.logs import PriceLogs
-from cs2tracker.scraper import Scraper
 from cs2tracker.scraper.background_task import BackgroundTask
+from cs2tracker.scraper.scraper import Scraper
+from cs2tracker.util.currency_conversion import CURRENCY_SYMBOLS
 from cs2tracker.util.tkinter import centered, size_info
 
 APPLICATION_NAME = "CS2Tracker"
@@ -83,8 +84,8 @@ class MainFrame(ttk.Frame):
 
         self._configure_button_frame()
         self.button_frame.grid(row=0, column=0, padx=10, pady=(0, 20), sticky="nsew")
-        self._configure_checkbox_frame()
-        self.checkbox_frame.grid(row=0, column=1, padx=10, pady=(0, 20), sticky="nsew")
+        self._configure_settings_frame()
+        self.settings_frame.grid(row=0, column=1, padx=10, pady=(0, 20), sticky="nsew")
 
     def _add_button(self, text, command, row):
         """Create and style a button for the button frame."""
@@ -109,7 +110,7 @@ class MainFrame(ttk.Frame):
         """Create and style a checkbox for the checkbox frame."""
         grid_pos = {"row": row, "column": 0, "sticky": "w", "padx": (10, 0), "pady": 5}
         checkbox = ttk.Checkbutton(
-            self.checkbox_frame,
+            self.settings_frame,
             text=text,
             variable=variable,
             command=command,
@@ -117,9 +118,9 @@ class MainFrame(ttk.Frame):
         )
         checkbox.grid(**grid_pos)
 
-    def _configure_checkbox_frame(self):
+    def _configure_settings_frame(self):
         """Configure the checkbox frame for background tasks and settings."""
-        self.checkbox_frame = ttk.LabelFrame(self, text="Settings", padding=15)
+        self.settings_frame = ttk.LabelFrame(self, text="Settings", padding=15)
 
         self.background_checkbox_value = tk.BooleanVar(value=BackgroundTask.identify())
         self._add_checkbox(
@@ -155,6 +156,28 @@ class MainFrame(ttk.Frame):
 
         self.dark_theme_checkbox_value = tk.BooleanVar(value=DARK_THEME)
         self._add_checkbox("Dark Theme", self.dark_theme_checkbox_value, sv_ttk.toggle_theme, 3)
+
+        self.currency_selection = ttk.Combobox(
+            self.settings_frame,
+            state="readonly",
+            values=list(CURRENCY_SYMBOLS),
+        )
+        self.currency_selection.set(config.conversion_currency)
+
+        def on_currency_change(_):
+            """Update the conversion currency in the config when the selection
+            changes.
+            """
+            config.set_app_option("conversion_currency", self.currency_selection.get())
+            self.currency_selection.selection_clear()
+            self.parent.focus_set()
+
+        self.currency_selection.bind(
+            "<<ComboboxSelected>>",
+            on_currency_change,
+        )
+
+        self.currency_selection.grid(row=4, column=0, sticky="ew", padx=(20, 0), pady=10)
 
     def scrape_prices(self):
         """Scrape prices from the configured sources, print the total, and save the
@@ -236,7 +259,7 @@ class MainFrame(ttk.Frame):
             )
             return False
 
-        config.toggle_use_proxy(enabled)
+        config.toggle_app_option("use_proxy", enabled)
         return True
 
     def _toggle_discord_webhook(self, enabled: bool):
@@ -250,5 +273,5 @@ class MainFrame(ttk.Frame):
             )
             return False
 
-        config.toggle_discord_webhook(enabled)
+        config.toggle_app_option("discord_webhook", enabled)
         return True

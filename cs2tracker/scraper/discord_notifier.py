@@ -12,8 +12,6 @@ DC_RECENT_HISTORY_LIMIT = 5
 console = get_console()
 config = get_config()
 
-CONVERSION_CURRENCY = config.get("App Settings", "conversion_currency", fallback="EUR")
-
 
 class DiscordNotifier:
     @classmethod
@@ -35,13 +33,15 @@ class DiscordNotifier:
         ]
         price_fields = [
             {
-                "name": f"{price_source.value.title()} (USD | {CONVERSION_CURRENCY})",
+                "name": f"{price_source.name.title()} (USD | {config.conversion_currency})",
                 "value": "\n".join(
                     [
                         f"{usd_total} | {converted_total}"
                         for usd_total, converted_total in zip(
                             totals[price_source]["USD"][:DC_RECENT_HISTORY_LIMIT],
-                            totals[price_source][CONVERSION_CURRENCY][:DC_RECENT_HISTORY_LIMIT],
+                            totals[price_source][config.conversion_currency][
+                                :DC_RECENT_HISTORY_LIMIT
+                            ],
                         )
                     ]
                 ),
