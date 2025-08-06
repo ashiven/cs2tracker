@@ -50,10 +50,12 @@ class ValidatedConfig(ConfigParser):
             raise ValueError("Missing 'User Settings' section in the configuration file.")
         if not self.has_section("App Settings"):
             raise ValueError("Missing 'App Settings' section in the configuration file.")
-        if not self.has_section("Custom Items"):
-            raise ValueError("Missing 'Custom Items' section in the configuration file.")
+        if not self.has_section("Stickers"):
+            raise ValueError("Missing 'Stickers' section in the configuration file.")
         if not self.has_section("Cases"):
             raise ValueError("Missing 'Cases' section in the configuration file.")
+        if not self.has_section("Skins"):
+            raise ValueError("Missing 'Skins' section in the configuration file.")
         for capsule_section in CAPSULE_PAGES:
             if not self.has_section(capsule_section):
                 raise ValueError(f"Missing '{capsule_section}' section in the configuration file.")
@@ -61,33 +63,34 @@ class ValidatedConfig(ConfigParser):
     def _validate_config_values(self):
         """Validate that the configuration file has valid values for all sections."""
         try:
-            for custom_item_href, custom_item_owned in self.items("Custom Items"):
-                if not re.match(STEAM_MARKET_LISTING_REGEX, custom_item_href):
-                    raise ValueError(
-                        f"Invalid Steam market listing URL in 'Custom Items' section: {custom_item_href}"
-                    )
-
-                if int(custom_item_owned) < 0:
-                    raise ValueError(
-                        f"Invalid value in 'Custom Items' section: {custom_item_href} = {custom_item_owned}"
-                    )
-            for case_href, case_owned in self.items("Cases"):
-                if not re.match(STEAM_MARKET_LISTING_REGEX, case_href):
-                    raise ValueError(
-                        f"Invalid Steam market listing URL in 'Cases' section: {case_href}"
-                    )
-
-                if int(case_owned) < 0:
-                    raise ValueError(
-                        f"Invalid value in 'Cases' section: {case_href} = {case_owned}"
-                    )
-            for capsule_section in CAPSULE_PAGES:
-                for capsule_href, capsule_owned in self.items(capsule_section):
-                    if int(capsule_owned) < 0:
-                        raise ValueError(
-                            f"Invalid value in '{capsule_section}' section: {capsule_href} = {capsule_owned}"
-                        )
+            for section in self.sections():
+                if section == "App Settings":
+                    for option in ("use_proxy", "discord_notifications", "conversion_currency"):
+                        if not self.has_option(section, option):
+                            raise ValueError(f"Missing '{option}' in '{section}' section.")
+                        if option in ("use_proxy", "discord_notifications") and self.get(
+                            section, option, fallback=False
+                        ) not in ("True", "False"):
+                            raise ValueError(
+                                f"Invalid value for '{option}' in '{section}' section."
+                            )
+                elif section == "User Settings":
+                    for option in ("proxy_api_key", "discord_webhook_url"):
+                        if not self.has_option(section, option):
+                            raise ValueError(f"Missing '{option}' in '{section}' section.")
+                else:
+                    for item_href, item_owned in self.items(section):
+                        if not re.match(STEAM_MARKET_LISTING_REGEX, item_href):
+                            raise ValueError(
+                                f"Invalid Steam market listing URL in '{section}' section: {item_href}"
+                            )
+                        if int(item_owned) < 0:
+                            raise ValueError(
+                                f"Invalid value in '{section}' section: {item_href} = {item_owned}"
+                            )
         except ValueError as error:
+            # Re-raise the error if it contains "Invalid" to maintain the original message
+            # and raise a ValueError if if the conversion of a value to an integer fails.
             if "Invalid " in str(error):
                 raise
             raise ValueError("Invalid value type. All values must be integers.") from error
@@ -137,17 +140,19 @@ class ValidatedConfig(ConfigParser):
                 added_to_config = set()
 
                 for item_name, item_owned in inventory_data.items():
-                    option_name_href = self.name_to_option(item_name, href=True)
+                    option = self.name_to_option(item_name, href=True)
                     for section in self.sections():
-                        if option_name_href in self.options(section):
-                            self.set(section, option_name_href, str(item_owned))
+                        if option in self.options(section):
+                            self.set(section, option, str(item_owned))
                             added_to_config.add(item_name)
 
                 for item_name, item_owned in inventory_data.items():
                     if item_name not in added_to_config:
-                        url_encoded_item_name = quote(item_name)
-                        listing_url = f"{STEAM_MARKET_LISTING_BASEURL_CS2}{url_encoded_item_name}"
-                        self.set("Custom Items", listing_url, str(item_owned))
+                        option = self.name_to_option(item_name, href=True)
+                        if item_name.startswith("Sticker"):
+                            self.set("Stickers", option, str(item_owned))
+                        else:
+                            self.set("Skins", option, str(item_owned))
 
             self.write_to_file()
         except (FileNotFoundError, json.JSONDecodeError) as error:
@@ -208,6 +213,18 @@ class ValidatedConfig(ConfigParser):
 
         console.info(f"Set {option} to {value}.")
 
+    def option_exists(self, option):
+        """
+        Check if an option exists in any section of the configuration.
+
+        :param option: The option to check.
+        :return: True if the option exists, False otherwise.
+        """
+        for section in self.sections():
+            if option in self.options(section):
+                return True
+        return False
+
     @property
     def use_proxy(self):
         """Check if the application should use proxies for requests."""
@@ -222,6 +239,16 @@ class ValidatedConfig(ConfigParser):
     def conversion_currency(self):
         """Get the conversion currency for price calculations."""
         return self.get("App Settings", "conversion_currency", fallback="EUR")
+
+    @property
+    def proxy_api_key(self):
+        """Get the API key for the proxy service."""
+        return self.get("User Settings", "proxy_api_key", fallback="")
+
+    @property
+    def discord_webhook_url(self):
+        """Get the Discord webhook URL for notifications."""
+        return self.get("User Settings", "discord_webhook_url", fallback="")
 
 
 config = ValidatedConfig()

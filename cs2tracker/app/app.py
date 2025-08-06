@@ -131,9 +131,7 @@ class MainFrame(ttk.Frame):
             0,
         )
 
-        self.discord_webhook_checkbox_value = tk.BooleanVar(
-            value=config.getboolean("App Settings", "discord_notifications", fallback=False)
-        )
+        self.discord_webhook_checkbox_value = tk.BooleanVar(value=config.discord_notifications)
         self._add_checkbox(
             "Discord Notifications",
             self.discord_webhook_checkbox_value,
@@ -143,9 +141,7 @@ class MainFrame(ttk.Frame):
             1,
         )
 
-        self.use_proxy_checkbox_value = tk.BooleanVar(
-            value=config.getboolean("App Settings", "use_proxy", fallback=False)
-        )
+        self.use_proxy_checkbox_value = tk.BooleanVar(value=config.use_proxy)
         self._add_checkbox(
             "Proxy Requests",
             self.use_proxy_checkbox_value,
@@ -253,7 +249,7 @@ class MainFrame(ttk.Frame):
 
     def _toggle_use_proxy(self, enabled: bool):
         """Toggle whether the scraper should use proxy servers for requests."""
-        proxy_api_key = config.get("User Settings", "proxy_api_key", fallback=None)
+        proxy_api_key = config.proxy_api_key
         if not proxy_api_key and enabled:
             messagebox.showerror(
                 "Config Error",
@@ -267,7 +263,7 @@ class MainFrame(ttk.Frame):
 
     def _toggle_discord_webhook(self, enabled: bool):
         """Toggle whether the scraper should send notifications to a Discord webhook."""
-        discord_webhook_url = config.get("User Settings", "discord_webhook_url", fallback=None)
+        discord_webhook_url = config.discord_webhook_url
         if not discord_webhook_url and enabled:
             messagebox.showerror(
                 "Config Error",

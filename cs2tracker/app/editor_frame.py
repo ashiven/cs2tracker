@@ -31,13 +31,13 @@ config = get_config()
 
 
 class ConfigEditorFrame(ttk.Frame):
-    def __init__(self, parent):
+    def __init__(self, window):
         """Initialize the configuration editor frame that allows users to view and edit
         the configuration options.
         """
-        super().__init__(parent, padding=15)
+        super().__init__(window, padding=15)
 
-        self.parent = parent
+        self.window = window
         self.edit_entry = None
         self._add_widgets()
 
@@ -72,9 +72,11 @@ class ConfigEditorFrame(ttk.Frame):
             config.load_from_file()
             self.reload_config_into_tree()
             messagebox.showerror(
-                "Config Error", f"The configuration is invalid. ({config.last_error})", parent=self
+                "Config Error",
+                f"The configuration is invalid. ({config.last_error})",
+                parent=self.window,
             )
-        self.parent.focus_set()
+        self.window.focus_set()
         self.tree.focus_set()
 
     def _save_edit(self, event, row, column):
@@ -127,18 +129,18 @@ class ConfigEditorFrame(ttk.Frame):
         """
         selected = self.tree.selection()
         if selected:
-            row = selected[0]
-            section_name = self.tree.parent(row)
-            if section_name == "Custom Items":
-                next_option = self.tree.next(row)
-                self.tree.delete(row)
+            item = selected[0]
+            section_name = self.tree.parent(item)
+            if section_name in ("Stickers", "Skins"):
+                next_option = self.tree.next(item)
+                self.tree.delete(item)
                 self.save_config()
                 if next_option:
                     self.tree.focus(next_option)
                     self.tree.selection_set(next_option)
                 else:
-                    self.tree.focus("Custom Items")
-                    self.tree.selection_set("Custom Items")
+                    self.tree.focus(section_name)
+                    self.tree.selection_set(section_name)
 
     def _destroy_entry(self, _):
         """Destroy any entry widgets in the treeview on an event, such as a mouse wheel
@@ -156,8 +158,8 @@ class ConfigEditorFrame(ttk.Frame):
         self.tree.bind("<Double-1>", self._set_cell_value)
         self.tree.bind("<Return>", self._set_selection_value)
         self.tree.bind("<BackSpace>", self._delete_selection_value)
-        self.parent.bind("<MouseWheel>", self._destroy_entry)
-        self.parent.bind("<Escape>", self._destroy_entry)
+        self.window.bind("<MouseWheel>", self._destroy_entry)
+        self.window.bind("<Escape>", self._destroy_entry)
 
     def _load_config_into_tree(self):
         """Load the configuration options into the treeview for display and editing."""
@@ -168,9 +170,9 @@ class ConfigEditorFrame(ttk.Frame):
 
             section_level = self.tree.insert("", "end", iid=section, text=section)
 
-            # Items in the Custom Items section should be displayed alphabetically sorted
+            # Items in the Stickers, Cases, and Skins sections should be displayed alphabetically sorted
             section_items = config.items(section)
-            if section == "Custom Items":
+            if section in ("Stickers", "Cases", "Skins"):
                 section_items = sorted(section_items)
 
             for config_option, value in section_items:
@@ -271,7 +273,9 @@ class ConfigEditorButtonFrame(ttk.Frame):
     def _reset_config(self):
         """Reset the configuration file to its default state."""
         confirm = messagebox.askokcancel(
-            "Reset Config", "Are you sure you want to reset the configuration?", parent=self
+            "Reset Config",
+            "Are you sure you want to reset the configuration?",
+            parent=self.editor_frame,
         )
         if confirm:
             copy(CONFIG_FILE_BACKUP, CONFIG_FILE)
@@ -316,10 +320,10 @@ class ConfigEditorButtonFrame(ttk.Frame):
 
 
 class CustomItemFrame(ttk.Frame):
-    def __init__(self, parent, editor_frame):
+    def __init__(self, window, editor_frame):
         """Initialize the custom item frame that allows users to add custom items."""
-        super().__init__(parent, style="Card.TFrame", padding=15)
-        self.parent = parent
+        super().__init__(window, style="Card.TFrame", padding=15)
+        self.window = window
         self.editor_frame = editor_frame
         self._add_widgets()
 
@@ -339,48 +343,59 @@ class CustomItemFrame(ttk.Frame):
             command=lambda: self._add_custom_item(item_url_entry.get(), item_owned_entry.get()),
         )
         add_button.pack(pady=10)
-        self.parent.bind("<Return>", lambda _: add_button.invoke())
+        self.window.bind("<Return>", lambda _: add_button.invoke())
 
     def _add_custom_item(self, item_href, item_owned):
         """Add a custom item to the configuration."""
         if not item_href or not item_owned:
-            messagebox.showerror("Input Error", "All fields must be filled out.", parent=self)
+            messagebox.showerror(
+                "Input Error", "All fields must be filled out.", parent=self.window
+            )
             self.editor_frame.focus_set()
-            self.parent.focus_set()
+            self.window.focus_set()
             return
 
         item_name = config.option_to_name(item_href, href=True)
 
         # Make sure not to reinsert custom items that have already been added
-        for option in self.editor_frame.tree.get_children("Custom Items"):
-            option_name = self.editor_frame.tree.item(option, "text")
-            if option_name == item_name:
-                self.editor_frame.tree.set(option, column="#1", value=item_owned)
+        for sticker in self.editor_frame.tree.get_children("Stickers"):
+            sticker_name = self.editor_frame.tree.item(sticker, "text")
+            if item_name == sticker_name:
+                self.editor_frame.tree.set(sticker, column="#1", value=item_owned)
                 self.editor_frame.focus_set()
                 self.editor_frame.save_config()
-                self.parent.destroy()
+                self.window.destroy()
                 return
 
+        for skin in self.editor_frame.tree.get_children("Skins"):
+            skin_name = self.editor_frame.tree.item(skin, "text")
+            if item_name == skin_name:
+                self.editor_frame.tree.set(skin, column="#1", value=item_owned)
+                self.editor_frame.focus_set()
+                self.editor_frame.save_config()
+                self.window.destroy()
+                return
+
+        section = "Stickers" if item_name.startswith("Sticker") else "Skins"
         self.editor_frame.tree.insert(
-            "Custom Items",
+            section,
             "end",
-            iid=f"Custom Items-{item_name}",
+            iid=f"{section}-{item_name}",
             text=item_name,
             values=[item_owned],
         )
         self.editor_frame.save_config()
-        self.editor_frame.reload_config_into_tree()
-        self.parent.destroy()
+        self.window.destroy()
 
 
 class InventoryImportFrame(ttk.Frame):
     # pylint: disable=too-many-instance-attributes
-    def __init__(self, parent, editor_frame):
+    def __init__(self, window, editor_frame):
         """Initialize the inventory import frame that allows users to import their Steam
         inventory.
         """
-        super().__init__(parent, padding=10)
-        self.parent = parent
+        super().__init__(window, padding=10)
+        self.window = window
         self.editor_frame = editor_frame
         self._add_widgets()
 
@@ -455,7 +470,7 @@ class InventoryImportFrame(ttk.Frame):
         self.import_others_value = tk.BooleanVar(value=False)
         self.import_others_checkbox = ttk.Checkbutton(
             self.checkbox_frame,
-            text="Import Other Items",
+            text="Import Skins",
             variable=self.import_others_value,
             style="Switch.TCheckbutton",
         )
@@ -484,7 +499,7 @@ class InventoryImportFrame(ttk.Frame):
             self.entry_frame, text="Import", command=self._import_inventory, state="disabled"
         )
 
-        def form_complete(_):
+        def check_form(_):
             if (
                 len(self.user_name_entry.get().strip()) > 0
                 and len(self.password_entry.get().strip()) > 0
@@ -494,8 +509,8 @@ class InventoryImportFrame(ttk.Frame):
             else:
                 self.import_button.configure(state="disabled")
 
-        self.parent.bind("<KeyRelease>", form_complete)
-        self.parent.bind("<Return>", lambda _: self.import_button.invoke())
+        self.window.bind("<KeyRelease>", check_form)
+        self.window.bind("<Return>", lambda _: self.import_button.invoke())
 
     def _import_inventory(self):
         """
@@ -532,7 +547,7 @@ class InventoryImportFrame(ttk.Frame):
             ]
         )
 
-        self.parent.destroy()
+        self.window.destroy()
 
     def _display_node_subprocess(self, node_cmd):
         console_window = tk.Toplevel(self.editor_frame)
@@ -556,10 +571,10 @@ class InventoryImportFrame(ttk.Frame):
 class InventoryImportProcessFrame(ttk.Frame):
     # pylint: disable=attribute-defined-outside-init
     # Source: https://stackoverflow.com/questions/27327886/issues-intercepting-subprocess-output-in-real-time
-    def __init__(self, parent, editor_frame):
+    def __init__(self, window, editor_frame):
         """Initialize the frame that displays the output of the subprocess."""
-        super().__init__(parent)
-        self.parent = parent
+        super().__init__(window)
+        self.window = window
         self.editor_frame = editor_frame
         self._add_widgets()
 
@@ -628,4 +643,4 @@ class InventoryImportProcessFrame(ttk.Frame):
         config.read_from_inventory_file()
         self.editor_frame.reload_config_into_tree()
         self.editor_frame.tree.focus_set()
-        self.parent.destroy()
+        self.window.destroy()

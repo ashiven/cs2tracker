@@ -62,7 +62,7 @@ class SteamParser(BaseParser):
         # Therefore, if the provided item is a sticker capsule we return a search page defined in CAPSULE_PAGES
         # where all of the sticker capsules of one section are listed
         for section in config.sections():
-            if section in ("Custom Items", "Cases", "User Settings", "App Settings"):
+            if section in ("Skins", "Stickers", "Cases", "User Settings", "App Settings"):
                 continue
             if any(item_href == option for option in config.options(section)):
                 return CAPSULE_PAGES[section]
@@ -156,9 +156,13 @@ class CSGOTraderParser(BaseParser):
             if not price:
                 price = price_info.get("last_7d")
                 if not price:
-                    raise ValueError(
-                        f"CSGOTrader: Could not find steam price of the past 7 days: {url_decoded_name}"
-                    )
+                    price = price_info.get("last_30d")
+                    if not price:
+                        price = price_info.get("last_90d")
+                        if not price:
+                            raise ValueError(
+                                f"CSGOTrader: Could not find a steam price info for the past 3 months: {url_decoded_name}"
+                            )
         elif source == PriceSource.BUFF163:
             price = price_info.get("starting_at")
             if not price:
