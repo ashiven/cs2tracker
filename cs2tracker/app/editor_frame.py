@@ -492,7 +492,7 @@ class InventoryImportFrame(ttk.Frame):
         self.import_others_value = tk.BooleanVar(value=False)
         self.import_others_checkbox = ttk.Checkbutton(
             self.checkbox_frame,
-            text="Import Skins",
+            text="Import Other Items",
             variable=self.import_others_value,
             style="Switch.TCheckbutton",
         )
@@ -580,6 +580,8 @@ class InventoryImportFrame(ttk.Frame):
 
         def on_close():
             console_window.destroy()
+            config.read_from_inventory_file()
+            self.editor_frame.reload_config_into_tree()
             self.editor_frame.tree.focus_set()
 
         console_window.protocol("WM_DELETE_WINDOW", on_close)
