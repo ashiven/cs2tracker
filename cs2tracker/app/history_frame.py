@@ -49,11 +49,11 @@ class PriceHistoryFrame(ttk.Frame):
         for price_source in Parser.SOURCES:
             usd_prices = totals[price_source]["USD"]
             converted_prices = totals[price_source][config.conversion_currency]
-            ax.plot(dates, usd_prices, label=f"{price_source.value.title()}: USD")
+            ax.plot(dates, usd_prices, label=f"{price_source.name.title()}: USD")
             ax.plot(
                 dates,
                 converted_prices,
-                label=f"{price_source.value.title()}: {config.conversion_currency}",
+                label=f"{price_source.name.title()}: {config.conversion_currency}",
             )
 
         ax.legend(loc="upper left", fontsize="small")
