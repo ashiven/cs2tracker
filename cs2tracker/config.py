@@ -68,33 +68,31 @@ class ValidatedConfig(ConfigParser):
                 if section == "App Settings":
                     for option in ("use_proxy", "discord_notifications", "conversion_currency"):
                         if not self.has_option(section, option):
-                            raise ValueError(f"Missing '{option}' in '{section}' section.")
+                            raise ValueError(f"Reason: Missing '{option}' in '{section}' section.")
                         if option in ("use_proxy", "discord_notifications") and self.get(
                             section, option, fallback=False
                         ) not in ("True", "False"):
                             raise ValueError(
-                                f"Invalid value for '{option}' in '{section}' section."
+                                f"Reason: Invalid value for '{option}' in '{section}' section."
                             )
                 elif section == "User Settings":
                     for option in ("proxy_api_key", "discord_webhook_url"):
                         if not self.has_option(section, option):
-                            raise ValueError(f"Missing '{option}' in '{section}' section.")
+                            raise ValueError(f"Reason: Missing '{option}' in '{section}' section.")
                 else:
                     for item_href, item_owned in self.items(section):
                         if not re.match(STEAM_MARKET_LISTING_REGEX, item_href):
-                            raise ValueError(
-                                f"Invalid Steam market listing URL in '{section}' section: {item_href}"
-                            )
+                            raise ValueError("Reason: Invalid Steam market listing URL.")
                         if int(item_owned) < 0:
-                            raise ValueError(
-                                f"Invalid value in '{section}' section: {item_href} = {item_owned}"
-                            )
+                            raise ValueError("Reason: Negative values are not allowed.")
+                        elif int(item_owned) > 1000000:
+                            raise ValueError("Reason: Value exceeds maximum limit of 1,000,000.")
         except ValueError as error:
             # Re-raise the error if it contains "Invalid" to maintain the original message
             # and raise a ValueError if if the conversion of a value to an integer fails.
-            if "Invalid " in str(error):
+            if "Reason: " in str(error):
                 raise
-            raise ValueError("Invalid value type. All values must be integers.") from error
+            raise ValueError("Reason: Invalid value type. All values must be integers.") from error
 
     def _validate_config(self):
         """
@@ -170,6 +168,9 @@ class ValidatedConfig(ConfigParser):
         :return: The reader-friendly name.
         """
         if href:
+            if not re.match(STEAM_MARKET_LISTING_REGEX, option):
+                raise ValueError(f"Invalid Steam market listing URL: {option}")
+
             converted_option = unquote(option.split("/")[-1])
         else:
             converted_option = option.replace("_", " ").title()
@@ -214,14 +215,15 @@ class ValidatedConfig(ConfigParser):
 
         console.info(f"Set {option} to {value}.")
 
-    def option_exists(self, option):
+    def option_exists(self, option, exclude_sections=()):
         """
         Check if an option exists in any section of the configuration.
 
         :param option: The option to check.
+        :param exclude_sections: Sections to exclude from the check.
         :return: True if the option exists, False otherwise.
         """
-        for section in self.sections():
+        for section in [section for section in self.sections() if section not in exclude_sections]:
             if option in self.options(section):
                 return True
         return False

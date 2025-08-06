@@ -262,7 +262,7 @@ class ConfigEditorButtonFrame(ttk.Frame):
         reset_button = ttk.Button(self, text="Reset", command=self._reset_config)
         reset_button.pack(side="left", expand=True, padx=5)
 
-        custom_item_button = ttk.Button(self, text="Add Custom Item", command=self._add_custom_item)
+        custom_item_button = ttk.Button(self, text="Add Item", command=self._add_custom_item)
         custom_item_button.pack(side="left", expand=True, padx=5)
 
         import_inventory_button = ttk.Button(
@@ -351,11 +351,18 @@ class CustomItemFrame(ttk.Frame):
             messagebox.showerror(
                 "Input Error", "All fields must be filled out.", parent=self.window
             )
-            self.editor_frame.focus_set()
-            self.window.focus_set()
+            return
+        if config.option_exists(item_href, exclude_sections=("Stickers", "Skins")):
+            messagebox.showerror(
+                "Item Exists", "This item already exists in another section.", parent=self.window
+            )
             return
 
-        item_name = config.option_to_name(item_href, href=True)
+        try:
+            item_name = config.option_to_name(item_href, href=True)
+        except ValueError as error:
+            messagebox.showerror("Invalid URL", str(error), parent=self.window)
+            return
 
         # Make sure not to reinsert custom items that have already been added
         for sticker in self.editor_frame.tree.get_children("Stickers"):
