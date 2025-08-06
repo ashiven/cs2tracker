@@ -33,11 +33,11 @@ console.error = (...args) => {
 (async () => {
   const closeWithError = (message) => {
     console.error(message);
-    console.error("This window will automatically close in 5 seconds.");
+    console.error("This window will automatically close in 10 seconds.");
     setTimeout(() => {
       user.logOff();
       process.exit(1);
-    }, 5000);
+    }, 10000);
   };
 
   let user = new SteamUser();
