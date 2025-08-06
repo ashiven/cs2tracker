@@ -212,13 +212,6 @@ class ItemNameConverter {
     }
 
     if (
-      def.image_inventory !== undefined &&
-      def.image_inventory.startsWith("econ/weapons/base_weapons")
-    ) {
-      return false;
-    }
-
-    if (
       item.paint_index === undefined &&
       def.image_inventory === undefined &&
       def.prefab !== undefined
