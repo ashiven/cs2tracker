@@ -121,7 +121,7 @@ class MainFrame(ttk.Frame):
         checkbox.grid(**grid_pos)
 
     def _configure_settings_frame(self):
-        """Configure the checkbox frame for background tasks and settings."""
+        """Configure the settings frame for background tasks and other settings."""
         self.settings_frame = ttk.LabelFrame(self, text="Settings", padding=15)
         self.settings_frame.columnconfigure(0, weight=1)
 
@@ -206,7 +206,7 @@ class MainFrame(ttk.Frame):
         editor_frame.pack(expand=True, fill="both")
 
     def _show_history(self):
-        """Show a chart containing past calculations."""
+        """Show a chart consisting of past calculations."""
         if PriceLogs.empty():
             return
 
@@ -275,6 +275,7 @@ class MainFrame(ttk.Frame):
         return True
 
     def _toggle_theme(self):
+        """Toggle the theme of the application."""
         if self.dark_theme_checkbox_value.get():
             sv_ttk.use_dark_theme()
         else:
