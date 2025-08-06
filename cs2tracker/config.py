@@ -88,8 +88,8 @@ class ValidatedConfig(ConfigParser):
                         if int(item_owned) > 1000000:
                             raise ValueError("Reason: Value exceeds maximum limit of 1,000,000.")
         except ValueError as error:
-            # Re-raise the error if it contains "Invalid" to maintain the original message
-            # and raise a ValueError if if the conversion of a value to an integer fails.
+            # Re-raise the error if it contains "Reason: " to maintain the original message
+            # and raise a ValueError if the conversion of a value to an integer fails.
             if "Reason: " in str(error):
                 raise
             raise ValueError("Reason: Invalid value type. All values must be integers.") from error
