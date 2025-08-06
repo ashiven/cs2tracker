@@ -21,6 +21,11 @@ class PaddedConsole:
         """Print text with padding to the console."""
         self.console.print(Padding(text, self.padding))
 
+    def info(self, text):
+        """Print info text with padding to the console."""
+        text = "[bold green][+] " + text
+        self.print(text)
+
     def error(self, text):
         """Print error text with padding to the console."""
         text = "[bold red][!] " + text

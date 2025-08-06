@@ -6,7 +6,11 @@ from matplotlib.axes import Axes
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.dates import DateFormatter
 
-from cs2tracker.util import PriceLogs
+from cs2tracker.config import get_config
+from cs2tracker.logs import PriceLogs
+from cs2tracker.scraper.parser import Parser
+
+config = get_config()
 
 
 class PriceHistoryFrame(ttk.Frame):
@@ -36,14 +40,22 @@ class PriceHistoryFrame(ttk.Frame):
 
     def _draw_plot(self):
         """Draw a chart of the price history."""
-        dates, usd_prices, eur_prices = PriceLogs.read()
 
         self.fig, ax_raw = plt.subplots(dpi=100)
         self.fig.autofmt_xdate()
-
         ax = cast(Axes, ax_raw)
-        ax.plot(dates, usd_prices, label="USD")
-        ax.plot(dates, eur_prices, label="EUR")
-        ax.legend()
+
+        dates, totals = PriceLogs.read()
+        for price_source in Parser.SOURCES:
+            usd_prices = totals[price_source]["USD"]
+            converted_prices = totals[price_source][config.conversion_currency]
+            ax.plot(dates, usd_prices, label=f"{price_source.name.title()}: USD")
+            ax.plot(
+                dates,
+                converted_prices,
+                label=f"{price_source.name.title()}: {config.conversion_currency}",
+            )
+
+        ax.legend(loc="upper left", fontsize="small")
         date_formatter = DateFormatter("%Y-%m-%d")
         ax.xaxis.set_major_formatter(date_formatter)

@@ -8,6 +8,7 @@ from tkinter import messagebox, ttk
 from nodejs import node
 from ttk_text import ThemedText
 
+from cs2tracker.config import get_config
 from cs2tracker.constants import (
     CONFIG_FILE,
     CONFIG_FILE_BACKUP,
@@ -15,11 +16,10 @@ from cs2tracker.constants import (
     INVENTORY_IMPORT_FILE,
     INVENTORY_IMPORT_SCRIPT,
 )
-from cs2tracker.util import get_config
 from cs2tracker.util.tkinter import centered, size_info
 
 ADD_CUSTOM_ITEM_TITLE = "Add Custom Item"
-ADD_CUSTOM_ITEM_SIZE = "500x220"
+ADD_CUSTOM_ITEM_SIZE = "500x230"
 
 IMPORT_INVENTORY_TITLE = "Import Steam Inventory"
 IMPORT_INVENTORY_SIZE = "700x350"
@@ -325,7 +325,7 @@ class CustomItemFrame(ttk.Frame):
 
     def _add_widgets(self):
         """Add widgets to the custom item frame for entering item details."""
-        ttk.Label(self, text="Item URL:").pack(pady=5)
+        ttk.Label(self, text="Steam Market Listing URL:").pack(pady=5)
         item_url_entry = ttk.Entry(self)
         item_url_entry.pack(fill="x", padx=10)
 
@@ -610,7 +610,7 @@ class InventoryImportProcessFrame(ttk.Frame):
             pass
 
         if self.process.poll() is None or not self.queue.empty():
-            self.after(50, self._update_lines)
+            self.after(35, self._update_lines)
         else:
             self._cleanup()
 

@@ -5,9 +5,9 @@ from urllib.parse import unquote
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 
+from cs2tracker.config import get_config
 from cs2tracker.constants import CAPSULE_PAGES
-from cs2tracker.util import get_console
-from cs2tracker.util.validated_config import get_config
+from cs2tracker.util.padded_console import get_console
 
 config = get_config()
 console = get_console()
@@ -17,9 +17,11 @@ class PriceSource(Enum):
     STEAM = "steam"
     BUFF163 = "buff163"
     SKINPORT = "skinport"
+    YOUPIN898 = "youpin"
+    CSFLOAT = "csfloat"
 
 
-class Parser(ABC):
+class BaseParser(ABC):
     @classmethod
     @abstractmethod
     def get_item_page_url(cls, item_href, source=PriceSource.STEAM) -> str:
@@ -46,7 +48,7 @@ class Parser(ABC):
         """
 
 
-class SteamParser(Parser):
+class SteamParser(BaseParser):
     STEAM_MARKET_SEARCH_PAGE_BASE_URL = "https://steamcommunity.com/market/search?q={}"
     PRICE_INFO = "Owned: {:<10}  {} price: ${:<10}  Total: ${:<10}"
     NEEDS_TIMEOUT = True
@@ -89,24 +91,7 @@ class SteamParser(Parser):
         return price
 
 
-class SkinLedgerParser(Parser):
-    SKINLEDGER_PRICE_LIST = ""
-    PRICE_INFO = "Owned: {:<10}  {} price: ${:<10}  Total: ${:<10}"
-    NEEDS_TIMEOUT = False
-    SOURCES = [PriceSource.STEAM, PriceSource.BUFF163, PriceSource.SKINPORT]
-
-    @classmethod
-    def get_item_page_url(cls, item_href, source=PriceSource.STEAM) -> str:
-        _ = source
-        return super().get_item_page_url(item_href)
-
-    @classmethod
-    def parse_item_price(cls, item_page, item_href, source=PriceSource.STEAM) -> float:
-        _, _ = item_href, source
-        return super().parse_item_price(item_page, item_href)
-
-
-class ClashParser(Parser):
+class ClashParser(BaseParser):
     CLASH_ITEM_API_BASE_URL = "https://inventory.clash.gg/api/GetItemPrice?id={}"
     PRICE_INFO = "Owned: {:<10}  {} price: ${:<10}  Total: ${:<10}"
     NEEDS_TIMEOUT = True
@@ -138,11 +123,11 @@ class ClashParser(Parser):
         return price
 
 
-class CSGOTrader(Parser):
+class CSGOTraderParser(BaseParser):
     CSGOTRADER_PRICE_LIST = "https://prices.csgotrader.app/latest/{}.json"
     PRICE_INFO = "Owned: {:<10}  {:<10}: ${:<10}  Total: ${:<10}"
     NEEDS_TIMEOUT = False
-    SOURCES = [PriceSource.STEAM, PriceSource.BUFF163, PriceSource.SKINPORT]
+    SOURCES = [PriceSource.STEAM, PriceSource.BUFF163, PriceSource.YOUPIN898]
 
     @classmethod
     def get_item_page_url(cls, item_href, source=PriceSource.STEAM):
@@ -183,6 +168,12 @@ class CSGOTrader(Parser):
                 raise ValueError(
                     f"CSGOTrader: Could not find recent buff163 price: {url_decoded_name}"
                 )
+        elif source == PriceSource.YOUPIN898:
+            price = price_info
+            if not price:
+                raise ValueError(
+                    f"CSGOTrader: Could not find recent youpin898 price: {url_decoded_name}"
+                )
         else:
             price = price_info.get("starting_at")
             if not price:
@@ -190,3 +181,7 @@ class CSGOTrader(Parser):
 
         price = float(price)
         return price
+
+
+# Default parser used by the scraper
+Parser = CSGOTraderParser
