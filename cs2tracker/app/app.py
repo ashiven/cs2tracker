@@ -50,6 +50,7 @@ class Application:
 
         fix_sv_ttk(ttk.Style())
 
+        window.focus_force()
         window.mainloop()
 
     def _configure_window(self):

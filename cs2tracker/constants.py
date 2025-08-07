@@ -1,11 +1,17 @@
+import ctypes
 import enum
 import os
 import sys
+import tkinter as tk
 from datetime import datetime
-from shutil import copy
+from shutil import copy, copytree
 from subprocess import DEVNULL
+from tkinter import ttk
 
+import sv_ttk
 from nodejs import npm
+
+from cs2tracker.util.tkinter import centered
 
 try:
     from cs2tracker._version import version  # pylint: disable=E0611
@@ -48,33 +54,86 @@ if RUNNING_IN_EXE:
     else:
         raise NotImplementedError(f"Unsupported OS: {OS}")
 
-    DATA_DIR = os.path.join(APP_DATA_DIR, "cs2tracker", "data")
-    os.makedirs(DATA_DIR, exist_ok=True)
-
     CONFIG_FILE_SOURCE = os.path.join(MODULE_DIR, "data", "config.ini")
     OUTPUT_FILE_SOURCE = os.path.join(MODULE_DIR, "data", "output.csv")
-    IVENTORY_CONVERT_SCRIPT_SOURCE = os.path.join(MODULE_DIR, "data", "convert_inventory.js")
+    INVENTORY_CONVERT_SCRIPT_SOURCE = os.path.join(MODULE_DIR, "data", "convert_inventory.js")
     INVENTORY_IMPORT_SCRIPT_SOURCE = os.path.join(MODULE_DIR, "data", "get_inventory.js")
+    NODE_MODULES_SOURCE = os.path.join(MODULE_DIR, "data", "node_modules")
 
+    DATA_DIR = os.path.join(APP_DATA_DIR, "cs2tracker", "data")
     CONFIG_FILE = os.path.join(DATA_DIR, "config.ini")
     CONFIG_FILE_BACKUP = os.path.join(DATA_DIR, "config.ini.bak")
     OUTPUT_FILE = os.path.join(DATA_DIR, "output.csv")
-    IVENTORY_CONVERT_SCRIPT = os.path.join(DATA_DIR, "convert_inventory.js")
+    INVENTORY_CONVERT_SCRIPT = os.path.join(DATA_DIR, "convert_inventory.js")
     INVENTORY_IMPORT_SCRIPT = os.path.join(DATA_DIR, "get_inventory.js")
+    NODE_MODULES = os.path.join(DATA_DIR, "node_modules")
+
+    ICON_FILE = os.path.join(PROJECT_DIR, "assets", "icon.png")
+    BATCH_FILE = os.path.join(DATA_DIR, "cs2tracker_scraper.bat")
+    INVENTORY_IMPORT_FILE = os.path.join(DATA_DIR, "inventory.json")
+    INVENTORY_IMPORT_SCRIPT_DEPENDENCIES = [
+        "steam-user",
+        "globaloffensive",
+        "@node-steam/vdf",
+        "axios",
+    ]
+
+    def show_temp_popup():
+        """Show a temporary popup window while copying initial files."""
+        popup = tk.Tk()
+        popup.title("Please wait")
+        popup.geometry(centered(popup, "300x80"))
+        popup.resizable(False, False)
+        if OS == OSType.WINDOWS:
+            app_id = "cs2tracker.unique.id"
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(app_id)
+        icon = tk.PhotoImage(file=ICON_FILE)
+        popup.wm_iconphoto(True, icon)
+
+        label = ttk.Label(popup, text="Setting up the application. Please wait...")
+        label.pack(pady=20)
+
+        sv_ttk.use_dark_theme()
+
+        popup.update()
+        return popup
+
+    def copy_initial_files_with_popup():
+        """Copy initial files to the user data directory with a temporary popup."""
+        popup = show_temp_popup()
+
+        try:
+            if not os.path.exists(DATA_DIR):
+                os.makedirs(DATA_DIR)
+            if not os.path.exists(OUTPUT_FILE):
+                copy(OUTPUT_FILE_SOURCE, OUTPUT_FILE)
+            if not os.path.exists(CONFIG_FILE):
+                copy(CONFIG_FILE_SOURCE, CONFIG_FILE)
+            if not os.path.exists(INVENTORY_CONVERT_SCRIPT):
+                copy(INVENTORY_CONVERT_SCRIPT_SOURCE, INVENTORY_CONVERT_SCRIPT)
+            if not os.path.exists(INVENTORY_IMPORT_SCRIPT):
+                copy(INVENTORY_IMPORT_SCRIPT_SOURCE, INVENTORY_IMPORT_SCRIPT)
+            if not os.path.exists(NODE_MODULES):
+                copytree(NODE_MODULES_SOURCE, NODE_MODULES)
+        finally:
+            popup.destroy()
+
+    # pylint: disable=too-many-boolean-expressions
+    if (
+        not os.path.exists(DATA_DIR)
+        or not os.path.exists(OUTPUT_FILE)
+        or not os.path.exists(CONFIG_FILE)
+        or not os.path.exists(INVENTORY_CONVERT_SCRIPT)
+        or not os.path.exists(INVENTORY_IMPORT_SCRIPT)
+        or not os.path.exists(NODE_MODULES)
+    ):
+        copy_initial_files_with_popup()
 
     # Always copy the source config into the user data directory as a backup
     # and overwrite the existing backup if it exists
     # (This is to ensure that no outdated config backup remains in the user data directory)
     copy(CONFIG_FILE_SOURCE, CONFIG_FILE_BACKUP)
 
-    if not os.path.exists(OUTPUT_FILE):
-        copy(OUTPUT_FILE_SOURCE, OUTPUT_FILE)
-    if not os.path.exists(CONFIG_FILE):
-        copy(CONFIG_FILE_SOURCE, CONFIG_FILE)
-    if not os.path.exists(IVENTORY_CONVERT_SCRIPT):
-        copy(IVENTORY_CONVERT_SCRIPT_SOURCE, IVENTORY_CONVERT_SCRIPT)
-    if not os.path.exists(INVENTORY_IMPORT_SCRIPT):
-        copy(INVENTORY_IMPORT_SCRIPT_SOURCE, INVENTORY_IMPORT_SCRIPT)
 
 else:
     MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -86,24 +145,25 @@ else:
     OUTPUT_FILE = os.path.join(DATA_DIR, "output.csv")
     INVENTORY_CONVERT_SCRIPT = os.path.join(DATA_DIR, "convert_inventory.js")
     INVENTORY_IMPORT_SCRIPT = os.path.join(DATA_DIR, "get_inventory.js")
+    NODE_MODULES = os.path.join(DATA_DIR, "node_modules")
+
+    ICON_FILE = os.path.join(PROJECT_DIR, "assets", "icon.png")
+    BATCH_FILE = os.path.join(DATA_DIR, "cs2tracker_scraper.bat")
+    INVENTORY_IMPORT_FILE = os.path.join(DATA_DIR, "inventory.json")
+    INVENTORY_IMPORT_SCRIPT_DEPENDENCIES = [
+        "steam-user",
+        "globaloffensive",
+        "@node-steam/vdf",
+        "axios",
+    ]
 
     if not os.path.exists(CONFIG_FILE_BACKUP):
         copy(CONFIG_FILE, CONFIG_FILE_BACKUP)
 
 
-ICON_FILE = os.path.join(PROJECT_DIR, "assets", "icon.png")
-BATCH_FILE = os.path.join(DATA_DIR, "cs2tracker_scraper.bat")
-INVENTORY_IMPORT_FILE = os.path.join(DATA_DIR, "inventory.json")
-INVENTORY_IMPORT_SCRIPT_DEPENDENCIES = [
-    "steam-user",
-    "globaloffensive",
-    "@node-steam/vdf",
-    "axios",
-]
-
 # Ensures that the necessary node modules are installed if a user wants
 # to import their steam inventory via the cs2tracker/data/get_inventory.js Node.js script.
-if not os.path.exists(os.path.join(DATA_DIR, "node_modules")):
+if not os.path.exists(NODE_MODULES):
     npm.Popen(
         ["install", "-g", "--prefix", DATA_DIR] + INVENTORY_IMPORT_SCRIPT_DEPENDENCIES,
         stdout=DEVNULL,
