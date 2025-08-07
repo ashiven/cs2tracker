@@ -98,17 +98,19 @@ This will open the config editor where you can change any setting by double clic
 
 ## FAQ
 
-Q: Is it safe to login with my Steam account?
+**Q: Is it safe to login with my Steam account?**
 
-A: Yes, the program uses the [SteamUser](https://github.com/DoctorMcKay/node-steam-user?tab=readme-ov-file#methods-) and [Globaloffensive](https://github.com/DoctorMcKay/node-globaloffensive) libraries to sign in and import your Storage Units and all of the login related code is transparently available in [this file](cs2tracker/data/get_inventory.js).
+**A:** Yes, the program uses the [SteamUser](https://github.com/DoctorMcKay/node-steam-user?tab=readme-ov-file#methods-) and [Globaloffensive](https://github.com/DoctorMcKay/node-globaloffensive) libraries to sign in and import your Storage Units and all of the login related code is transparently available in [this file](cs2tracker/data/get_inventory.js).
 
-Q: Do I have to login with my Steam account?
 
-A: No, you can also manually specify the number of items you own in the config editor.
+**Q: Do I have to login with my Steam account?**
 
-Q: Can I get VAC-banned for using this program?
+**A:** No, you can also manually specify the number of items you own in the config editor.
 
-A: No, this program does not interact with the game in any way and only reads your Storage Units.
+
+**Q: Can I get VAC-banned for using this program?**
+
+**A:** No, this program does not interact with the game in any way and only reads your Storage Units.
 
 ## Contributing
 
