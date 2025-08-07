@@ -410,7 +410,7 @@ class CustomItemFrame(ttk.Frame):
         return insert_index
 
     def _identify_custom_section(self, item_name):
-        # pylint: disable=too-many-return-statements
+        # pylint: disable=too-many-return-statements,too-many-branches
         """Given an item name, identify the custom section it belongs to."""
         if "Patch Pack" in item_name or "Patch Collection" in item_name:
             return "Patch Packs"
