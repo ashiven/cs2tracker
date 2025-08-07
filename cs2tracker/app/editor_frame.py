@@ -18,7 +18,7 @@ from cs2tracker.constants import (
 )
 from cs2tracker.util.tkinter import centered, size_info
 
-ADD_CUSTOM_ITEM_TITLE = "Add Custom Item"
+ADD_CUSTOM_ITEM_TITLE = "Add Item"
 ADD_CUSTOM_ITEM_SIZE = "500x230"
 
 IMPORT_INVENTORY_TITLE = "Import Steam Inventory"
@@ -169,8 +169,13 @@ class ConfigEditorFrame(ttk.Frame):
                 continue
 
             section_level = self.tree.insert("", "end", iid=section, text=section)
-            sorted_section_items = sorted(config.items(section))
-            for config_option, value in sorted_section_items:
+            section_items = config.items(section)
+
+            # Major Sticker Capsules should remain sorted by year
+            if section != "Major Sticker Capsules":
+                section_items = sorted(section_items)
+
+            for config_option, value in section_items:
                 if section not in ("User Settings", "App Settings"):
                     option_name = config.option_to_name(config_option, href=True)
                 else:
@@ -423,6 +428,8 @@ class CustomItemFrame(ttk.Frame):
             return "Skins"
         elif "Music Kit |" in item_name:
             return "Others"
+        elif "Capsule" in item_name:
+            return "Sticker Capsules"
         elif " | " in item_name:
             return "Agents"
         else:
@@ -530,7 +537,7 @@ class InventoryImportFrame(ttk.Frame):
         self.import_sticker_capsules_value = tk.BooleanVar(value=True)
         self.import_sticker_capsules_checkbox = ttk.Checkbutton(
             self.checkbox_frame,
-            text="Import Sticker Capsules",
+            text="Import Major Sticker Capsules",
             variable=self.import_sticker_capsules_value,
             style="Switch.TCheckbutton",
         )

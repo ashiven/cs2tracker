@@ -183,9 +183,16 @@ class ItemNameConverter {
       let translatedName =
         def.item_name.replace("#", "").toLowerCase() || def.item_name;
       if (
-        translatedName.startsWith("csgo_crate_sticker_pack") ||
+        (translatedName.startsWith("csgo_crate_sticker_pack") &&
+          (translatedName.includes("2014") ||
+            translatedName.includes("2015") ||
+            translatedName.includes("contenders") ||
+            translatedName.includes("challengers") ||
+            translatedName.includes("legends"))) ||
         translatedName.startsWith("csgo_crate_signature_pack")
       ) {
+        return "Major Sticker Capsules";
+      } else if (translatedName.startsWith("csgo_crate_sticker_pack")) {
         return "Sticker Capsules";
       } else if (translatedName.startsWith("csgo_crate_patch_pack")) {
         return "Patch Packs";
