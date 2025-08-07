@@ -66,13 +66,23 @@ jobs:
 
       - name: Build executable
         run: |
-          pyinstaller --noconfirm --onefile --windowed --name ${{ env.NAME }} --icon ${{ env.ICON }} `
-            --add-data ${{ env.ICON_INCLUDE }} `
-            --add-data ${{ env.DATA_DIR_INCLUDE }} `
-            --add-data ${{ env.NODE_MODULES_INCLUDE }} `
-            --add-data ${{ env.CURRENCY_INCLUDE }} `
-            --add-data ${{ env.NODE_BIN_INCLUDE }} `
-            ${{ env.MAIN_FILE }}
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            pyinstaller --noconfirm --onefile --windowed --name ${{ env.NAME }} --icon ${{ env.ICON }} `
+              --add-data ${{ env.ICON_INCLUDE }} `
+              --add-data ${{ env.DATA_DIR_INCLUDE }} `
+              --add-data ${{ env.NODE_MODULES_INCLUDE }} `
+              --add-data ${{ env.CURRENCY_INCLUDE }} `
+              --add-data ${{ env.NODE_BIN_INCLUDE }} `
+              ${{ env.MAIN_FILE }}
+          else
+            pyinstaller --noconfirm --onefile --windowed --name ${{ env.NAME }} --icon ${{ env.ICON }} \
+              --add-data ${{ env.ICON_INCLUDE }} \
+              --add-data ${{ env.DATA_DIR_INCLUDE }} \
+              --add-data ${{ env.NODE_MODULES_INCLUDE }} \
+              --add-data ${{ env.CURRENCY_INCLUDE }} \
+              --add-data ${{ env.NODE_BIN_INCLUDE }} \
+              ${{ env.MAIN_FILE }}
+          fi
 
       - name: List files in dist folder
         run: ls -R dist/
