@@ -18,19 +18,36 @@ except ImportError:
 class OSType(enum.Enum):
     WINDOWS = "Windows"
     LINUX = "Linux"
+    MACOS = "MacOS"
 
 
-OS = OSType.WINDOWS if sys.platform.startswith("win") else OSType.LINUX
+if sys.platform.startswith("win"):
+    OS = OSType.WINDOWS
+elif sys.platform.startswith("linux"):
+    OS = OSType.LINUX
+elif sys.platform.startswith("darwin"):
+    OS = OSType.MACOS
+else:
+    raise NotImplementedError(f"Unsupported OS: {sys.platform}")
+
+
 PYTHON_EXECUTABLE = sys.executable
-
-
 RUNNING_IN_EXE = getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS")
 
 if RUNNING_IN_EXE:
     MEIPASS_DIR = sys._MEIPASS  # type: ignore  pylint: disable=protected-access
     MODULE_DIR = MEIPASS_DIR
     PROJECT_DIR = MEIPASS_DIR
-    APP_DATA_DIR = os.path.join(os.path.expanduser("~"), "AppData", "Local")
+
+    if OS == OSType.WINDOWS:
+        APP_DATA_DIR = os.path.join(os.path.expanduser("~"), "AppData", "Local")
+    elif OS == OSType.LINUX:
+        APP_DATA_DIR = os.environ.get(
+            "XDG_DATA_HOME", os.path.join(os.path.expanduser("~"), ".local", "share")
+        )
+    else:
+        raise NotImplementedError(f"Unsupported OS: {OS}")
+
     DATA_DIR = os.path.join(APP_DATA_DIR, "cs2tracker", "data")
     os.makedirs(DATA_DIR, exist_ok=True)
 
