@@ -100,7 +100,7 @@ This will open the config editor where you can change any setting by double clic
 
 **Q: Is it safe to login with my Steam account?**
 
-**A:** Yes, the program uses the [SteamUser](https://github.com/DoctorMcKay/node-steam-user?tab=readme-ov-file#methods-) and [Globaloffensive](https://github.com/DoctorMcKay/node-globaloffensive) libraries to sign in and import your Storage Units and all of the login related code is transparently available in [this file](cs2tracker/data/get_inventory.js).
+**A:** Yes, the program uses the [SteamUser](https://github.com/DoctorMcKay/node-steam-user?tab=readme-ov-file#methods-) and [Globaloffensive](https://github.com/DoctorMcKay/node-globaloffensive) libraries to sign in and import your Storage Units (the same method is used by [casemove](https://github.com/nombersDev/casemove)) and all of the login-related code is transparently available in [this file](cs2tracker/data/get_inventory.js).
 
 
 **Q: Do I have to login with my Steam account?**
