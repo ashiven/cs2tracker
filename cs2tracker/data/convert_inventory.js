@@ -216,6 +216,10 @@ class ItemNameConverter {
         return "Charms";
       } else if (translatedName.startsWith("csgo_customplayer")) {
         return "Agents";
+      } else if (translatedName.startsWith("csgo_collectible_pin")) {
+        return "Collectible Pins";
+      } else if (translatedName.startsWith("coupon_pins")) {
+        return "Pins Capsules";
       }
     }
 
@@ -232,6 +236,10 @@ class ItemNameConverter {
       ) {
         return "Skins";
       }
+    }
+
+    if (this.getItemName(item).startsWith("Music Kit |")) {
+      return "Music Kits";
     }
 
     return "Others";

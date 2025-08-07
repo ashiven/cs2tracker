@@ -185,6 +185,9 @@ console.error = (...args) => {
       "Souvenirs",
       "Others",
       "Sticker Capsules",
+      "Collectible Pins",
+      "Pins Capsules",
+      "Music Kits",
     ];
     let filteredItems = [];
 

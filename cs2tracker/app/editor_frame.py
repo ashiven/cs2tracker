@@ -420,16 +420,20 @@ class CustomItemFrame(ttk.Frame):
             return "Stickers"
         elif "Charm |" in item_name:
             return "Charms"
+        elif "Music Kit |" in item_name:
+            return "Music Kits"
         elif "Souvenir" in item_name and "|" not in item_name:
             return "Souvenirs"
         elif "★ " in item_name:
             return "Special Items"
         elif " | " in item_name and "(" in item_name and ")" in item_name:
             return "Skins"
-        elif "Music Kit |" in item_name:
-            return "Others"
+        elif "Pins Capsule" in item_name:
+            return "Pins Capsules"
         elif "Capsule" in item_name:
             return "Sticker Capsules"
+        elif "Pin" in item_name:
+            return "Collectible Pins"
         elif " | " in item_name:
             return "Agents"
         else:
