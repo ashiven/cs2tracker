@@ -183,9 +183,16 @@ class ItemNameConverter {
       let translatedName =
         def.item_name.replace("#", "").toLowerCase() || def.item_name;
       if (
-        translatedName.startsWith("csgo_crate_sticker_pack") ||
+        (translatedName.startsWith("csgo_crate_sticker_pack") &&
+          (translatedName.includes("2014") ||
+            translatedName.includes("2015") ||
+            translatedName.includes("contenders") ||
+            translatedName.includes("challengers") ||
+            translatedName.includes("legends"))) ||
         translatedName.startsWith("csgo_crate_signature_pack")
       ) {
+        return "Major Sticker Capsules";
+      } else if (translatedName.startsWith("csgo_crate_sticker_pack")) {
         return "Sticker Capsules";
       } else if (translatedName.startsWith("csgo_crate_patch_pack")) {
         return "Patch Packs";
@@ -209,6 +216,10 @@ class ItemNameConverter {
         return "Charms";
       } else if (translatedName.startsWith("csgo_customplayer")) {
         return "Agents";
+      } else if (translatedName.startsWith("csgo_collectible_pin")) {
+        return "Collectible Pins";
+      } else if (translatedName.startsWith("coupon_pins")) {
+        return "Pins Capsules";
       }
     }
 
@@ -225,6 +236,10 @@ class ItemNameConverter {
       ) {
         return "Skins";
       }
+    }
+
+    if (this.getItemName(item).startsWith("Music Kit |")) {
+      return "Music Kits";
     }
 
     return "Others";

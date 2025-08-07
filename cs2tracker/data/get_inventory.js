@@ -184,6 +184,10 @@ console.error = (...args) => {
       "Patch Packs",
       "Souvenirs",
       "Others",
+      "Sticker Capsules",
+      "Collectible Pins",
+      "Pins Capsules",
+      "Music Kits",
     ];
     let filteredItems = [];
 
@@ -193,7 +197,8 @@ console.error = (...args) => {
       }
       if (
         (item.item_type === "Cases" && importCases) ||
-        (item.item_type === "Sticker Capsules" && importStickerCapsules) ||
+        (item.item_type === "Major Sticker Capsules" &&
+          importStickerCapsules) ||
         (item.item_type === "Stickers" && importStickers) ||
         (otherItemTypes.includes(item.item_type) && importOthers)
       ) {

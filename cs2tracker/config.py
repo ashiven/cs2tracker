@@ -21,34 +21,14 @@ CUSTOM_SECTIONS = [
     "Patch Packs",
     "Stickers",
     "Souvenirs",
+    "Sticker Capsules",
     "Others",
+    "Collectible Pins",
+    "Pins Capsules",
+    "Music Kits",
 ]
 
-PREEXISTING_SECTIONS = [
-    "Cases",
-    "Katowice 2014 Sticker Capsule",
-    "Cologne 2014 Sticker Capsule",
-    "DreamHack 2014 Sticker Capsule",
-    "Katowice 2015 Sticker Capsule",
-    "Cologne 2015 Sticker Capsule",
-    "Cluj-Napoca 2015 Sticker Capsule",
-    "Columbus 2016 Sticker Capsule",
-    "Cologne 2016 Sticker Capsule",
-    "Atlanta 2017 Sticker Capsule",
-    "Krakow 2017 Sticker Capsule",
-    "Boston 2018 Sticker Capsule",
-    "London 2018 Sticker Capsule",
-    "Katowice 2019 Sticker Capsule",
-    "Berlin 2019 Sticker Capsule",
-    "2020 RMR Sticker Capsule",
-    "Stockholm 2021 Sticker Capsule",
-    "Antwerp 2022 Sticker Capsule",
-    "Rio 2022 Sticker Capsule",
-    "Paris 2023 Sticker Capsule",
-    "Copenhagen 2024 Sticker Capsule",
-    "Shanghai 2024 Sticker Capsule",
-    "Austin 2025 Sticker Capsule",
-]
+PRECONFIGURED_SECTIONS = ["Cases", "Major Sticker Capsules", "App Settings", "User Settings"]
 
 console = get_console()
 
@@ -90,7 +70,7 @@ class ValidatedConfig(ConfigParser):
         for section in CUSTOM_SECTIONS:
             if not self.has_section(section):
                 raise ValueError(f"Missing '{section}' section in the configuration file.")
-        for section in PREEXISTING_SECTIONS:
+        for section in PRECONFIGURED_SECTIONS:
             if not self.has_section(section):
                 raise ValueError(f"Missing '{section}' section in the configuration file.")
 
