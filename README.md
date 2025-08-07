@@ -69,7 +69,7 @@ Simply download the program and run it:
 
 ## Usage
 
-- Click **Run!** to gather the current market prices of your items and calculate the total amount in USD and EUR.
+- Click **Run!** to gather the current market prices of your items and calculate the total amount in USD and your selected currency.
 - The generated Excel sheet can be saved by right-clicking and then selecting **Save Sheet**.
 - Use **Edit Config** to specify the numbers of items owned in the configuration.
 - Click **Show History** to see a price chart consisting of past calculations.
