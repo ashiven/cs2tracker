@@ -26,6 +26,7 @@
 - [Usage](#usage)
 - [Configuration](#configuration)
 - [Advanced Features](#advanced-features)
+- Frequently Asked Questions
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -46,8 +47,9 @@
 #### Method 1: Executable
 
 Simply download the program and run it:
-  - [Windows](https://github.com/ashiven/cs2tracker/releases/latest/download/cs2tracker-windows.zip)
-  - [Linux](https://github.com/ashiven/cs2tracker/releases/latest/download/cs2tracker-linux.zip)
+
+- [Windows](https://github.com/ashiven/cs2tracker/releases/latest/download/cs2tracker-windows.zip)
+- [Linux](https://github.com/ashiven/cs2tracker/releases/latest/download/cs2tracker-linux.zip)
 
 #### Method 2: Install via Pip
 
@@ -62,6 +64,7 @@ Simply download the program and run it:
    ```bash
    cs2tracker
    ```
+
 ### Additional Setup
 
 - Register for the [Crawlbase Smart Proxy API](https://crawlbase.com/) and retrieve your API key. (Optional)
@@ -92,6 +95,24 @@ This will open the config editor where you can change any setting by double clic
 - You need to set up a [webhook](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks) in your Discord server and enter the webhook url into the `discord_webhook_url` field in the config `User Settings`.
 - Enable **Proxy Requests** to prevent your requests from being rate limited by the steamcommunity server.
 - You need to register for a free API key on [Crawlbase](crawlbase.com) and enter it into the `proxy_api_key` field in the config `User Settings`.
+
+## Frequentyl Asked Questions
+
+### Is it safe to login with my Steam account?
+
+A: Yes, the program uses the [SteamUser](https://github.com/DoctorMcKay/node-steam-user?tab=readme-ov-file#methods-) and [Globaloffensive](https://github.com/DoctorMcKay/node-globaloffensive) libraries to sign in and import your Storage Units and does not store your login credentials. All of the login related code is transparently available in [this file](cs2tracker/data/get_inventory.js).
+
+Q: Do I have to login with my Steam account?
+
+A: No, you can also manually specify the number of items you own in the config editor.
+
+Q: Can I get VAC-banned for using this program?
+
+A: No, this program does not interact with the game in any way and only reads your Storage Units.
+
+Q: Will this program remain free?
+
+A: Yes, this program is free and open source. It will always remain free.
 
 ## Contributing
 

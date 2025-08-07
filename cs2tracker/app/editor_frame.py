@@ -305,7 +305,7 @@ class ConfigEditorButtonFrame(ttk.Frame):
         self.custom_item_window.focus_set()
 
         def on_close():
-            self.custom_item_window.destroy()
+            self.custom_item_window.destroy()  # type: ignore
             self.editor_frame.tree.focus_set()
 
         self.custom_item_window.protocol("WM_DELETE_WINDOW", on_close)
@@ -334,7 +334,7 @@ class ConfigEditorButtonFrame(ttk.Frame):
         self.steam_inventory_window.focus_set()
 
         def on_close():
-            self.steam_inventory_window.destroy()
+            self.steam_inventory_window.destroy()  # type: ignore
             self.editor_frame.tree.focus_set()
 
         self.steam_inventory_window.protocol("WM_DELETE_WINDOW", on_close)
