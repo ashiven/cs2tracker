@@ -11,6 +11,9 @@ const itemsGameLink =
 const translationsCacheFile = path.join(__dirname, "translations.json");
 const itemsCacheFile = path.join(__dirname, "items.json");
 
+const translationRegex = /"(.+?)"\s+"(.+?)"/;
+const souvenirRegex = /^csgo_crate_[a-z0-9]+_promo.*/;
+
 class ItemNameConverter {
   constructor() {
     this.translations = {};
@@ -38,7 +41,7 @@ class ItemNameConverter {
     const res = await axios.get(translationsLink);
     const lines = res.data.split(/\n/);
     for (const line of lines) {
-      const match = line.match(/"(.+?)"\s+"(.+?)"/);
+      const match = line.match(translationRegex);
       if (match) {
         this.translations[match[1].toLowerCase()] = match[2];
       }
@@ -174,7 +177,7 @@ class ItemNameConverter {
 
   getItemType(item) {
     const def = this.items[item.def_index];
-    if (def === undefined) return "unknown";
+    if (def === undefined) return "Unknown";
 
     if (def.item_name !== undefined) {
       let translatedName =
@@ -183,17 +186,48 @@ class ItemNameConverter {
         translatedName.startsWith("csgo_crate_sticker_pack") ||
         translatedName.startsWith("csgo_crate_signature_pack")
       ) {
-        return "sticker capsule";
-      } else if (translatedName.startsWith("csgo_crate_community")) {
-        return "case";
+        return "Sticker Capsules";
+      } else if (translatedName.startsWith("csgo_crate_patch_pack")) {
+        return "Patch Packs";
+      } else if (translatedName.match(souvenirRegex)) {
+        return "Souvenirs";
+      } else if (
+        translatedName.startsWith("csgo_crate_community") ||
+        translatedName.startsWith("csgo_crate_gamma") ||
+        translatedName.startsWith("csgo_crate_valve") ||
+        translatedName.startsWith("csgo_crate_esports") ||
+        translatedName.startsWith("csgo_crate_operation")
+      ) {
+        return "Cases";
       } else if (translatedName.startsWith("csgo_tool_spray")) {
-        return "graffiti kit";
+        return "Graffitis";
       } else if (translatedName.startsWith("csgo_tool_sticker")) {
-        return "sticker";
+        return "Stickers";
+      } else if (translatedName.startsWith("csgo_tool_patch")) {
+        return "Patches";
+      } else if (translatedName.startsWith("csgo_tool_keychain")) {
+        return "Charms";
+      } else if (translatedName.startsWith("csgo_customplayer")) {
+        return "Agents";
       }
     }
 
-    return "other";
+    if (item.quality === 3) {
+      return "Special Items";
+    }
+
+    if (def.prefab !== undefined) {
+      let prefab = this.prefabs[def.prefab];
+      if (
+        prefab !== undefined &&
+        prefab.image_inventory !== undefined &&
+        prefab.image_inventory.startsWith("econ/weapons/base_weapons")
+      ) {
+        return "Skins";
+      }
+    }
+
+    return "Others";
   }
 
   getItemTradable(item) {
@@ -204,11 +238,13 @@ class ItemNameConverter {
       let translatedName =
         def.item_name.replace("#", "").toLowerCase() || def.item_name;
       if (
-        translatedName.startsWith("csgo_collectible") ||
+        (translatedName.startsWith("csgo_collectible") &&
+          !translatedName.startsWith("csgo_collectible_pin")) ||
         translatedName.startsWith("csgo_tournamentpass") ||
         translatedName.startsWith("csgo_tournamentjournal") ||
         translatedName.startsWith("csgo_ticket") ||
-        translatedName.startsWith("csgo_tool_casket_tag")
+        translatedName.startsWith("csgo_tool_casket_tag") ||
+        translatedName.startsWith("sfui_wpnhud_c4")
       ) {
         return false;
       }
@@ -223,14 +259,6 @@ class ItemNameConverter {
 
     // Base weapons with stickers/name tags
     if (
-      def.image_inventory !== undefined &&
-      def.image_inventory.startsWith("econ/weapons/base_weapons")
-    ) {
-      return false;
-    }
-
-    // Base weapons with stickers/name tags
-    if (
       item.paint_index === undefined &&
       def.image_inventory === undefined &&
       def.prefab !== undefined
@@ -239,7 +267,10 @@ class ItemNameConverter {
       if (
         prefab !== undefined &&
         prefab.image_inventory !== undefined &&
-        prefab.image_inventory.startsWith("econ/weapons/base_weapons")
+        prefab.image_inventory.startsWith("econ/weapons/base_weapons") &&
+        !prefab.image_inventory.startsWith(
+          "econ/weapons/base_weapons/weapon_knife",
+        )
       ) {
         return false;
       }

@@ -8,7 +8,7 @@ from tkinter import messagebox, ttk
 from nodejs import node
 from ttk_text import ThemedText
 
-from cs2tracker.config import get_config
+from cs2tracker.config import CUSTOM_SECTIONS, get_config
 from cs2tracker.constants import (
     CONFIG_FILE,
     CONFIG_FILE_BACKUP,
@@ -131,7 +131,7 @@ class ConfigEditorFrame(ttk.Frame):
         if selected:
             item = selected[0]
             section_name = self.tree.parent(item)
-            if section_name in ("Stickers", "Skins"):
+            if section_name in CUSTOM_SECTIONS:
                 next_option = self.tree.next(item)
                 self.tree.delete(item)
                 self.save_config()
@@ -169,31 +169,19 @@ class ConfigEditorFrame(ttk.Frame):
                 continue
 
             section_level = self.tree.insert("", "end", iid=section, text=section)
-
-            # Items in the Stickers, Cases, and Skins sections should be displayed alphabetically sorted
-            section_items = config.items(section)
-            if section in ("Stickers", "Cases", "Skins"):
-                section_items = sorted(section_items)
-
-            for config_option, value in section_items:
+            sorted_section_items = sorted(config.items(section))
+            for config_option, value in sorted_section_items:
                 if section not in ("User Settings", "App Settings"):
                     option_name = config.option_to_name(config_option, href=True)
-                    self.tree.insert(
-                        section_level,
-                        "end",
-                        iid=f"{section}-{option_name}",
-                        text=option_name,
-                        values=[value],
-                    )
                 else:
                     option_name = config.option_to_name(config_option)
-                    self.tree.insert(
-                        section_level,
-                        "end",
-                        iid=f"{section}-{option_name}",
-                        text=option_name,
-                        values=[value],
-                    )
+                self.tree.insert(
+                    section_level,
+                    "end",
+                    iid=f"{section}-{option_name}",
+                    text=option_name,
+                    values=[value],
+                )
 
         self.tree.focus("User Settings")
         self.tree.selection_set("User Settings")
@@ -266,6 +254,25 @@ class ConfigEditorButtonFrame(ttk.Frame):
 
         custom_item_button = ttk.Button(self, text="Add Item", command=self._add_custom_item)
         custom_item_button.pack(side="left", expand=True, padx=5)
+
+        def open_custom_enter(_):
+            selected = self.editor_frame.tree.selection()
+            if selected and not self.editor_frame.tree.parent(selected[0]):
+                selected_section = self.editor_frame.tree.item(selected[0], "text")
+                if selected_section in CUSTOM_SECTIONS and not self.editor_frame.tree.get_children(
+                    selected_section
+                ):
+                    custom_item_button.invoke()
+
+        def open_custom_click(event):
+            selected_section = self.editor_frame.tree.identify_row(event.y)
+            if selected_section in CUSTOM_SECTIONS and not self.editor_frame.tree.get_children(
+                selected_section
+            ):
+                custom_item_button.invoke()
+
+        self.editor_frame.tree.bind("<Return>", open_custom_enter, add="+")
+        self.editor_frame.tree.bind("<Double-1>", open_custom_click, add="+")
 
         import_inventory_button = ttk.Button(
             self, text="Import Steam Inventory", command=self._import_steam_inventory
@@ -397,6 +404,30 @@ class CustomItemFrame(ttk.Frame):
                 break
         return insert_index
 
+    def _identify_custom_section(self, item_name):
+        # pylint: disable=too-many-return-statements
+        """Given an item name, identify the custom section it belongs to."""
+        if "Patch Pack" in item_name or "Patch Collection" in item_name:
+            return "Patch Packs"
+        elif "Patch |" in item_name:
+            return "Patches"
+        elif "Sticker |" in item_name:
+            return "Stickers"
+        elif "Charm |" in item_name:
+            return "Charms"
+        elif "Souvenir" in item_name and "|" not in item_name:
+            return "Souvenirs"
+        elif "★ " in item_name:
+            return "Special Items"
+        elif " | " in item_name and "(" in item_name and ")" in item_name:
+            return "Skins"
+        elif "Music Kit |" in item_name:
+            return "Others"
+        elif " | " in item_name:
+            return "Agents"
+        else:
+            return "Others"
+
     def _add_custom_item(self, item_href, item_owned):
         """Add a custom item to the configuration."""
         if not item_href or not item_owned:
@@ -404,7 +435,7 @@ class CustomItemFrame(ttk.Frame):
                 "Input Error", "All fields must be filled out.", parent=self.window
             )
             return
-        if config.option_exists(item_href, exclude_sections=("Stickers", "Skins")):
+        if config.option_exists(item_href, exclude_sections=CUSTOM_SECTIONS):
             messagebox.showerror(
                 "Item Exists", "This item already exists in another section.", parent=self.window
             )
@@ -416,12 +447,11 @@ class CustomItemFrame(ttk.Frame):
             messagebox.showerror("Invalid URL", str(error), parent=self.window)
             return
 
-        if self._update_existing("Stickers", item_name, item_owned):
-            return
-        if self._update_existing("Skins", item_name, item_owned):
-            return
+        for section in CUSTOM_SECTIONS:
+            if self._update_existing(section, item_name, item_owned):
+                return
 
-        section = "Stickers" if item_name.startswith("Sticker") else "Skins"
+        section = self._identify_custom_section(item_name)
         insert_index = self._get_insert_index(item_name, section)
         self.editor_frame.tree.insert(
             section,
