@@ -32,7 +32,7 @@
 ## Features
 
 - ⚡ Rapidly import your Storage Units
-- 🔍 Track prices on Steam, Buff163, Youpin898
+- 🔍 Track prices on Steam, Buff163, CSFloat
 - 📈 View investment price history
 - 🧾 Export/Import history data
 - 📤 Discord notifications on updates
@@ -41,17 +41,18 @@
 
 ## Getting Started
 
-### Prerequisites
+### Before You Begin (Optional)
 
-- Download and install the latest versions of [Python](https://www.python.org/downloads/) and [Pip](https://pypi.org/project/pip/). (Required on Linux)
-- Register for the [Crawlbase Smart Proxy API](https://crawlbase.com/) and retrieve your API key. (Optional)
-- Create a [Discord Webhook](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks) to be notified about recent price updates. (Optional)
+- Register for the [Crawlbase Smart Proxy API](https://crawlbase.com/) and retrieve your API key.
+- Create a [Discord Webhook](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks) to be notified about recent price updates.
 
 ### Installation
 
-#### Option 1: Windows Executable
+#### Option 1: Executable
 
-- Simply [download the latest executable](https://github.com/ashiven/cs2tracker/releases/latest/download/cs2tracker-windows.zip) and run it.
+- Simply download the program and run it:
+  - [Windows](https://github.com/ashiven/cs2tracker/releases/latest/download/cs2tracker-windows.zip)
+  - [Linux](https://github.com/ashiven/cs2tracker/releases/latest/download/cs2tracker-linux.zip)
 
 #### Option 2: Install via Pip
 
