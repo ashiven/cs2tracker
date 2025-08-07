@@ -255,6 +255,21 @@ class ConfigEditorButtonFrame(ttk.Frame):
         custom_item_button = ttk.Button(self, text="Add Item", command=self._add_custom_item)
         custom_item_button.pack(side="left", expand=True, padx=5)
 
+        def open_window(event):
+            selected = self.editor_frame.tree.selection()
+            selected_section = None
+
+            if event.x and event.y:
+                selected_section = self.editor_frame.tree.identify_row(event.y)
+            elif selected and not self.editor_frame.parent(selected[0]):
+                selected_section = self.editor_frame.tree.item(selected[0], "text")
+
+            if selected_section and selected_section in CUSTOM_SECTIONS:
+                custom_item_button.invoke()
+
+        self.editor_frame.tree.bind("<Return>", open_window)
+        self.editor_frame.tree.bind("<Double-1>", open_window)
+
         import_inventory_button = ttk.Button(
             self, text="Import Steam Inventory", command=self._import_steam_inventory
         )
