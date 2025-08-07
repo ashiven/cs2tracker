@@ -253,6 +253,8 @@ class ConfigEditorButtonFrame(ttk.Frame):
         self.editor_frame = editor_frame
         self.custom_item_dialog = None
 
+        self.custom_item_window = None
+        self.steam_inventory_window = None
         self._add_widgets()
 
     def _add_widgets(self):
@@ -285,37 +287,59 @@ class ConfigEditorButtonFrame(ttk.Frame):
         self.editor_frame.tree.focus_set()
 
     def _add_custom_item(self):
+        """Open a window to add a new custom item or lift the existing one if it is
+        already open.
+        """
+        if self.custom_item_window is None or not self.custom_item_window.winfo_exists():
+            self._open_custom_item_window()
+        else:
+            self.custom_item_window.lift()
+            self.custom_item_window.focus_set()
+
+    def _open_custom_item_window(self):
         """Open a window to add a new custom item."""
-        custom_item_window = tk.Toplevel(self.editor_frame)
-        custom_item_window.title(ADD_CUSTOM_ITEM_TITLE)
-        custom_item_window.geometry(centered(custom_item_window, ADD_CUSTOM_ITEM_SIZE))
-        custom_item_window.minsize(*size_info(ADD_CUSTOM_ITEM_SIZE))
-        custom_item_window.focus_set()
+        self.custom_item_window = tk.Toplevel(self.editor_frame)
+        self.custom_item_window.title(ADD_CUSTOM_ITEM_TITLE)
+        self.custom_item_window.geometry(centered(self.custom_item_window, ADD_CUSTOM_ITEM_SIZE))
+        self.custom_item_window.minsize(*size_info(ADD_CUSTOM_ITEM_SIZE))
+        self.custom_item_window.focus_set()
 
         def on_close():
-            custom_item_window.destroy()
+            self.custom_item_window.destroy()
             self.editor_frame.tree.focus_set()
 
-        custom_item_window.protocol("WM_DELETE_WINDOW", on_close)
+        self.custom_item_window.protocol("WM_DELETE_WINDOW", on_close)
 
-        custom_item_frame = CustomItemFrame(custom_item_window, self.editor_frame)
+        custom_item_frame = CustomItemFrame(self.custom_item_window, self.editor_frame)
         custom_item_frame.pack(expand=True, fill="both", padx=15, pady=15)
 
     def _import_steam_inventory(self):
+        """Open a window to import the user's Steam inventory or lift the existing one
+        if it is already open.
+        """
+        if self.steam_inventory_window is None or not self.steam_inventory_window.winfo_exists():
+            self._open_steam_inventory_window()
+        else:
+            self.steam_inventory_window.lift()
+            self.steam_inventory_window.focus_set()
+
+    def _open_steam_inventory_window(self):
         """Open a window to import the user's Steam inventory."""
-        steam_inventory_window = tk.Toplevel(self.editor_frame)
-        steam_inventory_window.title(IMPORT_INVENTORY_TITLE)
-        steam_inventory_window.geometry(centered(steam_inventory_window, IMPORT_INVENTORY_SIZE))
-        steam_inventory_window.minsize(*size_info(IMPORT_INVENTORY_SIZE))
-        steam_inventory_window.focus_set()
+        self.steam_inventory_window = tk.Toplevel(self.editor_frame)
+        self.steam_inventory_window.title(IMPORT_INVENTORY_TITLE)
+        self.steam_inventory_window.geometry(
+            centered(self.steam_inventory_window, IMPORT_INVENTORY_SIZE)
+        )
+        self.steam_inventory_window.minsize(*size_info(IMPORT_INVENTORY_SIZE))
+        self.steam_inventory_window.focus_set()
 
         def on_close():
-            steam_inventory_window.destroy()
+            self.steam_inventory_window.destroy()
             self.editor_frame.tree.focus_set()
 
-        steam_inventory_window.protocol("WM_DELETE_WINDOW", on_close)
+        self.steam_inventory_window.protocol("WM_DELETE_WINDOW", on_close)
 
-        steam_inventory_frame = InventoryImportFrame(steam_inventory_window, self.editor_frame)
+        steam_inventory_frame = InventoryImportFrame(self.steam_inventory_window, self.editor_frame)
         steam_inventory_frame.pack(expand=True, fill="both", padx=15, pady=15)
 
 
