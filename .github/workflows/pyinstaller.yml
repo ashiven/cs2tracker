@@ -17,9 +17,12 @@ jobs:
       MAIN_FILE: '"./cs2tracker/__main__.py"'
       NAME: '"cs2tracker"'
       ICON: '"./assets/icon.png"'
-      ICON_INCLUDE: '"./assets/icon.png;./assets"'
-      DATA_DIR_INCLUDE: '"./cs2tracker/data;./data"'
-      NODE_MODULES_INCLUDE: '"./node_modules;./node_modules"'
+      WINDOWS_ICON_INCLUDE: '"./assets/icon.png;./assets"'
+      WINDOWS_DATA_DIR_INCLUDE: '"./cs2tracker/data;./data"'
+      WINDOWS_NODE_MODULES_INCLUDE: '"./node_modules;./node_modules"'
+      LINUX_ICON_INCLUDE: '"./assets/icon.png:./assets"'
+      LINUX_DATA_DIR_INCLUDE: '"./cs2tracker/data:./data"'
+      LINUX_NODE_MODULES_INCLUDE: '"./node_modules:./node_modules"'
 
     steps:
       - name: Checkout code
@@ -48,46 +51,46 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: |
           $ZIP_PATH = python -c "import currency_converter, os; print(os.path.join(os.path.dirname(currency_converter.__file__), 'eurofxref-hist.zip'))"
-          echo "CURRENCY_INCLUDE='$ZIP_PATH;./currency_converter'" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          echo "WINDOWS_CURRENCY_INCLUDE='$ZIP_PATH;./currency_converter'" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Locate eurofxref-hist.zip Linux
         if: matrix.os == 'ubuntu-latest'
         run: |
           ZIP_PATH=$(python -c "import currency_converter, os; print(os.path.join(os.path.dirname(currency_converter.__file__), 'eurofxref-hist.zip'))")
-          echo "CURRENCY_INCLUDE=$ZIP_PATH:./currency_converter" >> $GITHUB_ENV
+          echo "LINUX_CURRENCY_INCLUDE=$ZIP_PATH:./currency_converter" >> $GITHUB_ENV
 
       - name: Locate nodejs-bin files Windows
         if: matrix.os == 'windows-latest'
         run: |
           $NODE_BIN_PATH = python -c "import nodejs, os; print(os.path.dirname(nodejs.__file__))"
-          echo "NODE_BIN_INCLUDE='$NODE_BIN_PATH;./nodejs'" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          echo "WINDOWS_NODE_BIN_INCLUDE='$NODE_BIN_PATH;./nodejs'" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Locate nodejs-bin files Linux
         if: matrix.os == 'ubuntu-latest'
         run: |
           NODE_BIN_PATH=$(python -c "import nodejs, os; print(os.path.dirname(nodejs.__file__))")
-          echo "NODE_BIN_INCLUDE=$NODE_BIN_PATH:./nodejs" >> $GITHUB_ENV
+          echo "LINUX_NODE_BIN_INCLUDE=$NODE_BIN_PATH:./nodejs" >> $GITHUB_ENV
 
       - name: Build Windows executable
         if: matrix.os == 'windows-latest'
         run: |
           pyinstaller --noconfirm --onefile --windowed --name ${{ env.NAME }} --icon ${{ env.ICON }} `
-            --add-data ${{ env.ICON_INCLUDE }} `
-            --add-data ${{ env.DATA_DIR_INCLUDE }} `
-            --add-data ${{ env.NODE_MODULES_INCLUDE }} `
-            --add-data ${{ env.CURRENCY_INCLUDE }} `
-            --add-data ${{ env.NODE_BIN_INCLUDE }} `
+            --add-data ${{ env.WINDOWS_ICON_INCLUDE }} `
+            --add-data ${{ env.WINDOWS_DATA_DIR_INCLUDE }} `
+            --add-data ${{ env.WINDOWS_NODE_MODULES_INCLUDE }} `
+            --add-data ${{ env.WINDOWS_CURRENCY_INCLUDE }} `
+            --add-data ${{ env.WINDOWS_NODE_BIN_INCLUDE }} `
             ${{ env.MAIN_FILE }}
 
       - name: Build Linux executable
         if: matrix.os == 'ubuntu-latest'
         run: |
           pyinstaller --noconfirm --onefile --windowed --name ${{ env.NAME }} --icon ${{ env.ICON }} \
-            --add-data ${{ env.ICON_INCLUDE }} \
-            --add-data ${{ env.DATA_DIR_INCLUDE }} \
-            --add-data ${{ env.NODE_MODULES_INCLUDE }} \
-            --add-data ${{ env.CURRENCY_INCLUDE }} \
-            --add-data ${{ env.NODE_BIN_INCLUDE }} \
+            --add-data ${{ env.LINUX_ICON_INCLUDE }} \
+            --add-data ${{ env.LINUX_DATA_DIR_INCLUDE }} \
+            --add-data ${{ env.LINUX_NODE_MODULES_INCLUDE }} \
+            --add-data ${{ env.LINUX_CURRENCY_INCLUDE }} \
+            --add-data ${{ env.LINUX_NODE_BIN_INCLUDE }} \
             ${{ env.MAIN_FILE }}
 
       - name: List files in dist folder
