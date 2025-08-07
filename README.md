@@ -26,7 +26,7 @@
 - [Usage](#usage)
 - [Configuration](#configuration)
 - [Advanced Features](#advanced-features)
-- [Frequently Asked Questions](#frequently-asked-questions)
+- [FAQ](#faq)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -96,30 +96,29 @@ This will open the config editor where you can change any setting by double clic
 - Enable **Proxy Requests** to prevent your requests from being rate limited by the steamcommunity server.
 - You need to register for a free API key on [Crawlbase](crawlbase.com) and enter it into the `proxy_api_key` field in the config `User Settings`.
 
-## Frequently Asked Questions
+## FAQ
 
-### Q: Is it safe to login with my Steam account?
+Q: Is it safe to login with my Steam account?
 
-- Yes, the program uses the [SteamUser](https://github.com/DoctorMcKay/node-steam-user?tab=readme-ov-file#methods-) and [Globaloffensive](https://github.com/DoctorMcKay/node-globaloffensive) libraries to sign in and import your Storage Units.
-- All of the login related code is transparently available in [this file](cs2tracker/data/get_inventory.js).
-- No credentials are ever stored
+A: Yes, the program uses the [SteamUser](https://github.com/DoctorMcKay/node-steam-user?tab=readme-ov-file#methods-) and [Globaloffensive](https://github.com/DoctorMcKay/node-globaloffensive) libraries to sign in and import your Storage Units and all of the login related code is transparently available in [this file](cs2tracker/data/get_inventory.js).
 
-### Q: Do I have to login with my Steam account?
+Q: Do I have to login with my Steam account?
 
-- No, you can also manually specify the number of items you own in the config editor.
+A: No, you can also manually specify the number of items you own in the config editor.
 
-### Q: Can I get VAC-banned for using this program?
+Q: Can I get VAC-banned for using this program?
 
-- No, this program does not interact with the game in any way and only reads your Storage Units.
+A: No, this program does not interact with the game in any way and only reads your Storage Units.
 
 ## Contributing
 
 Please feel free to submit a pull request or open an issue. See [issues](https://github.com/ashiven/cs2tracker/issues) and [pull requests](https://github.com/ashiven/cs2tracker/pulls) for current work.
 
 1. Fork the repository
-2. Create a new branch
+2. Create a new branch: `git checkout -b feature-name`.
 3. Make your changes
-4. Submit a PR
+4. Push your branch: `git push origin feature-name`.
+5. Submit a PR
 
 ## License
 
