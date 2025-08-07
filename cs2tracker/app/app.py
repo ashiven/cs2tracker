@@ -15,6 +15,7 @@ from cs2tracker.logs import PriceLogs
 from cs2tracker.scraper.background_task import BackgroundTask
 from cs2tracker.scraper.scraper import Scraper
 from cs2tracker.util.currency_conversion import CURRENCY_SYMBOLS
+from cs2tracker.util.padded_console import get_console
 from cs2tracker.util.tkinter import centered, fix_sv_ttk, size_info
 
 APPLICATION_NAME = "CS2Tracker"
@@ -31,6 +32,7 @@ PRICE_HISTORY_TITLE = "Price History"
 PRICE_HISTORY_SIZE = "900x700"
 
 config = get_config()
+console = get_console()
 
 
 class Application:
@@ -76,6 +78,10 @@ class MainFrame(ttk.Frame):
         super().__init__(parent, padding=15)
         self.parent = parent
         self.scraper = scraper
+
+        self.scraper_window = None
+        self.config_editor_window = None
+        self.price_history_window = None
         self._add_widgets()
 
     def _add_widgets(self):
@@ -181,13 +187,21 @@ class MainFrame(ttk.Frame):
         """Scrape prices from the configured sources, print the total, and save the
         results to a file.
         """
-        scraper_window = tk.Toplevel(self.parent)
-        scraper_window.geometry(centered(scraper_window, SCRAPER_WINDOW_SIZE))
-        scraper_window.minsize(*size_info(SCRAPER_WINDOW_SIZE))
-        scraper_window.title(SCRAPER_WINDOW_TITLE)
+        if self.scraper_window is None or not self.scraper_window.winfo_exists():
+            self._open_scraper_window()
+        else:
+            self.scraper_window.lift()
+            self.scraper_window.focus_set()
+
+    def _open_scraper_window(self):
+        """Open a new window with the scraper GUI."""
+        self.scraper_window = tk.Toplevel(self.parent)
+        self.scraper_window.geometry(centered(self.scraper_window, SCRAPER_WINDOW_SIZE))
+        self.scraper_window.minsize(*size_info(SCRAPER_WINDOW_SIZE))
+        self.scraper_window.title(SCRAPER_WINDOW_TITLE)
 
         run_frame = ScraperFrame(
-            scraper_window,
+            self.scraper_window,
             self.scraper,
             sheet_size=SCRAPER_WINDOW_SIZE,
             dark_theme=self.dark_theme_checkbox_value.get(),
@@ -196,26 +210,42 @@ class MainFrame(ttk.Frame):
         run_frame.start()
 
     def _edit_config(self):
-        """Open a new window with a config editor GUI."""
-        config_editor_window = tk.Toplevel(self.parent)
-        config_editor_window.geometry(centered(config_editor_window, CONFIG_EDITOR_SIZE))
-        config_editor_window.minsize(*size_info(CONFIG_EDITOR_SIZE))
-        config_editor_window.title(CONFIG_EDITOR_TITLE)
+        """Open a new window with a config editor GUI or lift the existing one."""
+        if self.config_editor_window is None or not self.config_editor_window.winfo_exists():
+            self._open_config_editor()
+        else:
+            self.config_editor_window.lift()
+            self.config_editor_window.focus_set()
 
-        editor_frame = ConfigEditorFrame(config_editor_window)
+    def _open_config_editor(self):
+        """Open a new window with a config editor GUI."""
+        self.config_editor_window = tk.Toplevel(self.parent)
+        self.config_editor_window.geometry(centered(self.config_editor_window, CONFIG_EDITOR_SIZE))
+        self.config_editor_window.minsize(*size_info(CONFIG_EDITOR_SIZE))
+        self.config_editor_window.title(CONFIG_EDITOR_TITLE)
+
+        editor_frame = ConfigEditorFrame(self.config_editor_window)
         editor_frame.pack(expand=True, fill="both")
 
     def _show_history(self):
         """Show a chart consisting of past calculations."""
+        if self.price_history_window is None or not self.price_history_window.winfo_exists():
+            self._open_history_window()
+        else:
+            self.price_history_window.lift()
+            self.price_history_window.focus_set()
+
+    def _open_history_window(self):
+        """Open a new window with a price history GUI."""
         if PriceLogs.empty():
             return
 
-        price_history_window = tk.Toplevel(self.parent)
-        price_history_window.geometry(centered(price_history_window, PRICE_HISTORY_SIZE))
-        price_history_window.minsize(*size_info(PRICE_HISTORY_SIZE))
-        price_history_window.title(PRICE_HISTORY_TITLE)
+        self.price_history_window = tk.Toplevel(self.parent)
+        self.price_history_window.geometry(centered(self.price_history_window, PRICE_HISTORY_SIZE))
+        self.price_history_window.minsize(*size_info(PRICE_HISTORY_SIZE))
+        self.price_history_window.title(PRICE_HISTORY_TITLE)
 
-        history_frame = PriceHistoryFrame(price_history_window)
+        history_frame = PriceHistoryFrame(self.price_history_window)
         history_frame.pack(expand=True, fill="both")
 
     def _export_log_file(self):
@@ -239,8 +269,10 @@ class MainFrame(ttk.Frame):
             filetypes=[("CSV files", "*.csv")],
         )
         if not PriceLogs.validate_file(import_path):
+            console.error("Invalid log file format.")
             return
         copy(import_path, OUTPUT_FILE)
+        console.info("Log file imported successfully.")
 
     def _toggle_background_task(self, enabled: bool):
         """Toggle whether a daily price calculation should run in the background."""
