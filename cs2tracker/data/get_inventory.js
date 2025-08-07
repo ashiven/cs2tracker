@@ -91,16 +91,12 @@ console.error = (...args) => {
 
     if (importInventory) {
       const inventoryItemCounts = await processInventory();
-      for (const [itemName, count] of Object.entries(inventoryItemCounts)) {
-        finalItemCounts[itemName] = (finalItemCounts[itemName] || 0) + count;
-      }
+      mergeItemCounts(finalItemCounts, inventoryItemCounts);
     }
 
     if (importStorageUnits) {
       const storageUnitItemCounts = await processStorageUnits();
-      for (const [itemName, count] of Object.entries(storageUnitItemCounts)) {
-        finalItemCounts[itemName] = (finalItemCounts[itemName] || 0) + count;
-      }
+      mergeItemCounts(finalItemCounts, storageUnitItemCounts);
     }
 
     paddedLog("Saving config...");
@@ -127,7 +123,7 @@ console.error = (...args) => {
       const convertedItems =
         nameConverter.convertInventory(prefilteredInventory);
       const filteredItems = filterItems(convertedItems);
-      const itemCounts = countItems(filteredItems);
+      const itemCounts = groupAndCountItems(filteredItems);
       paddedLog(`${filteredItems.length} items found in inventory`);
       console.log(itemCounts);
       return itemCounts;
@@ -145,10 +141,8 @@ console.error = (...args) => {
         const items = await getCasketContentsAsync(cs2, unitId);
         const convertedItems = nameConverter.convertInventory(items);
         const filteredItems = filterItems(convertedItems);
-        const itemCounts = countItems(filteredItems);
-        for (const [itemName, count] of Object.entries(itemCounts)) {
-          finalItemCounts[itemName] = (finalItemCounts[itemName] || 0) + count;
-        }
+        const itemCounts = groupAndCountItems(filteredItems);
+        mergeItemCounts(finalItemCounts, itemCounts);
         paddedLog(
           `${filteredItems.length} items found in storage unit: ${unitIndex + 1}/${storageUnitIds.length}`,
         );
@@ -186,11 +180,23 @@ console.error = (...args) => {
       if (!item.item_tradable) {
         return;
       }
+      let otherItemTypes = [
+        "Patch Packs",
+        "Souvenirs",
+        "Patches",
+        "Charms",
+        "Keys",
+        "Agents",
+        "Special Items",
+        "Skins",
+        "Music Kits",
+        "Others",
+      ];
       if (
-        (item.item_type === "case" && importCases) ||
-        (item.item_type === "sticker capsule" && importStickerCapsules) ||
-        (item.item_type === "sticker" && importStickers) ||
-        (item.item_type === "other" && importOthers)
+        (item.item_type === "Cases" && importCases) ||
+        (item.item_type === "Sticker Capsules" && importStickerCapsules) ||
+        (item.item_type === "Stickers" && importStickers) ||
+        (otherItemTypes.includes(item.item_type) && importOthers)
       ) {
         filteredItems.push(item);
       }
@@ -198,15 +204,39 @@ console.error = (...args) => {
     return filteredItems;
   }
 
-  function countItems(items) {
-    let itemCounts = {};
-    items.forEach((item) => {
-      if (itemCounts[item.item_name]) {
-        itemCounts[item.item_name]++;
-      } else {
-        itemCounts[item.item_name] = 1;
+  function groupAndCountItems(items) {
+    let groupedItems = items.reduce((acc, item) => {
+      const { item_name, item_type } = item;
+
+      if (!acc[item_type]) {
+        acc[item_type] = {};
       }
-    });
-    return itemCounts;
+
+      if (!acc[item_type][item_name]) {
+        acc[item_type][item_name] = 0;
+      }
+
+      acc[item_type][item_name]++;
+      return acc;
+    }, {});
+
+    return groupedItems;
+  }
+
+  function mergeItemCounts(finalItemCounts, currentItemCounts) {
+    for (const item_type in currentItemCounts) {
+      if (!finalItemCounts[item_type]) {
+        finalItemCounts[item_type] = {};
+      }
+
+      for (const item_name in currentItemCounts[item_type]) {
+        if (!finalItemCounts[item_type][item_name]) {
+          finalItemCounts[item_type][item_name] = 0;
+        }
+
+        finalItemCounts[item_type][item_name] +=
+          currentItemCounts[item_type][item_name];
+      }
+    }
   }
 })();
