@@ -46,7 +46,12 @@ jobs:
 
       - name: Install PyInstaller
         run: pip install pyinstaller
-
+        
+      - name: Install UPX
+        uses: crazy-max/ghaction-upx@v3
+        with:
+          install-only: true
+          
       - name: Locate eurofxref-hist.zip Windows
         if: matrix.os == 'windows-latest'
         run: |
