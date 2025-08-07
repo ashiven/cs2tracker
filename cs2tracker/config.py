@@ -3,11 +3,52 @@ import re
 from configparser import ConfigParser, ParsingError
 from urllib.parse import quote, unquote
 
-from cs2tracker.constants import CAPSULE_PAGES, CONFIG_FILE, INVENTORY_IMPORT_FILE
+from cs2tracker.constants import (
+    CONFIG_FILE,
+    INVENTORY_IMPORT_FILE,
+)
 from cs2tracker.util.padded_console import get_console
 
 STEAM_MARKET_LISTING_BASEURL_CS2 = "https://steamcommunity.com/market/listings/730/"
 STEAM_MARKET_LISTING_REGEX = r"^https://steamcommunity.com/market/listings/\d+/.+$"
+
+CUSTOM_SECTIONS = [
+    "Skins",
+    "Special Items",
+    "Agents",
+    "Charms",
+    "Patches",
+    "Patch Packs",
+    "Stickers",
+    "Souvenirs",
+    "Others",
+]
+
+PREEXISTING_SECTIONS = [
+    "Cases",
+    "Katowice 2014 Sticker Capsule",
+    "Cologne 2014 Sticker Capsule",
+    "DreamHack 2014 Sticker Capsule",
+    "Katowice 2015 Sticker Capsule",
+    "Cologne 2015 Sticker Capsule",
+    "Cluj-Napoca 2015 Sticker Capsule",
+    "Columbus 2016 Sticker Capsule",
+    "Cologne 2016 Sticker Capsule",
+    "Atlanta 2017 Sticker Capsule",
+    "Krakow 2017 Sticker Capsule",
+    "Boston 2018 Sticker Capsule",
+    "London 2018 Sticker Capsule",
+    "Katowice 2019 Sticker Capsule",
+    "Berlin 2019 Sticker Capsule",
+    "2020 RMR Sticker Capsule",
+    "Stockholm 2021 Sticker Capsule",
+    "Antwerp 2022 Sticker Capsule",
+    "Rio 2022 Sticker Capsule",
+    "Paris 2023 Sticker Capsule",
+    "Copenhagen 2024 Sticker Capsule",
+    "Shanghai 2024 Sticker Capsule",
+    "Austin 2025 Sticker Capsule",
+]
 
 console = get_console()
 
@@ -46,19 +87,12 @@ class ValidatedConfig(ConfigParser):
 
     def _validate_config_sections(self):
         """Validate that the configuration file has all required sections."""
-        if not self.has_section("User Settings"):
-            raise ValueError("Missing 'User Settings' section in the configuration file.")
-        if not self.has_section("App Settings"):
-            raise ValueError("Missing 'App Settings' section in the configuration file.")
-        if not self.has_section("Stickers"):
-            raise ValueError("Missing 'Stickers' section in the configuration file.")
-        if not self.has_section("Cases"):
-            raise ValueError("Missing 'Cases' section in the configuration file.")
-        if not self.has_section("Skins"):
-            raise ValueError("Missing 'Skins' section in the configuration file.")
-        for capsule_section in CAPSULE_PAGES:
-            if not self.has_section(capsule_section):
-                raise ValueError(f"Missing '{capsule_section}' section in the configuration file.")
+        for section in CUSTOM_SECTIONS:
+            if not self.has_section(section):
+                raise ValueError(f"Missing '{section}' section in the configuration file.")
+        for section in PREEXISTING_SECTIONS:
+            if not self.has_section(section):
+                raise ValueError(f"Missing '{section}' section in the configuration file.")
 
     def _validate_config_values(self):
         # pylint: disable=too-many-branches
@@ -136,23 +170,22 @@ class ValidatedConfig(ConfigParser):
         try:
             with open(INVENTORY_IMPORT_FILE, "r", encoding="utf-8") as inventory_file:
                 inventory_data = json.load(inventory_file)
-                sorted_inventory_data = dict(sorted(inventory_data.items()))
 
                 added_to_config = set()
-                for item_name, item_owned in sorted_inventory_data.items():
-                    option = self.name_to_option(item_name, href=True)
-                    for section in self.sections():
-                        if option in self.options(section):
-                            self.set(section, option, str(item_owned))
-                            added_to_config.add(item_name)
-
-                for item_name, item_owned in sorted_inventory_data.items():
-                    if item_name not in added_to_config:
+                for _, item_infos in inventory_data.items():
+                    for item_name, item_owned in item_infos.items():
                         option = self.name_to_option(item_name, href=True)
-                        if item_name.startswith("Sticker"):
-                            self.set("Stickers", option, str(item_owned))
-                        else:
-                            self.set("Skins", option, str(item_owned))
+                        for section in self.sections():
+                            if option in self.options(section):
+                                self.set(section, option, str(item_owned))
+                                added_to_config.add(item_name)
+
+                for section, item_infos in inventory_data.items():
+                    sorted_item_infos = dict(sorted(item_infos.items()))
+                    for item_name, item_owned in sorted_item_infos.items():
+                        if item_name not in added_to_config:
+                            option = self.name_to_option(item_name, href=True)
+                            self.set(section, option, str(item_owned))
 
             self.write_to_file()
         except (FileNotFoundError, json.JSONDecodeError) as error:

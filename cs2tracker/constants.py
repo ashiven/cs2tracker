@@ -187,6 +187,7 @@ AUTHOR_STRING = (
     f"Version: {VERSION} - {datetime.today().strftime('%Y/%m/%d')} - Jannik Novak @ashiven\n"
 )
 
+
 CAPSULE_PAGES = {
     "Katowice 2014 Sticker Capsule": "https://steamcommunity.com/market/search?q=katowice+2014+legends+challengers",
     "Cologne 2014 Sticker Capsule": "https://steamcommunity.com/market/search?q=cologne+2014+legends+challengers",

@@ -204,8 +204,6 @@ class ItemNameConverter {
         return "Patches";
       } else if (translatedName.startsWith("csgo_tool_keychain")) {
         return "Charms";
-      } else if (translatedName.startsWith("csgo_tool_weaponcase_key")) {
-        return "Keys";
       } else if (translatedName.startsWith("csgo_customplayer")) {
         return "Agents";
       }
@@ -226,11 +224,6 @@ class ItemNameConverter {
       }
     }
 
-    let itemName = this.getItemName(item);
-    if (itemName.startsWith("Music Kit | ")) {
-      return "Music Kits";
-    }
-
     return "Others";
   }
 
@@ -242,7 +235,8 @@ class ItemNameConverter {
       let translatedName =
         def.item_name.replace("#", "").toLowerCase() || def.item_name;
       if (
-        translatedName.startsWith("csgo_collectible") ||
+        (translatedName.startsWith("csgo_collectible") &&
+          !translatedName.startsWith("csgo_collectible_pin")) ||
         translatedName.startsWith("csgo_tournamentpass") ||
         translatedName.startsWith("csgo_tournamentjournal") ||
         translatedName.startsWith("csgo_ticket") ||

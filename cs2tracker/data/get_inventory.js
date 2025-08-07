@@ -181,15 +181,13 @@ console.error = (...args) => {
         return;
       }
       let otherItemTypes = [
+        "Skins",
+        "Special Items",
+        "Agents",
+        "Charms",
+        "Patches",
         "Patch Packs",
         "Souvenirs",
-        "Patches",
-        "Charms",
-        "Keys",
-        "Agents",
-        "Special Items",
-        "Skins",
-        "Music Kits",
         "Others",
       ];
       if (
