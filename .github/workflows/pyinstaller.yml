@@ -44,64 +44,72 @@ jobs:
       - name: Install PyInstaller
         run: pip install pyinstaller
 
-      - name: Locate eurofxref-hist.zip
+      - name: Locate eurofxref-hist.zip Windows
+        if: matrix.os == 'windows-latest'
         run: |
-          if [[ "${{matrix.os}}" == "windows-latest" ]]; then
-            $ZIP_PATH = python -c "import currency_converter, os; print(os.path.join(os.path.dirname(currency_converter.__file__), 'eurofxref-hist.zip'))"
-            echo "CURRENCY_INCLUDE='$ZIP_PATH;./currency_converter'" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          else
-            ZIP_PATH=$(python -c "import currency_converter, os; print(os.path.join(os.path.dirname(currency_converter.__file__), 'eurofxref-hist.zip'))")
-            echo "CURRENCY_INCLUDE=$ZIP_PATH:./currency_converter" >> $GITHUB_ENV
-          fi
+          $ZIP_PATH = python -c "import currency_converter, os; print(os.path.join(os.path.dirname(currency_converter.__file__), 'eurofxref-hist.zip'))"
+          echo "CURRENCY_INCLUDE='$ZIP_PATH;./currency_converter'" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
-      - name: Locate nodejs-bin files
+      - name: Locate eurofxref-hist.zip Linux
+        if: matrix.os == 'ubuntu-latest'
         run: |
-          if [[ "${{matrix.os}}" == "windows-latest" ]]; then
-            $NODE_BIN_PATH = python -c "import nodejs, os; print(os.path.dirname(nodejs.__file__))"
-            echo "NODE_BIN_INCLUDE='$NODE_BIN_PATH;./nodejs'" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          else
-            NODE_BIN_PATH=$(python -c "import nodejs, os; print(os.path.dirname(nodejs.__file__))")
-            echo "NODE_BIN_INCLUDE=$NODE_BIN_PATH:./nodejs" >> $GITHUB_ENV
-          fi
+          ZIP_PATH=$(python -c "import currency_converter, os; print(os.path.join(os.path.dirname(currency_converter.__file__), 'eurofxref-hist.zip'))")
+          echo "CURRENCY_INCLUDE=$ZIP_PATH:./currency_converter" >> $GITHUB_ENV
 
-      - name: Build executable
+      - name: Locate nodejs-bin files Windows
+        if: matrix.os == 'windows-latest'
         run: |
-          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            pyinstaller --noconfirm --onefile --windowed --name ${{ env.NAME }} --icon ${{ env.ICON }} `
-              --add-data ${{ env.ICON_INCLUDE }} `
-              --add-data ${{ env.DATA_DIR_INCLUDE }} `
-              --add-data ${{ env.NODE_MODULES_INCLUDE }} `
-              --add-data ${{ env.CURRENCY_INCLUDE }} `
-              --add-data ${{ env.NODE_BIN_INCLUDE }} `
-              ${{ env.MAIN_FILE }}
-          else
-            pyinstaller --noconfirm --onefile --windowed --name ${{ env.NAME }} --icon ${{ env.ICON }} \
-              --add-data ${{ env.ICON_INCLUDE }} \
-              --add-data ${{ env.DATA_DIR_INCLUDE }} \
-              --add-data ${{ env.NODE_MODULES_INCLUDE }} \
-              --add-data ${{ env.CURRENCY_INCLUDE }} \
-              --add-data ${{ env.NODE_BIN_INCLUDE }} \
-              ${{ env.MAIN_FILE }}
-          fi
+          $NODE_BIN_PATH = python -c "import nodejs, os; print(os.path.dirname(nodejs.__file__))"
+          echo "NODE_BIN_INCLUDE='$NODE_BIN_PATH;./nodejs'" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Locate nodejs-bin files Linux
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          NODE_BIN_PATH=$(python -c "import nodejs, os; print(os.path.dirname(nodejs.__file__))")
+          echo "NODE_BIN_INCLUDE=$NODE_BIN_PATH:./nodejs" >> $GITHUB_ENV
+
+      - name: Build Windows executable
+        if: matrix.os == 'windows-latest'
+        run: |
+          pyinstaller --noconfirm --onefile --windowed --name ${{ env.NAME }} --icon ${{ env.ICON }} `
+            --add-data ${{ env.ICON_INCLUDE }} `
+            --add-data ${{ env.DATA_DIR_INCLUDE }} `
+            --add-data ${{ env.NODE_MODULES_INCLUDE }} `
+            --add-data ${{ env.CURRENCY_INCLUDE }} `
+            --add-data ${{ env.NODE_BIN_INCLUDE }} `
+            ${{ env.MAIN_FILE }}
+
+      - name: Build Linux executable
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          pyinstaller --noconfirm --onefile --windowed --name ${{ env.NAME }} --icon ${{ env.ICON }} \
+            --add-data ${{ env.ICON_INCLUDE }} \
+            --add-data ${{ env.DATA_DIR_INCLUDE }} \
+            --add-data ${{ env.NODE_MODULES_INCLUDE }} \
+            --add-data ${{ env.CURRENCY_INCLUDE }} \
+            --add-data ${{ env.NODE_BIN_INCLUDE }} \
+            ${{ env.MAIN_FILE }}
 
       - name: List files in dist folder
         run: ls -R dist/
 
-      - name: Zip windows executable
-        run: |
-          if [[ "${{matrix.os}}" == "windows-latest" ]]; then
-            Compress-Archive -Path "dist/cs2tracker.exe" -DestinationPath "cs2tracker-windows.zip"
-          else
-            zip cs2tracker-linux.zip dist/cs2tracker
+      - name: Zip Windows executable
+        if: matrix.os == 'windows-latest'
+        run: Compress-Archive -Path "dist/cs2tracker.exe" -DestinationPath "cs2tracker-windows.zip"
 
-      - name: Generate SHA256 checksum
-        run: |
-          if [[ "${{matrix.os}}" == "windows-latest" ]]; then
-            shasum -a 256 cs2tracker-windows.zip > cs2tracker-windows.zip.sha256
-          else
-            shasum -a 256 cs2tracker-linux.zip > cs2tracker-linux.zip.sha256
+      - name: Zip Linux executable
+        if: matrix.os == 'ubuntu-latest'
+        run: zip cs2tracker-linux.zip dist/cs2tracker
 
-      - name: Upload windows executable
+      - name: Generate SHA256 checksum Windows
+        if: matrix.os == 'windows-latest'
+        run: shasum -a 256 cs2tracker-windows.zip > cs2tracker-windows.zip.sha256
+
+      - name: Generate SHA256 checksum Linux
+        if: matrix.os == 'ubuntu-latest'
+        run: shasum -a 256 cs2tracker-linux.zip > cs2tracker-linux.zip.sha256
+
+      - name: Upload Windows executable
         if: matrix.os == 'windows-latest'
         uses: alexellis/upload-assets@0.4.0
         env:
@@ -109,7 +117,7 @@ jobs:
         with:
           asset_paths: '["cs2tracker-windows.zip", "cs2tracker-windows.zip.sha256"]'
 
-      - name: Upload linux executable
+      - name: Upload Linux executable
         if: matrix.os == 'ubuntu-latest'
         uses: alexellis/upload-assets@0.4.0
         env:
