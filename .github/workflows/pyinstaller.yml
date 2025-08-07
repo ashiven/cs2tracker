@@ -19,10 +19,10 @@ jobs:
       ICON: '"./assets/icon.png"'
       WINDOWS_ICON_INCLUDE: '"./assets/icon.png;./assets"'
       WINDOWS_DATA_DIR_INCLUDE: '"./cs2tracker/data;./data"'
-      WINDOWS_NODE_MODULES_INCLUDE: '"./node_modules;./node_modules"'
+      WINDOWS_NODE_MODULES_INCLUDE: '"./node_modules;./data/node_modules"'
       LINUX_ICON_INCLUDE: '"./assets/icon.png:./assets"'
       LINUX_DATA_DIR_INCLUDE: '"./cs2tracker/data:./data"'
-      LINUX_NODE_MODULES_INCLUDE: '"./node_modules:./node_modules"'
+      LINUX_NODE_MODULES_INCLUDE: '"./node_modules:./data/node_modules"'
 
     steps:
       - name: Checkout code
