@@ -175,21 +175,22 @@ console.error = (...args) => {
   }
 
   function filterItems(items) {
+    const otherItemTypes = [
+      "Skins",
+      "Special Items",
+      "Agents",
+      "Charms",
+      "Patches",
+      "Patch Packs",
+      "Souvenirs",
+      "Others",
+    ];
     let filteredItems = [];
+
     items.forEach((item) => {
       if (!item.item_tradable) {
         return;
       }
-      let otherItemTypes = [
-        "Skins",
-        "Special Items",
-        "Agents",
-        "Charms",
-        "Patches",
-        "Patch Packs",
-        "Souvenirs",
-        "Others",
-      ];
       if (
         (item.item_type === "Cases" && importCases) ||
         (item.item_type === "Sticker Capsules" && importStickerCapsules) ||

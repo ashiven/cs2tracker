@@ -11,6 +11,9 @@ const itemsGameLink =
 const translationsCacheFile = path.join(__dirname, "translations.json");
 const itemsCacheFile = path.join(__dirname, "items.json");
 
+const translationRegex = /"(.+?)"\s+"(.+?)"/;
+const souvenirRegex = /^csgo_crate_[a-z0-9]+_promo.*/;
+
 class ItemNameConverter {
   constructor() {
     this.translations = {};
@@ -38,7 +41,7 @@ class ItemNameConverter {
     const res = await axios.get(translationsLink);
     const lines = res.data.split(/\n/);
     for (const line of lines) {
-      const match = line.match(/"(.+?)"\s+"(.+?)"/);
+      const match = line.match(translationRegex);
       if (match) {
         this.translations[match[1].toLowerCase()] = match[2];
       }
@@ -186,7 +189,7 @@ class ItemNameConverter {
         return "Sticker Capsules";
       } else if (translatedName.startsWith("csgo_crate_patch_pack")) {
         return "Patch Packs";
-      } else if (translatedName.match(/^csgo_crate_[a-z0-9]+_promo.*/)) {
+      } else if (translatedName.match(souvenirRegex)) {
         return "Souvenirs";
       } else if (
         translatedName.startsWith("csgo_crate_community") ||
