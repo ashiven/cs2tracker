@@ -4,6 +4,7 @@
 __pycache__
 venv
 venv-test
+venv-wsl
 
 # Python build output
 build
