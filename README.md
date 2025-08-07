@@ -21,8 +21,8 @@
 
 - [Features](#features)
 - [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
   - [Installation](#installation)
+  - [Additional Setup](#additional-setup)
 - [Usage](#usage)
 - [Configuration](#configuration)
 - [Advanced Features](#advanced-features)
@@ -41,20 +41,15 @@
 
 ## Getting Started
 
-### Before You Begin (Optional)
-
-- Register for the [Crawlbase Smart Proxy API](https://crawlbase.com/) and retrieve your API key.
-- Create a [Discord Webhook](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks) to be notified about recent price updates.
-
 ### Installation
 
-#### Option 1: Executable
+#### Method 1: Executable
 
-- Simply download the program and run it:
+Simply download the program and run it:
   - [Windows](https://github.com/ashiven/cs2tracker/releases/latest/download/cs2tracker-windows.zip)
   - [Linux](https://github.com/ashiven/cs2tracker/releases/latest/download/cs2tracker-linux.zip)
 
-#### Option 2: Install via Pip
+#### Method 2: Install via Pip
 
 1. Install the program:
 
@@ -67,6 +62,10 @@
    ```bash
    cs2tracker
    ```
+### Additional Setup
+
+- Register for the [Crawlbase Smart Proxy API](https://crawlbase.com/) and retrieve your API key. (Optional)
+- Create a [Discord Webhook](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks) to be notified about recent price updates. (Optional)
 
 ## Usage
 
