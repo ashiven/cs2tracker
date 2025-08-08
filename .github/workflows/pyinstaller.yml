@@ -44,9 +44,14 @@ jobs:
       - name: Install Node.js dependencies
         run: npm install steam-user globaloffensive axios @node-steam/vdf
 
+      - name: Install UPX
+        uses: crazy-max/ghaction-upx@v3
+        with:
+          install-only: true
+
       - name: Install PyInstaller
         run: pip install pyinstaller
-          
+
       - name: Locate eurofxref-hist.zip Windows
         if: matrix.os == 'windows-latest'
         run: |
@@ -92,13 +97,13 @@ jobs:
             --add-data ${{ env.LINUX_CURRENCY_INCLUDE }} \
             --add-data ${{ env.LINUX_NODE_BIN_INCLUDE }} \
             ${{ env.MAIN_FILE }}
-            
+
       - name: Replace version in setup.iss
         shell: bash
         run: |
           VERSION="${{ github.event.release.tag_name }}"
           sed -i "s/latest/$VERSION/g" setup.iss
-    
+
       - name: Create Windows installer
         if: matrix.os == 'windows-latest'
         uses: Minionguyjpro/Inno-Setup-Action@v1.2.2

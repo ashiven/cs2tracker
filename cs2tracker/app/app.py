@@ -64,8 +64,7 @@ class Application:
             app_id = "cs2tracker.unique.id"
             ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(app_id)
 
-        icon = tk.PhotoImage(file=ICON_FILE)
-        window.wm_iconphoto(True, icon)
+        window.iconbitmap(default=ICON_FILE)
 
         main_frame = MainFrame(window, self.scraper)
         main_frame.pack(expand=True, fill="both")

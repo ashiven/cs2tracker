@@ -1,7 +1,7 @@
 
 $NAME="cs2tracker"
-$ICON="./assets/icon.png"
-$ICON_INCLUDE="./assets/icon.png;./assets"
+$ICON="./assets/icon.ico"
+$ICON_INCLUDE="./assets/icon.ico;./assets"
 $DATA_DIR_INCLUDE="./cs2tracker/data;./data"
 $NODE_MODULES_INCLUDE="./build/node_modules;./data/node_modules"
 $ZIP_PATH = python -c "import currency_converter, os; print(os.path.join(os.path.dirname(currency_converter.__file__), 'eurofxref-hist.zip'))"
