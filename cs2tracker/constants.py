@@ -46,10 +46,19 @@ if RUNNING_IN_EXE:
     PROJECT_DIR = EXECUTABLE_DIR
 
     if OS == OSType.WINDOWS:
-        APP_DATA_DIR = os.path.join(os.path.expanduser("~"), "AppData", "Local")
+        DATA_DIR = os.path.join(
+            os.path.expanduser("~"),
+            "AppData",
+            "Local",
+            "Programs",
+            "CS2Tracker",
+            "_internal",
+            "data",
+        )
     elif OS == OSType.LINUX:
-        APP_DATA_DIR = os.environ.get(
-            "XDG_DATA_HOME", os.path.join(os.path.expanduser("~"), ".local", "share")
+        DATA_DIR = os.environ.get(
+            "XDG_DATA_HOME",
+            os.path.join(os.path.expanduser("~"), ".local", "share", "cs2tracker", "data"),
         )
     else:
         raise NotImplementedError(f"Unsupported OS: {OS}")
@@ -60,7 +69,6 @@ if RUNNING_IN_EXE:
     INVENTORY_IMPORT_SCRIPT_SOURCE = os.path.join(MODULE_DIR, "data", "get_inventory.js")
     NODE_MODULES_SOURCE = os.path.join(MODULE_DIR, "data", "node_modules")
 
-    DATA_DIR = os.path.join(APP_DATA_DIR, "cs2tracker", "data")
     CONFIG_FILE = os.path.join(DATA_DIR, "config.ini")
     CONFIG_FILE_BACKUP = os.path.join(DATA_DIR, "config.ini.bak")
     OUTPUT_FILE = os.path.join(DATA_DIR, "output.csv")
@@ -68,7 +76,7 @@ if RUNNING_IN_EXE:
     INVENTORY_IMPORT_SCRIPT = os.path.join(DATA_DIR, "get_inventory.js")
     NODE_MODULES = os.path.join(DATA_DIR, "node_modules")
 
-    ICON_FILE = os.path.join(PROJECT_DIR, "assets", "icon.png")
+    ICON_FILE = os.path.join(PROJECT_DIR, "assets", "icon.ico")
     BATCH_FILE = os.path.join(DATA_DIR, "cs2tracker_scraper.bat")
     INVENTORY_IMPORT_FILE = os.path.join(DATA_DIR, "inventory.json")
     INVENTORY_IMPORT_SCRIPT_DEPENDENCIES = [
@@ -118,21 +126,26 @@ if RUNNING_IN_EXE:
         finally:
             popup.destroy()
 
-    # pylint: disable=too-many-boolean-expressions
-    if (
-        not os.path.exists(DATA_DIR)
-        or not os.path.exists(OUTPUT_FILE)
-        or not os.path.exists(CONFIG_FILE)
-        or not os.path.exists(INVENTORY_CONVERT_SCRIPT)
-        or not os.path.exists(INVENTORY_IMPORT_SCRIPT)
-        or not os.path.exists(NODE_MODULES)
-    ):
-        copy_initial_files_with_popup()
+    # TODO: we still need to copy files around in the onefile version on linux but this will be removed in the near future
+    if OS == OSType.LINUX:
+        # pylint: disable=too-many-boolean-expressions
+        if (
+            not os.path.exists(DATA_DIR)
+            or not os.path.exists(OUTPUT_FILE)
+            or not os.path.exists(CONFIG_FILE)
+            or not os.path.exists(INVENTORY_CONVERT_SCRIPT)
+            or not os.path.exists(INVENTORY_IMPORT_SCRIPT)
+            or not os.path.exists(NODE_MODULES)
+        ):
+            copy_initial_files_with_popup()
 
-    # Always copy the source config into the user data directory as a backup
-    # and overwrite the existing backup if it exists
-    # (This is to ensure that no outdated config backup remains in the user data directory)
-    copy(CONFIG_FILE_SOURCE, CONFIG_FILE_BACKUP)
+        # Always copy the source config into the user data directory as a backup
+        # and overwrite the existing backup if it exists
+        # (This is to ensure that no outdated config backup remains in the user data directory)
+        copy(CONFIG_FILE_SOURCE, CONFIG_FILE_BACKUP)
+
+    elif not os.path.exists(CONFIG_FILE_BACKUP):
+        copy(CONFIG_FILE, CONFIG_FILE_BACKUP)
 
 
 else:
@@ -147,7 +160,7 @@ else:
     INVENTORY_IMPORT_SCRIPT = os.path.join(DATA_DIR, "get_inventory.js")
     NODE_MODULES = os.path.join(DATA_DIR, "node_modules")
 
-    ICON_FILE = os.path.join(PROJECT_DIR, "assets", "icon.png")
+    ICON_FILE = os.path.join(PROJECT_DIR, "assets", "icon.ico")
     BATCH_FILE = os.path.join(DATA_DIR, "cs2tracker_scraper.bat")
     INVENTORY_IMPORT_FILE = os.path.join(DATA_DIR, "inventory.json")
     INVENTORY_IMPORT_SCRIPT_DEPENDENCIES = [
