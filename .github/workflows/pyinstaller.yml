@@ -100,9 +100,6 @@ jobs:
           path: setup.iss
           options: /O+
 
-      - name: List files in the repo
-        run: ls
-
       - name: List files in dist folder
         run: ls -R dist/
 
