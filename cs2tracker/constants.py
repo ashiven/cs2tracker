@@ -38,12 +38,16 @@ else:
 
 
 PYTHON_EXECUTABLE = sys.executable
-RUNNING_IN_EXE = getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS")
+RUNNING_IN_EXE = getattr(sys, "frozen", False)
 
 if RUNNING_IN_EXE:
-    MEIPASS_DIR = sys._MEIPASS  # type: ignore  pylint: disable=protected-access
-    MODULE_DIR = MEIPASS_DIR
-    PROJECT_DIR = MEIPASS_DIR
+    if hasattr(sys, "_MEIPASS"):
+        EXECUTABLE_DIR = sys._MEIPASS  # type: ignore pylint: disable=protected-access
+    else:
+        EXECUTABLE_DIR = os.path.dirname(__file__)
+
+    MODULE_DIR = EXECUTABLE_DIR
+    PROJECT_DIR = EXECUTABLE_DIR
 
     if OS == OSType.WINDOWS:
         APP_DATA_DIR = os.path.join(os.path.expanduser("~"), "AppData", "Local")
