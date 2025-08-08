@@ -74,7 +74,7 @@ jobs:
       - name: Build Windows executable
         if: matrix.os == 'windows-latest'
         run: |
-          pyinstaller --noconfirm --onefile --windowed --name ${{ env.NAME }} --icon ${{ env.ICON }} `
+          pyinstaller --noconfirm --onedir --windowed --name ${{ env.NAME }} --icon ${{ env.ICON }} `
             --add-data ${{ env.WINDOWS_ICON_INCLUDE }} `
             --add-data ${{ env.WINDOWS_DATA_DIR_INCLUDE }} `
             --add-data ${{ env.WINDOWS_NODE_MODULES_INCLUDE }} `
@@ -92,13 +92,19 @@ jobs:
             --add-data ${{ env.LINUX_CURRENCY_INCLUDE }} \
             --add-data ${{ env.LINUX_NODE_BIN_INCLUDE }} \
             ${{ env.MAIN_FILE }}
-
-      - name: List files in dist folder
-        run: ls -R dist/
-
-      - name: Zip Windows executable
+            
+      - name: Replace version in setup.iss
+        shell: bash
+        run: |
+          VERSION="${{ github.event.release.tag_name }}"
+          sed -i "s/latest/$VERSION/g" setup.iss
+    
+      - name: Create Windows installer
         if: matrix.os == 'windows-latest'
-        run: Compress-Archive -Path "dist/cs2tracker.exe" -DestinationPath "cs2tracker-windows.zip"
+        uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
+        with:
+          path: setup.iss
+          options: /O+
 
       - name: Zip Linux executable
         if: matrix.os == 'ubuntu-latest'
@@ -106,7 +112,7 @@ jobs:
 
       - name: Generate SHA256 checksum Windows
         if: matrix.os == 'windows-latest'
-        run: shasum -a 256 cs2tracker-windows.zip > cs2tracker-windows.zip.sha256
+        run: shasum -a 256 Output/cs2tracker-setup.exe > cs2tracker-setup.exe.sha256
 
       - name: Generate SHA256 checksum Linux
         if: matrix.os == 'ubuntu-latest'
@@ -118,7 +124,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         with:
-          asset_paths: '["cs2tracker-windows.zip", "cs2tracker-windows.zip.sha256"]'
+          asset_paths: '["Output/cs2tracker-setup.exe", "cs2tracker-setup.exe.sha256"]'
 
       - name: Upload Linux executable
         if: matrix.os == 'ubuntu-latest'
