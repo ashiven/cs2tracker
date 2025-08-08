@@ -1,10 +1,13 @@
-.PHONY: build-nuitka build-pyinstaller clean
+.PHONY: build
 
-build-nuitka:
-	pwsh -NoProfile ./build/build-nuitka.ps1
-
-build-pyinstaller:
-	pwsh -NoProfile ./build/build-pyinstaller.ps1
+build:
+	pwsh -NoProfile ./build/build.ps1
 
 clean:
-	rm ./build/*.exe
+	rm -rf ./build/cs2tracker
+	rm -rf ./build/venv
+	rm -rf ./build/node_modules
+	rm -f ./build/package-lock.json
+	rm -f ./build/package.json
+	rm -f ./cs2tracker.spec
+	rm -rf ./dist

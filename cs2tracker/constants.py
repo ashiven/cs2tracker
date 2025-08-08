@@ -38,14 +38,10 @@ else:
 
 
 PYTHON_EXECUTABLE = sys.executable
-RUNNING_IN_EXE = getattr(sys, "frozen", False)
+RUNNING_IN_EXE = getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS")
 
 if RUNNING_IN_EXE:
-    if hasattr(sys, "_MEIPASS"):
-        EXECUTABLE_DIR = sys._MEIPASS  # type: ignore pylint: disable=protected-access
-    else:
-        EXECUTABLE_DIR = os.path.dirname(__file__)
-
+    EXECUTABLE_DIR = sys._MEIPASS  # type: ignore pylint: disable=protected-access
     MODULE_DIR = EXECUTABLE_DIR
     PROJECT_DIR = EXECUTABLE_DIR
 
