@@ -48,7 +48,7 @@
 
 Simply download the program and run it:
 
-- [Windows](https://github.com/ashiven/cs2tracker/releases/latest/download/cs2tracker-windows.zip)
+- [Windows](https://github.com/ashiven/cs2tracker/releases/latest/download/cs2tracker-setup.exe)
 - [Linux](https://github.com/ashiven/cs2tracker/releases/latest/download/cs2tracker-linux.zip)
 
 #### Method 2: Install via Pip
