@@ -16,11 +16,11 @@ jobs:
     env:
       MAIN_FILE: '"./cs2tracker/__main__.py"'
       NAME: '"cs2tracker"'
-      ICON: '"./assets/icon.png"'
-      WINDOWS_ICON_INCLUDE: '"./assets/icon.png;./assets"'
+      ICON: '"./assets/icon.ico"'
+      WINDOWS_ICON_INCLUDE: '"./assets/icon.ico;./assets"'
       WINDOWS_DATA_DIR_INCLUDE: '"./cs2tracker/data;./data"'
       WINDOWS_NODE_MODULES_INCLUDE: '"./node_modules;./data/node_modules"'
-      LINUX_ICON_INCLUDE: '"./assets/icon.png:./assets"'
+      LINUX_ICON_INCLUDE: '"./assets/icon.ico:./assets"'
       LINUX_DATA_DIR_INCLUDE: '"./cs2tracker/data:./data"'
       LINUX_NODE_MODULES_INCLUDE: '"./node_modules:./data/node_modules"'
 
