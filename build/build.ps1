@@ -1,4 +1,3 @@
-
 $NAME="cs2tracker"
 $ICON="./assets/icon.ico"
 $ICON_INCLUDE="./assets/icon.ico;./assets"

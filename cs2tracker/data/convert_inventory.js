@@ -183,17 +183,18 @@ class ItemNameConverter {
       let translatedName =
         def.item_name.replace("#", "").toLowerCase() || def.item_name;
       if (
-        (translatedName.startsWith("csgo_crate_sticker_pack") &&
-          (translatedName.includes("2014") ||
-            translatedName.includes("2015") ||
-            translatedName.includes("contenders") ||
-            translatedName.includes("challengers") ||
-            translatedName.includes("legends"))) ||
-        translatedName.startsWith("csgo_crate_signature_pack")
+        translatedName.startsWith("csgo_crate_sticker_pack") &&
+        (translatedName.includes("2014") ||
+          translatedName.includes("2015") ||
+          translatedName.includes("contenders") ||
+          translatedName.includes("challengers") ||
+          translatedName.includes("legends"))
       ) {
         return "Major Sticker Capsules";
       } else if (translatedName.startsWith("csgo_crate_sticker_pack")) {
         return "Sticker Capsules";
+      } else if (translatedName.startsWith("csgo_crate_signature_pack")) {
+        return "Autograph Capsules";
       } else if (translatedName.startsWith("csgo_crate_patch_pack")) {
         return "Patch Packs";
       } else if (translatedName.match(souvenirRegex)) {
@@ -206,6 +207,14 @@ class ItemNameConverter {
         translatedName.startsWith("csgo_crate_operation")
       ) {
         return "Cases";
+      } else if (
+        translatedName.startsWith("csgo_community_crate_key") ||
+        translatedName.startsWith("csgo_crate_key") ||
+        translatedName.startsWith("csgo_tool_weaponcase_key") ||
+        translatedName.startsWith("csgo_esports_crate_key") ||
+        translatedName.startsWith("csgo_base_crate_key")
+      ) {
+        return "Case Keys";
       } else if (translatedName.startsWith("csgo_tool_spray")) {
         return "Graffitis";
       } else if (translatedName.startsWith("csgo_tool_sticker")) {
@@ -219,7 +228,17 @@ class ItemNameConverter {
       } else if (translatedName.startsWith("csgo_collectible_pin")) {
         return "Collectible Pins";
       } else if (translatedName.startsWith("coupon_pins")) {
-        return "Pins Capsules";
+        return "Collectible Capsules";
+      } else if (
+        translatedName.startsWith("csgo_ticket") ||
+        translatedName.startsWith("csgo_tournamentpass")
+      ) {
+        return "Passes";
+      } else if (
+        translatedName.startsWith("csgo_crate_musickit") ||
+        translatedName.includes("musickit_capsule")
+      ) {
+        return "Music Kit Boxes";
       }
     }
 
@@ -255,9 +274,7 @@ class ItemNameConverter {
       if (
         (translatedName.startsWith("csgo_collectible") &&
           !translatedName.startsWith("csgo_collectible_pin")) ||
-        translatedName.startsWith("csgo_tournamentpass") ||
         translatedName.startsWith("csgo_tournamentjournal") ||
-        translatedName.startsWith("csgo_ticket") ||
         translatedName.startsWith("csgo_tool_casket_tag") ||
         translatedName.startsWith("sfui_wpnhud_c4")
       ) {

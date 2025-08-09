@@ -14,7 +14,7 @@ from nodejs import npm
 from cs2tracker.util.tkinter import centered
 
 try:
-    from cs2tracker._version import version  # pylint: disable=E0611
+    from cs2tracker._version import version  # type: ignore pylint: disable=E0611
 
     VERSION = f"v{version}"
 except ImportError:

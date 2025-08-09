@@ -24,8 +24,12 @@ CUSTOM_SECTIONS = [
     "Sticker Capsules",
     "Others",
     "Collectible Pins",
-    "Pins Capsules",
+    "Collectible Capsules",
     "Music Kits",
+    "Case Keys",
+    "Passes",
+    "Music Kit Boxes",
+    "Autograph Capsules",
 ]
 
 PRECONFIGURED_SECTIONS = ["Cases", "Major Sticker Capsules", "App Settings", "User Settings"]

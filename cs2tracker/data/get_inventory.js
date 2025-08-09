@@ -186,8 +186,12 @@ console.error = (...args) => {
       "Others",
       "Sticker Capsules",
       "Collectible Pins",
-      "Pins Capsules",
+      "Collectible Capsules",
       "Music Kits",
+      "Case Keys",
+      "Passes",
+      "Music Kit Boxes",
+      "Autograph Capsules",
     ];
     let filteredItems = [];
 

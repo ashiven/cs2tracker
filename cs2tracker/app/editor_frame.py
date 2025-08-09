@@ -172,7 +172,7 @@ class ConfigEditorFrame(ttk.Frame):
             section_items = config.items(section)
 
             # Major Sticker Capsules should remain sorted by year
-            if section != "Major Sticker Capsules":
+            if section not in ("Major Sticker Capsules", "Autograph Capsules"):
                 section_items = sorted(section_items)
 
             for config_option, value in section_items:
@@ -422,14 +422,22 @@ class CustomItemFrame(ttk.Frame):
             return "Charms"
         elif "Music Kit |" in item_name:
             return "Music Kits"
+        elif "Music Kit Box" in item_name:
+            return "Music Kit Boxes"
         elif "Souvenir" in item_name and "|" not in item_name:
             return "Souvenirs"
         elif "★ " in item_name:
             return "Special Items"
         elif " | " in item_name and "(" in item_name and ")" in item_name:
             return "Skins"
+        elif "Pass" in item_name and ("Viewer" in item_name or "Operation" in item_name):
+            return "Passes"
+        elif "Case Key" in item_name or "eSports Key" in item_name:
+            return "Case Keys"
+        elif "Autograph Capsule" in item_name:
+            return "Autograph Capsules"
         elif "Pins Capsule" in item_name:
-            return "Pins Capsules"
+            return "Collectible Capsules"
         elif "Capsule" in item_name:
             return "Sticker Capsules"
         elif "Pin" in item_name:
