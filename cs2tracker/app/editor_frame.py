@@ -1,3 +1,4 @@
+import re
 import tkinter as tk
 from queue import Empty, Queue
 from shutil import copy
@@ -171,15 +172,22 @@ class ConfigEditorFrame(ttk.Frame):
             section_level = self.tree.insert("", "end", iid=section, text=section)
             section_items = config.items(section)
 
-            # Major Sticker Capsules should remain sorted by year
-            if section not in ("Major Sticker Capsules", "Autograph Capsules"):
+            if section in ("User Settings", "App Settings"):
+                section_items = [
+                    (config.option_to_name(item[0]), item[1]) for item in section_items
+                ]
+            else:
+                section_items = [
+                    (config.option_to_name(item[0], href=True), item[1]) for item in section_items
+                ]
+
+            # Major Sticker Capsules should be sorted by year while other items should be sorted alphabetically
+            if section in ("Major Sticker Capsules", "Autograph Capsules"):
+                section_items = sorted(section_items, key=lambda item: extract_year(item[0]))
+            else:
                 section_items = sorted(section_items)
 
-            for config_option, value in section_items:
-                if section not in ("User Settings", "App Settings"):
-                    option_name = config.option_to_name(config_option, href=True)
-                else:
-                    option_name = config.option_to_name(config_option)
+            for option_name, value in section_items:
                 self.tree.insert(
                     section_level,
                     "end",
@@ -397,19 +405,25 @@ class CustomItemFrame(ttk.Frame):
                 return True
         return False
 
-    def _get_insert_index(self, item_name, section):
+    def _get_insert_index(self, item_name, section, by_year=False):
         """Get the index to insert the new item in alphabetical order."""
         insert_index = "end"
         for existing_item_index, existing_item in enumerate(
             self.editor_frame.tree.get_children(section)
         ):
             existing_item_name = self.editor_frame.tree.item(existing_item, "text")
-            if item_name < existing_item_name:
-                insert_index = existing_item_index
-                break
+            if by_year:
+                if extract_year(existing_item_name) >= extract_year(item_name):
+                    if item_name < existing_item_name:
+                        insert_index = existing_item_index
+                        break
+            else:
+                if item_name < existing_item_name:
+                    insert_index = existing_item_index
+                    break
         return insert_index
 
-    def _identify_custom_section(self, item_name):
+    def _identify_custom_section(self, item_name):  # noqa: C901
         # pylint: disable=too-many-return-statements,too-many-branches
         """Given an item name, identify the custom section it belongs to."""
         if "Patch Pack" in item_name or "Patch Collection" in item_name:
@@ -430,20 +444,24 @@ class CustomItemFrame(ttk.Frame):
             return "Special Items"
         elif " | " in item_name and "(" in item_name and ")" in item_name:
             return "Skins"
+        elif " | " in item_name:
+            return "Agents"
         elif "Pass" in item_name and ("Viewer" in item_name or "Operation" in item_name):
             return "Passes"
         elif "Case Key" in item_name or "eSports Key" in item_name:
             return "Case Keys"
+        elif "Case" in item_name:
+            return "Cases"
         elif "Autograph Capsule" in item_name:
             return "Autograph Capsules"
-        elif "Pins Capsule" in item_name:
-            return "Collectible Capsules"
+        elif "Legends" in item_name or "Challengers" in item_name or "Contenders" in item_name:
+            return "Major Sticker Capsules"
         elif "Capsule" in item_name:
             return "Sticker Capsules"
+        elif "Pins Capsule" in item_name:
+            return "Collectible Capsules"
         elif "Pin" in item_name:
             return "Collectible Pins"
-        elif " | " in item_name:
-            return "Agents"
         else:
             return "Others"
 
@@ -471,7 +489,8 @@ class CustomItemFrame(ttk.Frame):
                 return
 
         section = self._identify_custom_section(item_name)
-        insert_index = self._get_insert_index(item_name, section)
+        by_year = section in ("Major Sticker Capsules", "Autograph Capsules")
+        insert_index = self._get_insert_index(item_name, section, by_year=by_year)
         self.editor_frame.tree.insert(
             section,
             insert_index,
@@ -741,3 +760,9 @@ class InventoryImportProcessFrame(ttk.Frame):
         self.editor_frame.reload_config_into_tree()
         self.editor_frame.tree.focus_set()
         self.window.destroy()
+
+
+def extract_year(name):
+    """A utility function to extract the year from an item name."""
+    year = re.search(r"\b(\d{4})\b", name)
+    return int(year.group()) if year else 0

@@ -30,9 +30,11 @@ CUSTOM_SECTIONS = [
     "Passes",
     "Music Kit Boxes",
     "Autograph Capsules",
+    "Cases",
+    "Major Sticker Capsules",
 ]
 
-PRECONFIGURED_SECTIONS = ["Cases", "Major Sticker Capsules", "App Settings", "User Settings"]
+UNEDITABLE_SECTIONS = ["App Settings", "User Settings"]
 
 console = get_console()
 
@@ -74,7 +76,7 @@ class ValidatedConfig(ConfigParser):
         for section in CUSTOM_SECTIONS:
             if not self.has_section(section):
                 raise ValueError(f"Missing '{section}' section in the configuration file.")
-        for section in PRECONFIGURED_SECTIONS:
+        for section in UNEDITABLE_SECTIONS:
             if not self.has_section(section):
                 raise ValueError(f"Missing '{section}' section in the configuration file.")
 
@@ -110,7 +112,7 @@ class ValidatedConfig(ConfigParser):
             # and raise a ValueError if the conversion of a value to an integer fails.
             if "Reason: " in str(error):
                 raise
-            raise ValueError("Reason: Invalid value type. All values must be integers.") from error
+            raise ValueError("Reason: Invalid value type. All values must be numbers.") from error
 
     def _validate_config(self):
         """
