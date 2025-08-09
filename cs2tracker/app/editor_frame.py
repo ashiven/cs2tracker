@@ -416,7 +416,7 @@ class CustomItemFrame(ttk.Frame):
                 if year(item_name) == year(existing_item_name) and item_name < existing_item_name:
                     insert_index = existing_item_index
                     break
-                elif year(item_name) < year(existing_item_name):
+                if year(item_name) < year(existing_item_name):
                     insert_index = existing_item_index
                     break
             else:
@@ -766,5 +766,5 @@ class InventoryImportProcessFrame(ttk.Frame):
 
 def year(name):
     """A utility function to extract the year from an item name."""
-    year = re.search(r"\b(\d{4})\b", name)
-    return int(year.group()) if year else 0
+    year_match = re.search(r"\b(\d{4})\b", name)
+    return int(year_match.group()) if year_match else 0
