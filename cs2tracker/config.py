@@ -156,22 +156,11 @@ class ValidatedConfig(ConfigParser):
         try:
             with open(INVENTORY_IMPORT_FILE, "r", encoding="utf-8") as inventory_file:
                 inventory_data = json.load(inventory_file)
-
-                added_to_config = set()
-                for _, item_infos in inventory_data.items():
-                    for item_name, item_owned in item_infos.items():
-                        option = self.name_to_option(item_name, href=True)
-                        for section in self.sections():
-                            if option in self.options(section):
-                                self.set(section, option, str(item_owned))
-                                added_to_config.add(item_name)
-
                 for section, item_infos in inventory_data.items():
                     sorted_item_infos = dict(sorted(item_infos.items()))
                     for item_name, item_owned in sorted_item_infos.items():
-                        if item_name not in added_to_config:
-                            option = self.name_to_option(item_name, href=True)
-                            self.set(section, option, str(item_owned))
+                        option = self.name_to_option(item_name, href=True)
+                        self.set(section, option, str(item_owned))
 
             self.write_to_file()
         except (FileNotFoundError, json.JSONDecodeError) as error:
