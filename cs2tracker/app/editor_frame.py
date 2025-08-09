@@ -183,7 +183,7 @@ class ConfigEditorFrame(ttk.Frame):
 
             # Major Sticker Capsules should be sorted by year while other items should be sorted alphabetically
             if section in ("Major Sticker Capsules", "Autograph Capsules"):
-                section_items = sorted(section_items, key=lambda item: extract_year(item[0]))
+                section_items = sorted(section_items, key=lambda item: year(item[0]))
             else:
                 section_items = sorted(section_items)
 
@@ -413,10 +413,12 @@ class CustomItemFrame(ttk.Frame):
         ):
             existing_item_name = self.editor_frame.tree.item(existing_item, "text")
             if by_year:
-                if extract_year(existing_item_name) >= extract_year(item_name):
-                    if item_name < existing_item_name:
-                        insert_index = existing_item_index
-                        break
+                if year(item_name) == year(existing_item_name) and item_name < existing_item_name:
+                    insert_index = existing_item_index
+                    break
+                elif year(item_name) < year(existing_item_name):
+                    insert_index = existing_item_index
+                    break
             else:
                 if item_name < existing_item_name:
                     insert_index = existing_item_index
@@ -444,8 +446,6 @@ class CustomItemFrame(ttk.Frame):
             return "Special Items"
         elif " | " in item_name and "(" in item_name and ")" in item_name:
             return "Skins"
-        elif " | " in item_name:
-            return "Agents"
         elif "Pass" in item_name and ("Viewer" in item_name or "Operation" in item_name):
             return "Passes"
         elif "Case Key" in item_name or "eSports Key" in item_name:
@@ -462,6 +462,8 @@ class CustomItemFrame(ttk.Frame):
             return "Collectible Capsules"
         elif "Pin" in item_name:
             return "Collectible Pins"
+        elif " | " in item_name:
+            return "Agents"
         else:
             return "Others"
 
@@ -762,7 +764,7 @@ class InventoryImportProcessFrame(ttk.Frame):
         self.window.destroy()
 
 
-def extract_year(name):
+def year(name):
     """A utility function to extract the year from an item name."""
     year = re.search(r"\b(\d{4})\b", name)
     return int(year.group()) if year else 0
