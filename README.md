@@ -113,6 +113,10 @@ This will open the config editor where you can change any setting by double clic
 - **Q: Why does Windows Defender flag this program as potentially harmful?**
 - **A:** This is because the program is not signed with a [Code Signing Certificate](https://www.globalsign.com/en/code-signing-certificate/what-is-code-signing-certificate), which Windows uses to verify the identity of publishers. These certificates are very expensive and not something I am willing to invest in for a free and open source project like this.
 
+
+- **Why does the application startup take so long when starting the program for the first time?**
+- **A:** This happens because Windows Defender has to scan every program file on the first startup, which can take quite a while.
+
 ## Contributing
 
 Please feel free to submit a [pull request](https://github.com/ashiven/cs2tracker/pulls) or open an [issue](https://github.com/ashiven/cs2tracker/issues).
