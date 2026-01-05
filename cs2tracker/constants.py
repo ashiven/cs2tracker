@@ -150,7 +150,9 @@ if RUNNING_IN_EXE:
 
 else:
     MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
-    PROJECT_DIR = os.path.dirname(MODULE_DIR)
+    # The project directory doesn't really exist in this case
+    # (pip only installs contents of cs2tracker/cs2tracker in site-packages)
+    PROJECT_DIR = MODULE_DIR
     DATA_DIR = os.path.join(MODULE_DIR, "data")
 
     CONFIG_FILE = os.path.join(DATA_DIR, "config.ini")
@@ -160,7 +162,7 @@ else:
     INVENTORY_IMPORT_SCRIPT = os.path.join(DATA_DIR, "get_inventory.js")
     NODE_MODULES = os.path.join(DATA_DIR, "node_modules")
 
-    ICON_FILE = os.path.join(PROJECT_DIR, "assets", "icon.ico")
+    ICON_FILE = os.path.join(DATA_DIR, "icon.ico")
     BATCH_FILE = os.path.join(DATA_DIR, "cs2tracker_scraper.bat")
     INVENTORY_IMPORT_FILE = os.path.join(DATA_DIR, "inventory.json")
     INVENTORY_IMPORT_SCRIPT_DEPENDENCIES = [
@@ -224,4 +226,5 @@ CAPSULE_PAGES = {
     "Copenhagen 2024 Sticker Capsule": "https://steamcommunity.com/market/search?q=copenhagen+capsule",
     "Shanghai 2024 Sticker Capsule": "https://steamcommunity.com/market/search?q=shanghai+capsule",
     "Austin 2025 Sticker Capsule": "https://steamcommunity.com/market/search?q=austin+capsule",
+    "Budapest 2025 Sticker Capsule": "https://steamcommunity.com/market/search?q=budapest+capsule",
 }
