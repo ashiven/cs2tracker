@@ -150,9 +150,9 @@ if RUNNING_IN_EXE:
 
 else:
     MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
-    # The project directory doesn't really exist in this case
-    # (pip only installs contents of cs2tracker/cs2tracker in site-packages)
-    PROJECT_DIR = MODULE_DIR
+    # NOTE: The project directory doesn't really exist in this case when launched via pip
+    # (pip only installs contents of cs2tracker/cs2tracker in site-packages i.e. PROJECT_DIR = site-packages)
+    PROJECT_DIR = os.path.dirname(MODULE_DIR)
     DATA_DIR = os.path.join(MODULE_DIR, "data")
 
     CONFIG_FILE = os.path.join(DATA_DIR, "config.ini")
@@ -162,7 +162,7 @@ else:
     INVENTORY_IMPORT_SCRIPT = os.path.join(DATA_DIR, "get_inventory.js")
     NODE_MODULES = os.path.join(DATA_DIR, "node_modules")
 
-    ICON_FILE = os.path.join(DATA_DIR, "icon.ico")
+    ICON_FILE = os.path.join(DATA_DIR, "icon.ico" if OS == OSType.WINDOWS else "icon.png")
     BATCH_FILE = os.path.join(DATA_DIR, "cs2tracker_scraper.bat")
     INVENTORY_IMPORT_FILE = os.path.join(DATA_DIR, "inventory.json")
     INVENTORY_IMPORT_SCRIPT_DEPENDENCIES = [

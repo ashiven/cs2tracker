@@ -1,7 +1,7 @@
 import ctypes
 import tkinter as tk
 from shutil import copy
-from tkinter import messagebox, ttk
+from tkinter import PhotoImage, messagebox, ttk
 from tkinter.filedialog import askopenfilename, asksaveasfile
 
 import sv_ttk
@@ -63,6 +63,10 @@ class Application:
         if OS == OSType.WINDOWS:
             app_id = "cs2tracker.unique.id"
             ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(app_id)
+            window.iconbitmap(default=ICON_FILE)
+        else:
+            icon = PhotoImage(file=ICON_FILE)
+            window.iconphoto(True, icon)
 
         window.iconbitmap(default=ICON_FILE)
 
