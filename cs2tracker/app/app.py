@@ -68,8 +68,6 @@ class Application:
             icon = PhotoImage(file=ICON_FILE)
             window.iconphoto(True, icon)
 
-        window.iconbitmap(default=ICON_FILE)
-
         main_frame = MainFrame(window, self.scraper)
         main_frame.pack(expand=True, fill="both")
 
