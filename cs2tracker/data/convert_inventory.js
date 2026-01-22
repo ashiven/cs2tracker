@@ -315,6 +315,7 @@ class ItemNameConverter {
     // Some untradable items were too difficult to filter out via their properties,
     // so we filter them out by their item name here.
     let excludeItems = ["P250 | X-Ray", "Music Kit | Valve, CS:GO"];
+    let excludeIds = ["17293822569110896676", "17293822569102708641"];
 
     return inventoryList
       .map((item) => ({
@@ -323,7 +324,8 @@ class ItemNameConverter {
         item_type: this.getItemType(item),
         item_tradable: this.getItemTradable(item),
       }))
-      .filter((item) => !excludeItems.includes(item.item_name));
+      .filter((item) => !excludeItems.includes(item.item_name))
+      .filter((item) => !excludeIds.includes(item.id));
   }
 }
 
